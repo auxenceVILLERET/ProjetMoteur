@@ -1,0 +1,32 @@
+{
+    "projects": {
+        "1F02133D-4DCC-5D90-205F-304D2B605DC6": {
+            "config-debug": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "config-release": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "dependencies": [],
+            "dependents": [],
+            "name": "ProjetMoteur",
+            "property-lib": false,
+            "property-pch": false,
+            "property-vcpkg": false,
+            "property-window": false
+        }
+    },
+    "projects_name_to_guid": {
+        "ProjetMoteur": "1F02133D-4DCC-5D90-205F-304D2B605DC6"
+    },
+    "solution_guid": "20634907-0A26-6CD5-0D14-6420458C03C9",
+    "solution_name": "ProjetMoteur",
+    "startup_project": "",
+    "version": "2.0"
+}
