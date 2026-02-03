@@ -11,8 +11,8 @@ public:
 	void SetEntity(Entity* entity) { m_Entity = entity; }
 	Entity* GetEntity() { return m_Entity; }
 
-private:
-	int m_TypeId = 1;
+protected:
+	int m_TypeId;
 	Entity* m_Entity = nullptr;
 };
 
