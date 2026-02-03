@@ -30,3 +30,37 @@ inline T* ECS::AddSystem()
 	m_Systems.push_back(castedSystem);
 	return system;
 }
+
+template<typename T>
+T* ECS::AddComponent(Entity* owner)
+{
+	T* component = new T();
+	Component* castedComponent = dynamic_cast<Component*>(component);
+	if (castedComponent == nullptr)
+	{
+		delete component;
+		return nullptr;
+	}
+	castedComponent->SetEntity(owner);
+	m_Components.push_back(castedComponent);
+	return component;
+}
+
+template<typename T>
+inline T* ECS::GetComponent(Entity* owner)
+{
+	for (Component* component : m_Components)
+	{
+		T* castedComponent = dynamic_cast<T*>(component);
+		if (castedComponent != nullptr)
+		{
+			Entity* entity = nullptr;
+			entity = castedComponent->GetEntity();
+			if (entity == owner)
+			{
+				return castedComponent;
+			}
+		}
+	}
+	return nullptr;
+}
