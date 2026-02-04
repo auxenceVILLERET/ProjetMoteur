@@ -11,8 +11,8 @@ public:
 	{
 		for (Entity* entity : ecs.GetEntities())
 		{
-			PositionComponent* position = ecs.GetComponent<PositionComponent>(entity);
-			VelocityComponent* velocity = ecs.GetComponent<VelocityComponent>(entity);
+			PositionComponent* position = entity->GetComponent<PositionComponent>();
+			VelocityComponent* velocity = entity->GetComponent<VelocityComponent>();
 			if (position && velocity)
 			{
 				position->x += velocity->vx * deltaTime;
