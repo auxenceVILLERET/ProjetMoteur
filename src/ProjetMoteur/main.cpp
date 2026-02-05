@@ -1,3 +1,4 @@
+#include <windows.h>
 #include <iostream>
 #include "main.h"
 
@@ -8,8 +9,17 @@
 #include "VelocityComponent.h"
 #include "MovementSystem.h"
 
-int WinMain()
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+    AllocConsole();
+
+    FILE* f;
+    freopen_s(&f, "CONOUT$", "w", stdout);
+    freopen_s(&f, "CONOUT$", "w", stderr);
+    freopen_s(&f, "CONIN$", "r", stdin);
+
+    std::cout << "Console affiche !" << std::endl;
+
 	ECS ecs;
 
 	Entity* entity = ecs.CreateEntity<Entity>();
@@ -41,4 +51,6 @@ int WinMain()
 	std::cout << "Position after update: (" << position->x << ", " << position->y << ", " << position->z << ")\n";
 	std::cout << "Entity2 : " << entity2->GetId() << "\n";
 	std::cout << "Position after update: (" << position2->x << ", " << position2->y << ", " << position2->z << ")\n";
+	system("pause");
 }
+
