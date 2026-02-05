@@ -13,13 +13,15 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [],
+            "dependencies": [
+                "792F16B8-70EC-4096-12B5-05312EA53D42"
+            ],
             "dependents": [],
             "name": "ProjetMoteur",
             "property-lib": false,
             "property-pch": false,
             "property-vcpkg": false,
-            "property-window": false
+            "property-window": true
         },
         "792F16B8-70EC-4096-12B5-05312EA53D42": {
             "config-debug": {
@@ -35,12 +37,14 @@
                 "preprocessorDefinitions": []
             },
             "dependencies": [],
-            "dependents": [],
+            "dependents": [
+                "1F02133D-4DCC-5D90-205F-304D2B605DC6"
+            ],
             "name": "Engine",
-            "property-lib": false,
+            "property-lib": true,
             "property-pch": false,
             "property-vcpkg": false,
-            "property-window": true
+            "property-window": false
         }
     },
     "projects_name_to_guid": {

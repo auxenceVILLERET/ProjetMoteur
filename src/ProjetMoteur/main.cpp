@@ -8,7 +8,7 @@
 #include "VelocityComponent.h"
 #include "MovementSystem.h"
 
-int main()
+int WinMain()
 {
 	ECS ecs;
 

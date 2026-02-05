@@ -1,6 +1,8 @@
 #ifndef ENGINE_WINDOW_H
 #define ENGINE_WINDOW_H
 
+#include <windows.h>
+
 class Window
 {
 public:
