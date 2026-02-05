@@ -2,7 +2,6 @@
 #define ENGINE_WINDOW_H
 
 #include <windows.h>
-#include <D>
 
 class Window
 {

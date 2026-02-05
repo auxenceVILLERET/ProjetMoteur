@@ -1,8 +1,7 @@
 #include <iostream>
 #include "main.h"
 
-int main()
+int WinMain()
 {
-    std::cout << "Hello, World!\n";
     return 0;
 }
