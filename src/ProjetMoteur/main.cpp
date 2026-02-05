@@ -1,8 +1,15 @@
-#include <windows.h>
-#include <iostream>
 #include "main.h"
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#include <iostream>
+#include <windows.h>
+#include "Engine/Render/Window.h"
+#include "Engine/Render/Renderer.h"
+
+int WINAPI WinMain(
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPSTR lpCmdLine,
+    _In_ int nCmdShow)
 {
     AllocConsole();
 
@@ -11,8 +18,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     freopen_s(&f, "CONOUT$", "w", stderr);
     freopen_s(&f, "CONIN$", "r", stdin);
 
-    std::cout << "Console affichée !" << std::endl;
+    Window window(800, 600, L"test");
 
-    system("pause");
+     
+    while (window.ProcessMessages())
+    {
+        
+    }
+
     return 0;
 }
