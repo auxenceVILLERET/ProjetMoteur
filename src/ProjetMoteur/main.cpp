@@ -9,16 +9,19 @@
 #include "VelocityComponent.h"
 #include "MovementSystem.h"
 
+void AttachConsoleIO()
+{
+	AllocConsole();
+
+	FILE* f;
+	freopen_s(&f, "CONIN$", "r", stdin);
+	freopen_s(&f, "CONOUT$", "w", stdout);
+	freopen_s(&f, "CONOUT$", "w", stderr);
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    AllocConsole();
-
-    FILE* f;
-    freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONOUT$", "w", stderr);
-    freopen_s(&f, "CONIN$", "r", stdin);
-
-    std::cout << "Console affiche !" << std::endl;
+	AttachConsoleIO();
 
 	ECS ecs;
 
