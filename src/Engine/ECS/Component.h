@@ -12,7 +12,7 @@ public:
 	Entity* GetEntity() { return m_Entity; }
 
 protected:
-	int m_TypeId;
+	int m_TypeId = 0;
 	Entity* m_Entity = nullptr;
 };
 

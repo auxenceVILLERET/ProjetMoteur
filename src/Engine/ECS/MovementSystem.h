@@ -1,6 +1,6 @@
 #pragma once
-#include "System.h"
-#include "ECS.h"
+#include "Engine/ECS/System.h"
+#include "Engine/ECS/ECS.h"
 #include "PositionComponent.h"
 #include "VelocityComponent.h"
 

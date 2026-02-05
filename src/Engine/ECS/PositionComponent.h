@@ -1,5 +1,5 @@
 #pragma once
-#include "Component.h"
+#include "Engine/ECS/Component.h"
 
 struct PositionComponent : public Component
 {

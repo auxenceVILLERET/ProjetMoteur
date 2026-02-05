@@ -2,12 +2,11 @@
 #include <iostream>
 #include "main.h"
 
-#include "ECS.h"
-#include "Entity.h"
-#include "MeshComponent.h"
-#include "PositionComponent.h"
-#include "VelocityComponent.h"
-#include "MovementSystem.h"
+#include "Engine/ECS/ECS.h"
+#include "Engine/ECS/Entity.h"
+#include "Engine/ECS/PositionComponent.h"
+#include "Engine/ECS/VelocityComponent.h"
+#include "Engine/ECS/MovementSystem.h"
 
 void AttachConsoleIO()
 {
@@ -44,7 +43,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	velocity2->vx = 0.0f;
 	velocity2->vy = 2.0f;
 	velocity2->vz = -1.0f;
-
 
 	ecs.AddSystem<MovementSystem>();
 

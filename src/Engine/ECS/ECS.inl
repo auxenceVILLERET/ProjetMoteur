@@ -14,13 +14,7 @@ template<typename T>
 inline T* ECS::AddSystem()
 {
 	T* system = new T();
-	System* castedSystem = dynamic_cast<System*>(system);
-	if (castedSystem == nullptr)
-	{
-		delete system;
-		return nullptr;
-	}
-	m_Systems.push_back(castedSystem);
+	m_Systems.push_back(system);
 	return system;
 }
 
