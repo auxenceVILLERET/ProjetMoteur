@@ -20,9 +20,31 @@
             "property-pch": false,
             "property-vcpkg": false,
             "property-window": false
+        },
+        "792F16B8-70EC-4096-12B5-05312EA53D42": {
+            "config-debug": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "config-release": {
+                "additionalDependencies": [],
+                "additionalIncludeDirectories": [],
+                "additionalLibraryDirectories": [],
+                "preprocessorDefinitions": []
+            },
+            "dependencies": [],
+            "dependents": [],
+            "name": "Engine",
+            "property-lib": false,
+            "property-pch": false,
+            "property-vcpkg": false,
+            "property-window": true
         }
     },
     "projects_name_to_guid": {
+        "Engine": "792F16B8-70EC-4096-12B5-05312EA53D42",
         "ProjetMoteur": "1F02133D-4DCC-5D90-205F-304D2B605DC6"
     },
     "solution_guid": "20634907-0A26-6CD5-0D14-6420458C03C9",
