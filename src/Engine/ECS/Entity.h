@@ -28,6 +28,8 @@ public:
 	void MoveForward(float dist); // move along the "forward" of the obj
 	void MoveUp(float dist); // move along the "up" of the obj
 	void MoveRight(float dist); // move along the "right" of the obj
+	XMFLOAT3 GetPosition() const { return m_position; } // get the position of the obj
+
 
 	void CoutPosition(); // DEBUG
 
@@ -36,7 +38,7 @@ public:
 	void Scale(float scale); // multiply current scale
 	void SetScaleVector(XMFLOAT3 vectorScale); // set the scale with XYZ Vector
 	void ScaleVector(XMFLOAT3 vectorScale); // multiply current scale with XYZ Vector
-
+	XMFLOAT3 GetScale() const { return m_scale; } // get the scale of the obj
 
 	void CoutScale(); // DEBUG
 
