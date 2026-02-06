@@ -1,5 +1,5 @@
 #pragma once
-#include "Component.h"
+#include "Engine/ECS/Component.h"
 class MeshRendererComponent : public Component
 {
 };
