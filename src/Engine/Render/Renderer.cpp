@@ -4,17 +4,8 @@
 #include "Renderer.h"
 
 #include "Window.h"
+#include "Helpers/d3dUtil.h"
 
-//Macro pour release mémoire
-template<typename T>   
-inline void SafeRelease(T*& p)
-{
-    if (p)
-    {
-        p->Release();
-        p = nullptr;
-    }
-}
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -90,21 +81,20 @@ void Renderer::Shutdown()
         WaitForGpu();
 
     // Release in roughly reverse creation order.
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_depthStencilBuffer));
-    for (auto& b : m_swapChainBuffer)
-        SafeRelease(reinterpret_cast<IUnknown*&>(b));
+    if (m_depthStencilBuffer) m_depthStencilBuffer->Release();
+    for (auto& b : m_swapChainBuffer) 
+        if (b) b->Release();
+    if (m_rtvHeap) m_rtvHeap->Release();
+    if (m_dsvHeap) m_dsvHeap->Release();
 
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_rtvHeap));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_dsvHeap));
+    if (m_commandList) m_commandList->Release();
+    if (m_directCmdListAlloc) m_directCmdListAlloc->Release();
+    if (m_commandQueue) m_commandQueue->Release();
 
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_commandList));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_directCmdListAlloc));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_commandQueue));
-
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_fence));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_swapChain));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_d3dDevice));
-    SafeRelease(reinterpret_cast<IUnknown*&>(m_dxgiFactory));
+    if (m_fence) m_fence->Release();
+    if (m_swapChain) m_swapChain->Release();
+    if (m_d3dDevice) m_d3dDevice->Release();
+    if (m_dxgiFactory) m_dxgiFactory->Release();
 }
 
 void Renderer::OnResize(uint32_t width, uint32_t height)
@@ -119,7 +109,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
     // Flush before changing any resources.
     FlushCommandQueue();
 
-    ThrowIfFailed(m_commandList->Reset(m_directCmdListAlloc, nullptr));
+    HRESULT hr = m_commandList->Reset(m_directCmdListAlloc, nullptr);
+    if (FAILED(hr))
+        throw std::runtime_error("Command list reset failed.");
 
     m_width = width;
     m_height = height;
@@ -136,12 +128,14 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
     m_depthStencilBuffer->Release();
 
     // Resize swap chain.
-    ThrowIfFailed(m_swapChain->ResizeBuffers(
+    hr = m_swapChain->ResizeBuffers(
         SwapChainBufferCount,
         width,
         height,
         m_backBufferFormat,
-        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
+        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	if (FAILED(hr))
+		throw std::runtime_error("Swap chain resize failed.");
 
     m_currBackBuffer = 0;
 
@@ -177,7 +171,9 @@ void Renderer::WaitForGpu()
         return;
 
     ++m_currentFence;
-    ThrowIfFailed(m_commandQueue->Signal(m_fence, m_currentFence));
+    HRESULT hr = m_commandQueue->Signal(m_fence, m_currentFence);
+    if (FAILED(hr))
+		throw std::runtime_error("Command queue signal failed.");
 
     if (m_fence->GetCompletedValue() < m_currentFence)
     {
@@ -199,10 +195,10 @@ void Renderer::WaitForGpu()
 
 bool Renderer::CreateDevice()
 {
-    ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory)));
+    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory));
 
     // Try hardware device first.
-    HRESULT hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice));
+    hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_d3dDevice));
     if (FAILED(hr))
     {
         // Fallback to WARP.
@@ -217,7 +213,9 @@ bool Renderer::CreateDevice()
     }
 
     // Fence.
-    ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+    hr = m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence));
+    if (FAILED(hr))
+		throw std::runtime_error("Fence creation failed.");
 
     m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     m_dsvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -234,18 +232,24 @@ bool Renderer::CreateCommandObjects()
     D3D12_COMMAND_QUEUE_DESC qdesc = {};
     qdesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
     qdesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    ThrowIfFailed(m_d3dDevice->CreateCommandQueue(&qdesc, IID_PPV_ARGS(&m_commandQueue)));
+    HRESULT hr = m_d3dDevice->CreateCommandQueue(&qdesc, IID_PPV_ARGS(&m_commandQueue));
+	if (FAILED(hr))
+		throw std::runtime_error("Command queue creation failed.");
 
     // Command allocator.
-    ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_directCmdListAlloc)));
+    hr = m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_directCmdListAlloc));
+	if (FAILED(hr))
+		throw std::runtime_error("Command allocator creation failed.");
 
     // Command list.
-    ThrowIfFailed(m_d3dDevice->CreateCommandList(
+    hr = m_d3dDevice->CreateCommandList(
         0,
         D3D12_COMMAND_LIST_TYPE_DIRECT,
         m_directCmdListAlloc,
         nullptr,
-        IID_PPV_ARGS(&m_commandList)));
+        IID_PPV_ARGS(&m_commandList));
+	if (FAILED(hr))
+		throw std::runtime_error("Command list creation failed.");
 
     // Start closed.
     m_commandList->Close();
@@ -259,7 +263,7 @@ bool Renderer::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height)
     assert(m_commandQueue);
 
     // Release previous swap chain if any.
-	delete m_swapChain;
+	if (m_swapChain) m_swapChain->Release();
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     swapChainDesc.BufferDesc.Width = width;
@@ -278,10 +282,12 @@ bool Renderer::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height)
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-    ThrowIfFailed(m_dxgiFactory->CreateSwapChain(
+    HRESULT hr = (m_dxgiFactory->CreateSwapChain(
         m_commandQueue,
         &swapChainDesc,
         &m_swapChain));
+	if (FAILED(hr))
+		throw std::runtime_error("Swap chain creation failed.");
 
     return true;
 }
@@ -295,14 +301,18 @@ bool Renderer::CreateRtvDsvHeaps()
     rtvHeapDesc.NumDescriptors = SwapChainBufferCount;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+    HRESULT hr = m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap));
+	if (FAILED(hr))
+		throw std::runtime_error("RTV heap creation failed.");
 
     // DSV heap.
     D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
     dsvHeapDesc.NumDescriptors = 1;
     dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
     dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-    ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+    hr = m_d3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap));
+    if (FAILED(hr))
+		throw std::runtime_error("DSV heap creation failed.");
 
     return true;
 }
@@ -316,8 +326,11 @@ void Renderer::CreateRenderTargets()
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < SwapChainBufferCount; i++)
     {
-        delete m_swapChainBuffer[i];
-        ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_swapChainBuffer[i])));
+        if (m_swapChainBuffer[i]) m_swapChainBuffer[i]->Release();
+        HRESULT hr = m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_swapChainBuffer[i]));
+        if (FAILED(hr))
+			throw std::runtime_error("Swap chain buffer retrieval failed.");
+
         m_d3dDevice->CreateRenderTargetView(m_swapChainBuffer[i], nullptr, rtvHeapHandle);
         rtvHeapHandle.Offset(1, m_rtvDescriptorSize);
     }
@@ -328,7 +341,7 @@ void Renderer::CreateDepthStencil(uint32_t width, uint32_t height)
     assert(m_d3dDevice);
     assert(m_dsvHeap);
 
-    delete m_depthStencilBuffer;
+    if (m_depthStencilBuffer) m_depthStencilBuffer->Release();
 
     D3D12_RESOURCE_DESC depthDesc = {};
     depthDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -352,13 +365,15 @@ void Renderer::CreateDepthStencil(uint32_t width, uint32_t height)
     heapProps.CreationNodeMask = 1;
     heapProps.VisibleNodeMask = 1;
 
-    ThrowIfFailed(m_d3dDevice->CreateCommittedResource(
+    HRESULT hr = m_d3dDevice->CreateCommittedResource(
         &heapProps,
         D3D12_HEAP_FLAG_NONE,
         &depthDesc,
         D3D12_RESOURCE_STATE_COMMON,
         &optClear,
-        IID_PPV_ARGS(&m_depthStencilBuffer)));
+        IID_PPV_ARGS(&m_depthStencilBuffer));
+    if (FAILED(hr))
+		throw std::runtime_error("Depth stencil buffer creation failed.");
 
     // Create DSV.
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
@@ -373,9 +388,13 @@ void Renderer::CreateDepthStencil(uint32_t width, uint32_t height)
         m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
     // Transition depth buffer to DEPTH_WRITE.
-    ThrowIfFailed(m_directCmdListAlloc->Reset());
+    hr = m_directCmdListAlloc->Reset();
+	if (FAILED(hr))
+		throw std::runtime_error("Command allocator reset failed.");
 
-    ThrowIfFailed(m_commandList->Reset(m_directCmdListAlloc, nullptr));
+    hr = m_commandList->Reset(m_directCmdListAlloc, nullptr);
+	if (FAILED(hr))
+		throw std::runtime_error("Command list reset failed.");
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -394,7 +413,9 @@ void Renderer::CreateDepthStencil(uint32_t width, uint32_t height)
 void Renderer::FlushCommandQueue()
 {
     m_currentFence++;
-    ThrowIfFailed(m_commandQueue->Signal(m_fence, m_currentFence));
+    HRESULT hr = m_commandQueue->Signal(m_fence, m_currentFence);
+	if (FAILED(hr))
+		throw std::runtime_error("Command queue signal failed.");
 
     // Wait until the GPU has completed commands up to this fence point.
     if (m_fence->GetCompletedValue() < m_currentFence)
@@ -408,7 +429,12 @@ void Renderer::FlushCommandQueue()
         }
 
         // Fire event when GPU hits current fence.  
-        ThrowIfFailed(m_fence->SetEventOnCompletion(m_currentFence, eventHandle));
+        hr = m_fence->SetEventOnCompletion(m_currentFence, eventHandle);
+        if (FAILED(hr))
+        {
+            CloseHandle(eventHandle);
+            throw std::runtime_error("Échec de SetEventOnCompletion pour la synchronisation GPU.");
+        }
 
         // Wait until the GPU hits current fence event is fired.
         WaitForSingleObject(eventHandle, INFINITE);
@@ -418,11 +444,75 @@ void Renderer::FlushCommandQueue()
 
 void Renderer::BeginFrame()
 {
+    assert(m_commandQueue);
+    assert(m_commandList);
+    assert(m_directCmdListAlloc);
+
+    // Reset allocator and list.
+    HRESULT hr = m_directCmdListAlloc->Reset();
+    if (FAILED(hr))
+		throw std::runtime_error("Command allocator reset failed.");
+
+    hr = m_commandList->Reset(m_directCmdListAlloc, nullptr);
+	if (FAILED(hr))
+		throw std::runtime_error("Command list reset failed.");
+
+    // Transition current back buffer: PRESENT -> RENDER_TARGET.
+    ID3D12Resource* backBuffer = m_swapChainBuffer[m_currBackBuffer];
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Transition.pResource = backBuffer;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    m_commandList->ResourceBarrier(1, &barrier);
+
+    // Set viewport/scissor.
+    m_commandList->RSSetViewports(1, &m_screenViewport);
+    m_commandList->RSSetScissorRects(1, &m_scissorRect);
+
+    // RTV handle for current back buffer.
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
+    rtv = Offset(rtv, m_currBackBuffer, m_rtvDescriptorSize);
+
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
+    m_commandList->OMSetRenderTargets(1, &rtv, true, &dsv);
+
+    // Clear.
+    const float clearColor[] = { 0.07f, 0.07f, 0.12f, 1.0f };
+    m_commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+    m_commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
 
 void Renderer::EndFrame()
 {
-}
+    ID3D12Resource* backBuffer = m_swapChainBuffer[m_currBackBuffer];
 
+    // Transition back buffer: RENDER_TARGET -> PRESENT.
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Transition.pResource = backBuffer;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    m_commandList->ResourceBarrier(1, &barrier);
+
+    HRESULT hr = m_commandList->Close();
+	if (FAILED(hr))
+		throw std::runtime_error("Command list close failed.");
+
+    ID3D12CommandList* lists[] = { m_commandList };
+    m_commandQueue->ExecuteCommandLists(1, lists);
+
+    // Present.
+    hr = m_swapChain->Present(1, 0);
+	if (FAILED(hr))
+		throw std::runtime_error("Swap chain present failed.");
+
+    // Simple but safe: CPU waits GPU each frame.
+    WaitForGpu();
+
+    m_currBackBuffer = (m_currBackBuffer + 1) % SwapChainBufferCount;
+}
 
 #endif // !RENDERER_CPP_INCLUDED

@@ -1,6 +1,11 @@
 #ifndef RENDERER_H_DEFINED
 #define RENDERER_H_DEFINED
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
+
 #include "Helpers/d3dUtil.h"
 
 // Link necessary d3d12 libraries.

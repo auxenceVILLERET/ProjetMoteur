@@ -19,11 +19,13 @@ int WINAPI WinMain(
     freopen_s(&f, "CONIN$", "r", stdin);
 
     Window window(800, 600, L"test");
-
+	Renderer renderer;
+	renderer.Initialize(window.GetHandle(), 800, 600);
      
     while (window.ProcessMessages())
     {
-        
+        renderer.Update(0.0f);
+        renderer.Render();
     }
 
     return 0;

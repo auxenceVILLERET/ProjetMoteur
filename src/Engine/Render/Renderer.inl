@@ -6,4 +6,8 @@ inline void Renderer::SafeRelease(T*& p)
         p->Release();
         p = nullptr;
     }
+    else 
+    {
+        p = nullptr;
+	}
 }
