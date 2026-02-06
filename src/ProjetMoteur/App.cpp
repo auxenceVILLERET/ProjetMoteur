@@ -2,10 +2,6 @@
 
 #include <iostream>
 #include "Engine/Engine.h"
-#include "ECS/ECS.h"
-#include "Engine/ECS/MovementSystem.h"
-#include "Engine/ECS/PositionComponent.h"
-#include "Engine/ECS/VelocityComponent.h"
 
 App::App(Engine& engine) : m_engine(engine)
 {
