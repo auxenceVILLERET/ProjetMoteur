@@ -28,10 +28,10 @@ Renderer::~Renderer()
     Shutdown();
 }
 
-bool Renderer::Initialize(HWND hwnd, uint32_t width, uint32_t height)
+bool Renderer::Initialize(Window* window)
 {
-    m_width = width;
-    m_height = height;
+    m_width = window->GetWidth();
+    m_height = window->GetHeight();
 
 #if defined(DEBUG) || defined(_DEBUG)
     {
@@ -50,26 +50,26 @@ bool Renderer::Initialize(HWND hwnd, uint32_t width, uint32_t height)
     if (CreateCommandObjects() == false)
         return false;
 
-    if (CreateSwapChain(hwnd, width, height) == false)
+    if (CreateSwapChain(window->GetHandle(), m_width, m_height) == false)
         return false;
 
     if (CreateRtvDsvHeaps() == false)
         return false;
 
     CreateRenderTargets();
-    CreateDepthStencil(width, height);
+    CreateDepthStencil(m_width, m_height);
 
     m_screenViewport.TopLeftX = 0.0f;
     m_screenViewport.TopLeftY = 0.0f;
-    m_screenViewport.Width = static_cast<float>(width);
-    m_screenViewport.Height = static_cast<float>(height);
+    m_screenViewport.Width = static_cast<float>(m_width);
+    m_screenViewport.Height = static_cast<float>(m_height);
     m_screenViewport.MinDepth = 0.0f;
     m_screenViewport.MaxDepth = 1.0f;
 
     m_scissorRect.left = 0;
     m_scissorRect.top = 0;
-    m_scissorRect.right = static_cast<LONG>(width);
-    m_scissorRect.bottom = static_cast<LONG>(height);
+    m_scissorRect.right = static_cast<LONG>(m_width);
+    m_scissorRect.bottom = static_cast<LONG>(m_height);
 
     return true;
 }
@@ -81,29 +81,27 @@ void Renderer::Shutdown()
         WaitForGpu();
 
     // Release in roughly reverse creation order.
-    if (m_depthStencilBuffer) m_depthStencilBuffer->Release();
+    SafeRelease(m_depthStencilBuffer);
     for (auto& b : m_swapChainBuffer) 
-        if (b) b->Release();
-    if (m_rtvHeap) m_rtvHeap->Release();
-    if (m_dsvHeap) m_dsvHeap->Release();
-
-    if (m_commandList) m_commandList->Release();
-    if (m_directCmdListAlloc) m_directCmdListAlloc->Release();
-    if (m_commandQueue) m_commandQueue->Release();
-
-    if (m_fence) m_fence->Release();
-    if (m_swapChain) m_swapChain->Release();
-    if (m_d3dDevice) m_d3dDevice->Release();
-    if (m_dxgiFactory) m_dxgiFactory->Release();
+        SafeRelease(b);
+    SafeRelease(m_rtvHeap);
+    SafeRelease(m_dsvHeap);
+    SafeRelease(m_commandList);
+    SafeRelease(m_directCmdListAlloc);
+    SafeRelease(m_commandQueue);
+    SafeRelease(m_fence);
+    SafeRelease(m_swapChain);
+    SafeRelease(m_d3dDevice);
+    SafeRelease(m_dxgiFactory);
 }
 
-void Renderer::OnResize(uint32_t width, uint32_t height)
+void Renderer::OnResize()
 {
     if (m_d3dDevice == nullptr || m_swapChain == nullptr || m_directCmdListAlloc == nullptr)
         return;
 
     // Si minimizé, ne pas redimensionner.
-    if (width == 0 || height == 0)
+    if (m_pWindow->GetWidth() == 0 || m_pWindow->GetHeight() == 0)
         return;
 
     // Flush before changing any resources.
@@ -113,25 +111,24 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
     if (FAILED(hr))
         throw std::runtime_error("Command list reset failed.");
 
-    m_width = width;
-    m_height = height;
+    m_width = m_pWindow->GetWidth();
+    m_height = m_pWindow->GetHeight();
 
     WaitForGpu();
 
     // Release old buffers.
     for (int i = 0; i < SwapChainBufferCount; ++i)
     {
-        m_swapChainBuffer[i]->Release();
-        m_swapChainBuffer[i] = nullptr;
+		SafeRelease(m_swapChainBuffer[i]);
     }
-        
-    m_depthStencilBuffer->Release();
+
+    SafeRelease(m_depthStencilBuffer);
 
     // Resize swap chain.
     hr = m_swapChain->ResizeBuffers(
         SwapChainBufferCount,
-        width,
-        height,
+        m_width,
+        m_height,
         m_backBufferFormat,
         DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	if (FAILED(hr))
@@ -140,23 +137,30 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
     m_currBackBuffer = 0;
 
     CreateRenderTargets();
-    CreateDepthStencil(width, height);
+    CreateDepthStencil(m_width, m_height);
 
     m_screenViewport.TopLeftX = 0.0f;
     m_screenViewport.TopLeftY = 0.0f;
-    m_screenViewport.Width = static_cast<float>(width);
-    m_screenViewport.Height = static_cast<float>(height);
+    m_screenViewport.Width = static_cast<float>(m_width);
+    m_screenViewport.Height = static_cast<float>(m_height);
     m_screenViewport.MinDepth = 0.0f;
     m_screenViewport.MaxDepth = 1.0f;
 
     m_scissorRect.left = 0;
     m_scissorRect.top = 0;
-    m_scissorRect.right = static_cast<LONG>(width);
-    m_scissorRect.bottom = static_cast<LONG>(height);
+    m_scissorRect.right = static_cast<LONG>(m_width);
+    m_scissorRect.bottom = static_cast<LONG>(m_height);
+
+	m_pWindow->SetResizing(false);
 }
 
-void Renderer::Update(float dt)
+void Renderer::Update()
 {
+    if (m_pWindow)
+    {
+        if (m_pWindow->IsResizing())
+			OnResize();
+    }
 }
 
 void Renderer::Render()
@@ -263,7 +267,7 @@ bool Renderer::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t height)
     assert(m_commandQueue);
 
     // Release previous swap chain if any.
-	if (m_swapChain) m_swapChain->Release();
+	SafeRelease(m_swapChain);
 
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     swapChainDesc.BufferDesc.Width = width;
@@ -326,7 +330,7 @@ void Renderer::CreateRenderTargets()
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
     for (UINT i = 0; i < SwapChainBufferCount; i++)
     {
-        if (m_swapChainBuffer[i]) m_swapChainBuffer[i]->Release();
+        SafeRelease(m_swapChainBuffer[i]);
         HRESULT hr = m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_swapChainBuffer[i]));
         if (FAILED(hr))
 			throw std::runtime_error("Swap chain buffer retrieval failed.");
@@ -341,7 +345,7 @@ void Renderer::CreateDepthStencil(uint32_t width, uint32_t height)
     assert(m_d3dDevice);
     assert(m_dsvHeap);
 
-    if (m_depthStencilBuffer) m_depthStencilBuffer->Release();
+    SafeRelease(m_depthStencilBuffer);
 
     D3D12_RESOURCE_DESC depthDesc = {};
     depthDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;

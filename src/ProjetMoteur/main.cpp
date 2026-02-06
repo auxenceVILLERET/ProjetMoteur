@@ -25,11 +25,11 @@ int WINAPI WinMain(
 
     Window window(800, 600, L"test");
 	Renderer renderer;
-	renderer.Initialize(window.GetHandle(), 800, 600);
+	renderer.Initialize(&window);
      
     while (window.ProcessMessages())
     {
-        renderer.Update(0.0f);
+        renderer.Update();
         renderer.Render();
     }
 

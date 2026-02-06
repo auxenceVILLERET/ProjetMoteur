@@ -1,13 +1,9 @@
 template<typename T>
-inline void Renderer::SafeRelease(T*& p)
+inline void Renderer::SafeRelease(T*& ptr)
 {
-    if (p)
+    if (ptr)
     {
-        p->Release();
-        p = nullptr;
+        ptr->Release();
+        ptr = nullptr;
     }
-    else 
-    {
-        p = nullptr;
-	}
 }

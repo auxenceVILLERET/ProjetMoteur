@@ -21,11 +21,11 @@ public:
 	Renderer();
 	~Renderer();
 
-	bool Initialize(HWND hwnd, uint32_t width, uint32_t height);
+	bool Initialize(Window* window);
 	void Shutdown();
 
-	void OnResize(uint32_t width, uint32_t height);
-	void Update(float dt);
+	void OnResize();
+	void Update();
 	void Render();
 
 	void WaitForGpu();
@@ -46,7 +46,7 @@ private:
     void BeginFrame();
     void EndFrame();
 
-	Window* m_window = nullptr;
+	Window* m_pWindow = nullptr;
 
     IDXGIFactory4* m_dxgiFactory = nullptr;
     IDXGISwapChain* m_swapChain = nullptr;

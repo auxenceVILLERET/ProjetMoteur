@@ -15,6 +15,19 @@ public:
     Window* GetInstance();
     HWND GetHandle() const;
 
+    uint32_t GetWidth() const { return m_width; }
+    uint32_t GetHeight() const { return m_height; }
+
+	bool IsMinimized() const { return m_minimized; }
+	bool IsMaximized() const { return m_maximized; }
+	bool IsResizing() const { return m_resizing; }
+	bool IsFullscreen() const { return m_fullscreen; }
+
+	void SetMinimized(bool minimized) { m_minimized = minimized; }
+	void SetMaximized(bool maximized) { m_maximized = maximized; }
+	void SetResizing(bool resizing) { m_resizing = resizing; }
+	void SetFullscreen(bool fullscreen) { m_fullscreen = fullscreen; }
+
 private:
     static LRESULT CALLBACK StaticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -22,6 +35,9 @@ private:
 	static Window* s_pInstance;
 
     HWND m_hWindow = nullptr;
+
+	uint32_t m_width = 0;
+	uint32_t m_height = 0;
 
     bool m_minimized = false;   // is the application minimized?
     bool m_maximized = false;   // is the application maximized?

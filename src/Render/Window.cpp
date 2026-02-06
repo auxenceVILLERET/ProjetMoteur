@@ -12,6 +12,9 @@ Window::Window(int width, int height, const wchar_t* title)
 
     s_pInstance = this;
 
+    m_width = width;
+    m_height = height;
+
     HINSTANCE hInst = GetModuleHandle(nullptr);
 
     WNDCLASSEX wc = {};
@@ -23,7 +26,7 @@ Window::Window(int width, int height, const wchar_t* title)
 
     RegisterClassEx(&wc);
 
-    RECT r{ 0,0,width,height };
+    RECT r{ 0, 0, m_width, m_height };
     AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
 
     m_hWindow = CreateWindowEx(
@@ -57,6 +60,10 @@ bool Window::ProcessMessages()
     {
         if (msg.message == WM_QUIT)
             return false;
+        if (msg.message == WM_SIZE)
+        {
+            m_resizing = true;
+        }
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
