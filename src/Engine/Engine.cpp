@@ -1,6 +1,6 @@
 
 #include "Engine.h"
-#include "Engine/Core/GameTimer.h"
+#include "Core/GameTimer.h"
 
 
 void Engine::Initialize()

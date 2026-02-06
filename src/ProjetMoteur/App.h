@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Engine.h"
+#include "Engine/Engine.h"
 
 class App
 {

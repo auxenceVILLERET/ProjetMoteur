@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <iostream>
+#include "Engine/Engine.h"
 #include "ECS/ECS.h"
 #include "Engine/ECS/MovementSystem.h"
 #include "Engine/ECS/PositionComponent.h"
