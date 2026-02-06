@@ -30,6 +30,15 @@
 
 extern const int gNumFrameResources;
 
+template<typename T>
+inline void SafeRelease(T*& ptr)
+{
+    if (ptr)
+    {
+        ptr->Release();
+        ptr = nullptr;
+    }
+}
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
 {
     if(obj)
