@@ -9,7 +9,7 @@ class Component;
 class Entity
 {
 public:
-	Entity() = default;
+	Entity();
 	virtual ~Entity() = default;
 
 	void SetId(uint32_t id) { m_Id = id; }

@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine/ECS/System.h"
 
+class Entity;
+
 class ColliderSystem : public System
 {
 public:

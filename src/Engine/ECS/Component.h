@@ -3,9 +3,6 @@ class Entity;
 
 class Component
 {
-    virtual ~Component() = default;
-
-    // Appelés par les systems
     virtual void Start() {}
     virtual void Update(float dt) {}
 
