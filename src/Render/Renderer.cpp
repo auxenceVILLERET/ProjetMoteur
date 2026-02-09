@@ -160,28 +160,47 @@ void Renderer::Update()
 
 void Renderer::Render()
 {
+    if (m_pDxContext == nullptr || m_pSwapChainTargets == nullptr) return;
+    if (m_pWindow && m_pWindow->IsMinimized()) return;
+
     BeginFrame();
+
+    // draw calls (PSO, root signature, IA, DrawInstanced...)
+
     EndFrame();
 }
 
 void Renderer::BeginFrame()
 {
+	ID3D12Device* pDevice = m_pDxContext->GetDevice();
 	ID3D12CommandQueue* pCommandQueue = m_pDxContext->GetCommandQueue();
 	ID3D12GraphicsCommandList* pCommandList = m_pDxContext->GetCommandList();
 	ID3D12CommandAllocator* pCommandAllocator = m_pDxContext->GetCommandAllocator();
 
+	assert(pDevice);
     assert(pCommandQueue);
     assert(pCommandList);
     assert(pCommandAllocator);
 
     // Reset allocator and list.
-    HRESULT hr = m_pDxContext->GetCommandAllocator()->Reset();
+    HRESULT hr = pCommandAllocator->Reset();
     if (FAILED(hr))
 		throw std::runtime_error("Command allocator reset failed.");
 
-    hr = m_pDxContext->GetCommandList()->Reset(m_pDxContext->GetCommandAllocator(), nullptr);
+    hr = pCommandList->Reset(pCommandAllocator, nullptr);
 	if (FAILED(hr))
 		throw std::runtime_error("Command list reset failed.");
+
+    // Set viewport/scissor.
+    pCommandList->RSSetViewports(1, m_pSwapChainTargets->GetScreenViewport());
+    pCommandList->RSSetScissorRects(1, m_pSwapChainTargets->GetScissorRect());
+
+    // RTV handle
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_pSwapChainTargets->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
+    rtv = Offset(rtv, m_pSwapChainTargets->GetCurrentBackBufferIndex(), m_pDxContext->GetRtvDescriptorSize());
+
+    // DSV handle
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_pSwapChainTargets->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
     // Transition current back buffer: PRESENT -> RENDER_TARGET.
     ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
@@ -193,31 +212,22 @@ void Renderer::BeginFrame()
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     pCommandList->ResourceBarrier(1, &barrier);
 
-    // Set viewport/scissor.
-    pCommandList->RSSetViewports(1, m_pSwapChainTargets->GetScreenViewport());
-    pCommandList->RSSetScissorRects(1, m_pSwapChainTargets->GetScissorRect());
-
-    // RTV handle for current back buffer.
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_pSwapChainTargets->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
-    rtv = Offset(rtv, m_pSwapChainTargets->GetCurrentBackBufferIndex(), m_pDxContext->GetRtvDescriptorSize());
-
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = m_pSwapChainTargets->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    const float clearColor[] = { 0.07f, 0.07f, 0.12f, 1.0f };
+    float clearColor[4] = { 0.08f, 0.10f, 0.14f, 1.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
 
 void Renderer::EndFrame()
 {
-    ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
     ID3D12CommandQueue* pCommandQueue = m_pDxContext->GetCommandQueue();
     ID3D12GraphicsCommandList* pCommandList = m_pDxContext->GetCommandList();
     ID3D12CommandAllocator* pCommandAllocator = m_pDxContext->GetCommandAllocator();
 
     // Transition back buffer: RENDER_TARGET -> PRESENT.
+    ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Transition.pResource = backBuffer;

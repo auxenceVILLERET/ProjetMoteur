@@ -26,7 +26,7 @@ Window::Window(int width, int height, const wchar_t* title)
 
     RegisterClassEx(&wc);
 
-    RECT r{ 0, 0, m_width, m_height };
+    RECT r{ 0, 0, static_cast<LONG>(m_width), static_cast<LONG>(m_height) };
     AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
 
     m_hWindow = CreateWindowEx(

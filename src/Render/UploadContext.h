@@ -40,13 +40,13 @@ public:
     ID3D12GraphicsCommandList* GetCommandList() const { return m_cmdList; }
 
 private:
-    ID3D12Device* m_device;
-    ID3D12CommandQueue* m_queue;
+    ID3D12Device* m_device = nullptr;
+    ID3D12CommandQueue* m_queue = nullptr;
 
-    ID3D12CommandAllocator* m_alloc;
-    ID3D12GraphicsCommandList* m_cmdList;
+    ID3D12CommandAllocator* m_alloc = nullptr;
+    ID3D12GraphicsCommandList* m_cmdList = nullptr;
 
-    ID3D12Fence* m_fence;
+    ID3D12Fence* m_fence = nullptr;
     uint64_t m_fenceValue = 0;
     HANDLE m_fenceEvent = nullptr;
 
