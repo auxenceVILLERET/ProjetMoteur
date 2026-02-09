@@ -18,6 +18,7 @@ void Engine::Run()
 	m_timer->Reset();
 	while (m_isRunning)
 	{
+
 		m_timer->Tick();
 		float deltaTime = m_timer->DeltaTime();
 		m_ecs.Update(deltaTime);

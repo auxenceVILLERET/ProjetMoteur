@@ -25,9 +25,9 @@ void App::Initialize()
 
 void App::Update()
 {
+	UpdateWindow();
 	// Update your application here
-	m_renderer->Update();
-	m_renderer->Render();
+	
 
 	HandleInput();
 }
@@ -37,9 +37,16 @@ void App::Shutdown()
 	// Clean up your application here
 }
 
+void App::UpdateWindow()
+{
+	m_window->ProcessMessages();
+	m_renderer->Update();
+	m_renderer->Render();
+}
+
 void App::HandleInput()
 {
-	if(Input::GetKeyDown(Keyboard::SPACE))
+	if(Input::GetKeyUp(Keyboard::A))
 	{
 		std::cout << "A key was pressed!" << std::endl;
 	}
