@@ -1,0 +1,12 @@
+#ifndef DESCRIPTOR_HEAP_MANAGER_H_INCLUDED
+#define DESCRIPTOR_HEAP_MANAGER_H_INCLUDED
+class DescriptorHeapManager
+{
+public:
+
+
+private:
+
+};
+
+#endif // !DESCRIPTOR_HEAP_MANAGER_H_INCLUDED

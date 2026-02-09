@@ -31,8 +31,8 @@ public:
 	ID3D12Resource* GetCurrentBackBuffer() const { return m_swapChainBuffer[m_currBackBuffer]; }
 	UINT GetCurrentBackBufferIndex() const { return m_currBackBuffer; }
 
-    D3D12_VIEWPORT GetScreenViewport() const { return m_screenViewport; }
-	D3D12_RECT GetScissorRect() const { return m_scissorRect; }
+    D3D12_VIEWPORT* GetScreenViewport() { return &m_screenViewport; }
+	D3D12_RECT* GetScissorRect() { return &m_scissorRect; }
 
 	void Shutdown();
 

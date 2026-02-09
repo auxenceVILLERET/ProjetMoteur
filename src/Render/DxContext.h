@@ -22,13 +22,13 @@ public:
 
 	void Shutdown();
 
-	IDXGIFactory4* GetFactory() const { return m_dxgiFactory; }
-	ID3D12Device* GetDevice() const { return m_d3dDevice; }
-	ID3D12Fence* GetFence() const { return m_fence; }
-	UINT64 GetCurrentFence() const { return m_currentFence; }
-	ID3D12CommandQueue* GetCommandQueue() const { return m_commandQueue; }
-	ID3D12CommandAllocator* GetCommandAllocator() const { return m_directCmdListAlloc; }
-	ID3D12GraphicsCommandList* GetCommandList() const { return m_commandList; }
+	IDXGIFactory4* GetFactory()  { return m_dxgiFactory; }
+	ID3D12Device* GetDevice()  { return m_d3dDevice; }
+	ID3D12Fence* GetFence()  { return m_fence; }
+	UINT64 GetCurrentFence()  { return m_currentFence; }
+	ID3D12CommandQueue* GetCommandQueue()  { return m_commandQueue; }
+	ID3D12CommandAllocator* GetCommandAllocator()  { return m_directCmdListAlloc; }
+	ID3D12GraphicsCommandList* GetCommandList()  { return m_commandList; }
     
 	UINT GetRtvDescriptorSize() const { return m_rtvDescriptorSize; }
     UINT GetDsvDescriptorSize() const { return m_dsvDescriptorSize; }

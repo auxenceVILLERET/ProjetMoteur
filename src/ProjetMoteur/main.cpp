@@ -21,7 +21,7 @@ int WINAPI WinMain(
     _In_ LPSTR lpCmdLine,
     _In_ int nCmdShow)
 {
-	AttachConsoleIO();
+	//AttachConsoleIO();
 
     Window window(800, 600, L"test");
 	Renderer renderer;

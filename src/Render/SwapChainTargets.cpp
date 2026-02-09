@@ -37,10 +37,10 @@ bool SwapChainTargets::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t heigh
 {
 	DxContext* pDxContext = m_pRenderer->GetDxContext();
 	IDXGIFactory4* pFactory = pDxContext->GetFactory();
-	ID3D12GraphicsCommandList* pCommandList = pDxContext->GetCommandList();
+    ID3D12CommandQueue* pCommandQueue = pDxContext->GetCommandQueue();
 
     assert(pFactory);
-    assert(pCommandList);
+    assert(pCommandQueue);
 
     // Release previous swap chain if any.
     SafeRelease(m_swapChain);
@@ -62,10 +62,10 @@ bool SwapChainTargets::CreateSwapChain(HWND hwnd, uint32_t width, uint32_t heigh
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-    HRESULT hr = (pFactory->CreateSwapChain(
-        pCommandList,
+    HRESULT hr = pFactory->CreateSwapChain(
+        pCommandQueue,
         &swapChainDesc,
-        &m_swapChain));
+        &m_swapChain);
     if (FAILED(hr))
         throw std::runtime_error("Swap chain creation failed.");
 
@@ -263,4 +263,19 @@ void SwapChainTargets::Resize(uint32_t width, uint32_t height)
     m_pWindow->SetResizing(false);
 }
 
+void SwapChainTargets::UpdateCurrentBackBuffer()
+{
+    m_currBackBuffer = (m_currBackBuffer + 1) % SwapChainBufferCount;
+}
+
+void SwapChainTargets::Shutdown()
+{
+    SafeRelease(m_depthStencilBuffer);
+    for (int i = 0; i < SwapChainBufferCount; ++i)
+        SafeRelease(m_swapChainBuffer[i]);
+
+    SafeRelease(m_rtvHeap);
+    SafeRelease(m_dsvHeap);
+    SafeRelease(m_swapChain);
+}
 #endif // !SWAP_CHAIN_TARGETS_CPP_INCLUDED

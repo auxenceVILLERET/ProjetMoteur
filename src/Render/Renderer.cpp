@@ -24,6 +24,7 @@ Renderer::~Renderer()
 
 bool Renderer::Initialize(Window* window)
 {
+    m_pWindow = window;
 	uint32_t width = window->GetWidth();
     uint32_t height = window->GetHeight();
 
@@ -58,10 +59,24 @@ bool Renderer::Initialize(Window* window)
 
 void Renderer::Shutdown()
 {
-    // Can be called multiple times safely.
-    if (m_pDxContext->GetDevice())
+    if (m_pDxContext && m_pDxContext->GetDevice())
         m_pDxContext->WaitForGpu();
 
+    if (m_pSwapChainTargets)
+    {
+        m_pSwapChainTargets->Shutdown();
+        delete m_pSwapChainTargets;
+        m_pSwapChainTargets = nullptr;
+    }
+
+    if (m_pDxContext)
+    {
+        m_pDxContext->Shutdown();
+        delete m_pDxContext;
+        m_pDxContext = nullptr;
+    }
+
+    m_pWindow = nullptr;
     // Release in roughly reverse creation order.
     //SafeRelease(m_depthStencilBuffer);
     //for (auto& b : m_swapChainBuffer) 
@@ -123,8 +138,8 @@ void Renderer::BeginFrame()
     pCommandList->ResourceBarrier(1, &barrier);
 
     // Set viewport/scissor.
-    pCommandList->RSSetViewports(1, &m_pSwapChainTargets->GetScreenViewport());
-    pCommandList->RSSetScissorRects(1, &m_pSwapChainTargets->GetScissorRect());
+    pCommandList->RSSetViewports(1, m_pSwapChainTargets->GetScreenViewport());
+    pCommandList->RSSetScissorRects(1, m_pSwapChainTargets->GetScissorRect());
 
     // RTV handle for current back buffer.
     D3D12_CPU_DESCRIPTOR_HANDLE rtv = m_pSwapChainTargets->GetRtvHeap()->GetCPUDescriptorHandleForHeapStart();
@@ -142,6 +157,9 @@ void Renderer::BeginFrame()
 void Renderer::EndFrame()
 {
     ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
+    ID3D12CommandQueue* pCommandQueue = m_pDxContext->GetCommandQueue();
+    ID3D12GraphicsCommandList* pCommandList = m_pDxContext->GetCommandList();
+    ID3D12CommandAllocator* pCommandAllocator = m_pDxContext->GetCommandAllocator();
 
     // Transition back buffer: RENDER_TARGET -> PRESENT.
     D3D12_RESOURCE_BARRIER barrier = {};
@@ -167,7 +185,7 @@ void Renderer::EndFrame()
     // Simple but safe: CPU waits GPU each frame.
     m_pDxContext->WaitForGpu();
 
-    m_pSwapChainTargets->SetCurrentBackBufferIndex((m_pSwapChainTargets->GetCurrentBackBufferIndex() + 1) % SwapChainBufferCount);
+    m_pSwapChainTargets->UpdateCurrentBackBuffer();
 }
 
 #endif // !RENDERER_CPP_INCLUDED
