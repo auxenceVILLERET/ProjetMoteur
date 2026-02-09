@@ -9,8 +9,9 @@ public:
 	void Initialize();
 	void Update();
 	void Shutdown();
-
+	void HandleInput();
 private:
 	Engine& m_engine;
+
 };
 

@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include "Engine/Engine.h"
+#include "Core/InputsMethods.h"
+
+using namespace core;
 
 App::App(Engine& engine) : m_engine(engine)
 {
@@ -19,9 +22,18 @@ void App::Initialize()
 void App::Update()
 {
 	// Update your application here
+	HandleInput();
 }
 
 void App::Shutdown()
 {
 	// Clean up your application here
+}
+
+void App::HandleInput()
+{
+	if(Input::GetKeyDown(Keyboard::A))
+	{
+		std::cout << "A key was pressed!" << std::endl;
+	}
 }
