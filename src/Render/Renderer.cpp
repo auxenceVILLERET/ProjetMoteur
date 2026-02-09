@@ -6,6 +6,9 @@
 #include "Window.h"
 #include "DxContext.h"
 #include "SwapChainTargets.h"
+#include "Pipeline.h"
+#include "DescriptorHeapManager.h"
+#include "UploadContext.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -24,9 +27,10 @@ Renderer::~Renderer()
 
 bool Renderer::Initialize(Window* window)
 {
+    if (window == nullptr)
+        return false;
+
     m_pWindow = window;
-	uint32_t width = window->GetWidth();
-    uint32_t height = window->GetHeight();
 
 #if defined(DEBUG) || defined(_DEBUG)
     {
@@ -39,28 +43,94 @@ bool Renderer::Initialize(Window* window)
     }
 #endif
 
-	m_pDxContext = new DxContext();
+    // 1) DxContext (device + queue + cmdlist)
+    m_pDxContext = new DxContext();
     if (m_pDxContext->CreateDevice() == false)
         return false;
+
     if (m_pDxContext->CreateCommandObjects() == false)
         return false;
 
-	m_pSwapChainTargets = new SwapChainTargets(this, width, height);
-    if (m_pSwapChainTargets->CreateSwapChain(window->GetHandle(), width, height) == false)
+    // 2) SwapChain + RTV/DSV + backbuffers
+    m_pSwapChainTargets = new SwapChainTargets(this, window->GetWidth(), window->GetHeight());
+
+    if (m_pSwapChainTargets->CreateSwapChain(window->GetHandle(), window->GetWidth(), window->GetHeight()) == false)
         return false;
+
     if (m_pSwapChainTargets->CreateRtvDsvHeaps() == false)
         return false;
 
     m_pSwapChainTargets->CreateRenderTargets();
-    m_pSwapChainTargets->CreateDepthStencil(width, height);
+    m_pSwapChainTargets->CreateDepthStencil(window->GetWidth(), window->GetHeight());
+
+    // 3) Descriptor heap manager (CBV/SRV/UAV shader-visible)
+    m_pDescriptorHeapManager = new DescriptorHeapManager();
+    if (m_pDescriptorHeapManager->Initialize(
+        m_pDxContext->GetDevice(),
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+        1024,
+        true) == false)
+    {
+        return false;
+    }
+
+    // 4) Upload context
+    m_pUploadContext = new UploadContext();
+    if (m_pUploadContext->Initialize(m_pDxContext->GetDevice(), m_pDxContext->GetCommandQueue()) == false)
+        return false;
+
+    // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
+    //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
+    /*
+    m_pPipeline = new Pipeline();
+
+    std::vector<D3D12_INPUT_ELEMENT_DESC> layout = {
+        // Exemple si tu as POSITION/COLOR :
+        // { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,   D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        // { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
+
+    bool ok = m_pPipeline->InitializeGraphics(
+        m_pDxContext->GetDevice(),
+        L"Shaders/MyShader.hlsl", "VSMain",
+        L"Shaders/MyShader.hlsl", "PSMain",
+        layout,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        true
+    );
+
+    if (!ok) return false;
+    */
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
-    if (m_pDxContext && m_pDxContext->GetDevice())
+    if (m_pDxContext)
         m_pDxContext->WaitForGpu();
+
+    if (m_pPipeline)
+    {
+        m_pPipeline->Shutdown();
+        delete m_pPipeline;
+        m_pPipeline = nullptr;
+    }
+
+    if (m_pUploadContext)
+    {
+        m_pUploadContext->Shutdown();
+        delete m_pUploadContext;
+        m_pUploadContext = nullptr;
+    }
+
+    if (m_pDescriptorHeapManager)
+    {
+        m_pDescriptorHeapManager->Shutdown();
+        delete m_pDescriptorHeapManager;
+        m_pDescriptorHeapManager = nullptr;
+    }
 
     if (m_pSwapChainTargets)
     {
@@ -77,19 +147,6 @@ void Renderer::Shutdown()
     }
 
     m_pWindow = nullptr;
-    // Release in roughly reverse creation order.
-    //SafeRelease(m_depthStencilBuffer);
-    //for (auto& b : m_swapChainBuffer) 
-    //    SafeRelease(b);
-    //SafeRelease(m_rtvHeap);
-    //SafeRelease(m_dsvHeap);
-    //SafeRelease(m_commandList);
-    //SafeRelease(m_directCmdListAlloc);
-    //SafeRelease(m_commandQueue);
-    //SafeRelease(m_fence);
-    //SafeRelease(m_swapChain);
-    //SafeRelease(m_d3dDevice);
-    //SafeRelease(m_dxgiFactory);
 }
 
 void Renderer::Update()
@@ -106,7 +163,6 @@ void Renderer::Render()
     BeginFrame();
     EndFrame();
 }
-
 
 void Renderer::BeginFrame()
 {

@@ -16,6 +16,9 @@
 class Window;
 class DxContext;
 class SwapChainTargets;
+class Pipeline;
+class DescriptorHeapManager;
+class UploadContext;
 
 class Renderer
 {
@@ -44,7 +47,9 @@ private:
 
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;
-
+	Pipeline* m_pPipeline = nullptr;
+	DescriptorHeapManager* m_pDescriptorHeapManager = nullptr;
+	UploadContext* m_pUploadContext = nullptr;
 };
 
 #endif

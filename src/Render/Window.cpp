@@ -60,6 +60,10 @@ bool Window::ProcessMessages()
     {
         if (msg.message == WM_QUIT)
             return false;
+        if (msg.message == WM_SIZE)
+        {
+            m_resizing = true;
+		}
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -92,14 +96,6 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
     case WM_CLOSE:
         PostQuitMessage(0);
-        return 0;
-	case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-        {
-            m_width = LOWORD(lParam);
-            m_height = HIWORD(lParam);
-            m_resizing = true;
-        }
         return 0;
     }
 
