@@ -32,7 +32,7 @@ void App::Shutdown()
 
 void App::HandleInput()
 {
-	if(Input::GetKeyDown(Keyboard::A))
+	if(Input::GetKeyDown(Keyboard::SPACE))
 	{
 		std::cout << "A key was pressed!" << std::endl;
 	}

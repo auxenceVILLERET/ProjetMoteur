@@ -38,9 +38,12 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [],
+            "dependencies": [
+                "34FD2C0C-222C-36D3-38F7-42AF43CC3999"
+            ],
             "dependents": [
-                "1F02133D-4DCC-5D90-205F-304D2B605DC6"
+                "1F02133D-4DCC-5D90-205F-304D2B605DC6",
+                "792F16B8-70EC-4096-12B5-05312EA53D42"
             ],
             "name": "Render",
             "property-lib": true,
@@ -63,7 +66,9 @@
             },
             "dependencies": [],
             "dependents": [
-                "1F02133D-4DCC-5D90-205F-304D2B605DC6"
+                "1F02133D-4DCC-5D90-205F-304D2B605DC6",
+                "34DF322C-2E23-68D9-4E58-38A356602083",
+                "792F16B8-70EC-4096-12B5-05312EA53D42"
             ],
             "name": "Core",
             "property-lib": true,
@@ -84,7 +89,10 @@
                 "additionalLibraryDirectories": [],
                 "preprocessorDefinitions": []
             },
-            "dependencies": [],
+            "dependencies": [
+                "34FD2C0C-222C-36D3-38F7-42AF43CC3999",
+                "34DF322C-2E23-68D9-4E58-38A356602083"
+            ],
             "dependents": [
                 "1F02133D-4DCC-5D90-205F-304D2B605DC6"
             ],

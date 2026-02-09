@@ -19,16 +19,16 @@ public:
 	void Tick();  // Call every frame.
 
 private:
-	double m_SecondsPerCount;
-	double m_DeltaTime;
+	double mSecondsPerCount;
+	double mDeltaTime;
 
-	int m_BaseTime;
-	int m_PausedTime;
-	int m_StopTime;
-	int m_PrevTime;
-	int m_CurrTime;
+	__int64 mBaseTime;
+	__int64 mPausedTime;
+	__int64 mStopTime;
+	__int64 mPrevTime;
+	__int64 mCurrTime;
 
-	bool m_Stopped;
+	bool mStopped;
 };
 
 #endif // GAMETIMER_H
