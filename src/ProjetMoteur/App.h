@@ -2,6 +2,9 @@
 
 #include "Engine/Engine.h"
 
+class Window;
+class Renderer;
+
 class App
 {
 public:
@@ -12,5 +15,7 @@ public:
 
 private:
 	Engine& m_engine;
+	Window* m_window;
+	Renderer* m_renderer;
 };
 

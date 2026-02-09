@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include <windows.h>
-#include "Render/Window.h"
-#include "Render/Renderer.h"
+#include "Engine/Engine.h"
+#include "App.h"
 
 void AttachConsoleIO()
 {
@@ -21,17 +21,16 @@ int WINAPI WinMain(
     _In_ LPSTR lpCmdLine,
     _In_ int nCmdShow)
 {
-	//AttachConsoleIO();
 
-    Window window(800, 600, L"test");
-	Renderer renderer;
-	renderer.Initialize(&window);
-     
-    while (window.ProcessMessages())
-    {
-        renderer.Update();
-        renderer.Render();
-    }
+	AttachConsoleIO();
+
+	Engine engine;
+	App app(engine);
+
+	engine.Initialize();
+	engine.Run();
+	engine.Shutdown();
+
 
     return 0;
 }
