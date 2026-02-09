@@ -1,10 +1,9 @@
-#include <windows.h>
-#include <iostream>
 #include "main.h"
 
-#include "Engine/Engine.h"
-#include "App.h"
-
+#include <iostream>
+#include <windows.h>
+#include "Render/Window.h"
+#include "Render/Renderer.h"
 
 void AttachConsoleIO()
 {
@@ -16,17 +15,23 @@ void AttachConsoleIO()
 	freopen_s(&f, "CONOUT$", "w", stderr);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPSTR lpCmdLine,
+    _In_ int nCmdShow)
 {
-	AttachConsoleIO();
+	//AttachConsoleIO();
 
-	Engine engine;
-	
-	App app(engine);
+    Window window(800, 600, L"test");
+	Renderer renderer;
+	renderer.Initialize(&window);
+     
+    while (window.ProcessMessages())
+    {
+        renderer.Update();
+        renderer.Render();
+    }
 
-	engine.Initialize();
-	engine.Run();
-	engine.Shutdown();
-
+    return 0;
 }
-
