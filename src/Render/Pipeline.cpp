@@ -57,9 +57,6 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, const std::wstring& vsFi
     psoDesc.SampleDesc.Count = 1;
     psoDesc.SampleDesc.Quality = 0;
 
-    // ! CD3DX12_* est dans d3dx12.h (header helper Microsoft)
-    // Si tu ne l’as pas, je peux te donner des structs “à la main”.
-
     HRESULT hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pso));
     if (FAILED(hr))
         return false;

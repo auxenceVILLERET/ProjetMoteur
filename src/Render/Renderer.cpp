@@ -81,6 +81,10 @@ bool Renderer::Initialize(Window* window)
 
     // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
+    m_pPipeline = new Pipeline();
+    if (CreateTestPipeline() == false) return false;
+    if (CreateTestMesh() == false) return false;
+
     /*
     m_pPipeline = new Pipeline();
 
@@ -108,6 +112,12 @@ bool Renderer::Initialize(Window* window)
 
 void Renderer::Shutdown()
 {
+    SafeRelease(m_ib);
+    SafeRelease(m_vb);
+    SafeRelease(m_ibUpload);
+    SafeRelease(m_vbUpload);
+    m_indexCount = 0;
+
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
@@ -165,9 +175,88 @@ void Renderer::Render()
 
     BeginFrame();
 
-    // draw calls (PSO, root signature, IA, DrawInstanced...)
+    // draw calls (PSO, root signature, IA, DrawInstanced...)*
+    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+
+    cmd->SetPipelineState(m_pPipeline->GetPSO());
+    cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmd->IASetVertexBuffers(0, 1, &m_vbView);
+    cmd->IASetIndexBuffer(&m_ibView);
+
+    cmd->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 
     EndFrame();
+}
+
+bool Renderer::CreateTestPipeline()
+{
+    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
+
+    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
+    return m_pPipeline->InitializeGraphics(
+        m_pDxContext->GetDevice(),
+        L"Shaders/Simple.hlsl", "VSMain",
+        L"Shaders/Simple.hlsl", "PSMain",
+        layout,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        true
+    );
+}
+
+bool Renderer::CreateTestMesh()
+{
+    // Triangle en clip-space (pas besoin de matrices)
+    Vertex vertices[] =
+    {
+        { { 0.0f,  0.5f, 0.0f }, { 1, 0, 0, 1 } },
+        { { 0.5f, -0.5f, 0.0f }, { 0, 1, 0, 1 } },
+        { { -0.5f,-0.5f, 0.0f }, { 0, 0, 1, 1 } },
+    };
+
+    uint16_t indices[] = { 0, 1, 2 };
+    m_indexCount = 3;
+
+    m_pUploadContext->Begin();
+
+    // VB
+    {
+        const uint64_t vbBytes = sizeof(vertices);
+        if (m_pUploadContext->UploadBuffer(vertices, vbBytes, m_vb, m_vbUpload, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) == false)
+            return false;
+
+        m_vbView.BufferLocation = m_vb->GetGPUVirtualAddress();
+        m_vbView.SizeInBytes = (UINT)vbBytes;
+        m_vbView.StrideInBytes = sizeof(Vertex);
+    }
+
+    // IB
+    {
+        const uint64_t ibBytes = sizeof(indices);
+        if (!m_pUploadContext->UploadBuffer(indices, ibBytes, m_ib, m_ibUpload, D3D12_RESOURCE_STATE_INDEX_BUFFER))
+            return false;
+
+        m_ibView.BufferLocation = m_ib->GetGPUVirtualAddress();
+        m_ibView.SizeInBytes = (UINT)ibBytes;
+        m_ibView.Format = DXGI_FORMAT_R16_UINT;
+    }
+
+    m_pUploadContext->EndAndWait();
+
+    // Après EndAndWait, tu peux libérer les upload buffers si tu veux
+    SafeRelease(m_vbUpload);
+    SafeRelease(m_ibUpload);
+
+    return true;
 }
 
 void Renderer::BeginFrame()
@@ -204,12 +293,9 @@ void Renderer::BeginFrame()
 
     // Transition current back buffer: PRESENT -> RENDER_TARGET.
     ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Transition.pResource = backBuffer;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer,
+        D3D12_RESOURCE_STATE_PRESENT,
+        D3D12_RESOURCE_STATE_RENDER_TARGET);
     pCommandList->ResourceBarrier(1, &barrier);
 
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
