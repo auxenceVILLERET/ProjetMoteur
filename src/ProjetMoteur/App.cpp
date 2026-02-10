@@ -13,6 +13,8 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
 
+	m_renderer = nullptr;
+	m_window = nullptr;
 }
 
 void App::Initialize()
