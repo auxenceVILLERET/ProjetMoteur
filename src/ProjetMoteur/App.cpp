@@ -27,7 +27,6 @@ void App::Update()
 {
 	UpdateWindow();
 	// Update your application here
-	
 
 	HandleInput();
 }
@@ -46,8 +45,10 @@ void App::UpdateWindow()
 
 void App::HandleInput()
 {
-	if(Input::GetKeyUp(Keyboard::A))
+	if(Input::GetKey(Keyboard::A))
 	{
 		std::cout << "A key was pressed!" << std::endl;
 	}
+
+	Input::Update();
 }
