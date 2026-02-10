@@ -4,6 +4,7 @@
 
 class Window;
 class Renderer;
+class SceneManager;
 
 class App
 {
@@ -20,5 +21,6 @@ private:
 	Engine& m_engine;
 	Window* m_window;
 	Renderer* m_renderer;
+	SceneManager* m_sceneManager;
 };
 

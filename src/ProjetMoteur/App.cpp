@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Engine/Engine.h"
 #include "Core/InputsMethods.h"
+#include "Engine/Scene/SceneManager.h"
 
 using namespace core;
 
@@ -15,6 +16,7 @@ App::App(Engine& engine) : m_engine(engine)
 
 	m_renderer = nullptr;
 	m_window = nullptr;
+	m_sceneManager = nullptr;
 }
 
 void App::Initialize()
@@ -23,11 +25,13 @@ void App::Initialize()
 	m_window = new Window(800, 600, L"test");
 	m_renderer = new Renderer();
 	m_renderer->Initialize(m_window);
+	m_sceneManager = new SceneManager();
 }
 
 void App::Update()
 {
 	UpdateWindow();
+	m_sceneManager->Update(m_engine.GetDeltaTime());
 	// Update your application here
 
 	HandleInput();
