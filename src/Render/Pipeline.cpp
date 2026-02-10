@@ -23,8 +23,8 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, const std::wstring& vsFi
         return false;
 
     // 2) Compile shaders
-    if (CompileShader(vsFile, vsEntry, "vs_5_1", m_vs) == false) return false;
-    if (CompileShader(psFile, psEntry, "ps_5_1", m_ps) == false) return false;
+    if (CompileShader(vsFile, vsEntry, "vs_5_0", m_vs) == false) return false;
+    if (CompileShader(psFile, psEntry, "ps_5_0", m_ps) == false) return false;
 
     // 3) Remplir le PSO
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -93,7 +93,12 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
     );
 
     if (FAILED(hr))
+    {
+        if (error) OutputDebugStringA((char*)error->GetBufferPointer());
+        SafeRelease(error);
+        SafeRelease(serialized);
         return false;
+    }
 
     hr = device->CreateRootSignature(
         0,
@@ -102,6 +107,8 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
         IID_PPV_ARGS(&m_rootSig)
     );
 
+    SafeRelease(error);
+    SafeRelease(serialized);
     return SUCCEEDED(hr);
 }
 
@@ -123,6 +130,16 @@ bool Pipeline::CompileShader(const std::wstring& file, const std::string& entry,
         &outBlob,
         &errors
     );
+
+    if (FAILED(hr))
+    {
+        if (errors)
+        {
+            OutputDebugStringA((const char*)errors->GetBufferPointer());
+        }
+        SafeRelease(errors);
+        return false;
+    }
 
     SafeRelease(errors);
     return SUCCEEDED(hr);

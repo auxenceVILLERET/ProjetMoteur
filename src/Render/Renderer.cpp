@@ -204,8 +204,8 @@ bool Renderer::CreateTestPipeline()
     // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
     return m_pPipeline->InitializeGraphics(
         m_pDxContext->GetDevice(),
-        L"Shaders/Simple.hlsl", "VSMain",
-        L"Shaders/Simple.hlsl", "PSMain",
+        L"../../src/Render/Simple.hlsl", "VSMain",
+        L"../../src/Render/Simple.hlsl", "PSMain",
         layout,
         DXGI_FORMAT_R8G8B8A8_UNORM,
         DXGI_FORMAT_D24_UNORM_S8_UINT,
