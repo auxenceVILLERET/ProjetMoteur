@@ -9,6 +9,7 @@
 #include "Pipeline.h"
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
+#include "Mesh.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -83,40 +84,15 @@ bool Renderer::Initialize(Window* window)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
     m_pPipeline = new Pipeline();
     if (CreateTestPipeline() == false) return false;
-    if (CreateTestMesh() == false) return false;
-
-    /*
-    m_pPipeline = new Pipeline();
-
-    std::vector<D3D12_INPUT_ELEMENT_DESC> layout = {
-        // Exemple si tu as POSITION/COLOR :
-        // { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,   D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        // { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    bool ok = m_pPipeline->InitializeGraphics(
-        m_pDxContext->GetDevice(),
-        L"Shaders/MyShader.hlsl", "VSMain",
-        L"Shaders/MyShader.hlsl", "PSMain",
-        layout,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        DXGI_FORMAT_D24_UNORM_S8_UINT,
-        true
-    );
-
-    if (!ok) return false;
-    */
+	if (CreateTestMesh() == false) return false;
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
-    SafeRelease(m_ib);
-    SafeRelease(m_vb);
-    SafeRelease(m_ibUpload);
-    SafeRelease(m_vbUpload);
-    m_indexCount = 0;
+    for (auto& m : m_vMeshes) m.Release();
+        m_vMeshes.clear();
 
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
@@ -166,6 +142,36 @@ void Renderer::Update()
         if (m_pWindow->IsResizing())
 			m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
     }
+
+	angle += 0.01f;
+
+    // View/Proj (pour l’instant identité si tu es en clip space)
+    XMMATRIX view = XMMatrixIdentity();
+    XMMATRIX proj = XMMatrixIdentity();
+
+    // Exemple : mesh 0 tourne
+    {
+        XMMATRIX world =
+            XMMatrixRotationZ(angle) *
+            XMMatrixTranslation(-0.6f, 0.0f, 0.0f);
+
+        XMFLOAT4X4 wvpT;
+        XMStoreFloat4x4(&wvpT, XMMatrixTranspose(world * view * proj));
+        m_vMeshes[0].UpdateConstants(wvpT);
+    }
+
+    // Exemple : mesh 1 bouge en sinus
+    {
+        float x = 0.6f + 0.2f * sinf(angle);
+
+        XMMATRIX world =
+            XMMatrixScaling(1.0f, 1.0f, 1.0f) *
+            XMMatrixTranslation(x, 0.0f, 0.0f);
+
+        XMFLOAT4X4 wvpT;
+        XMStoreFloat4x4(&wvpT, XMMatrixTranspose(world * view * proj));
+        m_vMeshes[1].UpdateConstants(wvpT);
+    }
 }
 
 void Renderer::Render()
@@ -182,10 +188,13 @@ void Renderer::Render()
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
 
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    cmd->IASetVertexBuffers(0, 1, &m_vbView);
-    cmd->IASetIndexBuffer(&m_ibView);
 
-    cmd->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
+    for (const auto& mesh : m_vMeshes)
+    {
+        // root param 0 = CBV(b0)
+        cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
+        mesh.Draw(cmd);
+    }
 
     EndFrame();
 }
@@ -194,10 +203,10 @@ bool Renderer::CreateTestPipeline()
 {
     std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
           D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
           D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
@@ -215,46 +224,61 @@ bool Renderer::CreateTestPipeline()
 
 bool Renderer::CreateTestMesh()
 {
-    // Triangle en clip-space (pas besoin de matrices)
-    Vertex vertices[] =
+    m_vMeshes.clear();
+    m_vMeshes.resize(2);
+
+    // Mesh 0 : triangle
+    Vertex triV[] =
     {
         { { 0.0f,  0.5f, 0.0f }, { 1, 0, 0, 1 } },
         { { 0.5f, -0.5f, 0.0f }, { 0, 1, 0, 1 } },
         { { -0.5f,-0.5f, 0.0f }, { 0, 0, 1, 1 } },
     };
+    uint16_t triI[] = { 0, 1, 2 };
 
-    uint16_t indices[] = { 0, 1, 2 };
-    m_indexCount = 3;
+    // Mesh 1 : quad (2 triangles)
+    Vertex quadV[] =
+    {
+        { { -0.5f,  0.5f, 0.0f }, { 1, 1, 0, 1 } },
+        { {  0.5f,  0.5f, 0.0f }, { 0, 1, 1, 1 } },
+        { {  0.5f, -0.5f, 0.0f }, { 1, 0, 1, 1 } },
+        { { -0.5f, -0.5f, 0.0f }, { 1, 1, 1, 1 } },
+    };
+    uint16_t quadI[] = { 0,1,2, 0,2,3 };
 
+    // Upload VB/IB en batch
     m_pUploadContext->Begin();
 
-    // VB
-    {
-        const uint64_t vbBytes = sizeof(vertices);
-        if (m_pUploadContext->UploadBuffer(vertices, vbBytes, m_vb, m_vbUpload, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) == false)
-            return false;
-
-        m_vbView.BufferLocation = m_vb->GetGPUVirtualAddress();
-        m_vbView.SizeInBytes = (UINT)vbBytes;
-        m_vbView.StrideInBytes = sizeof(Vertex);
-    }
-
-    // IB
-    {
-        const uint64_t ibBytes = sizeof(indices);
-        if (!m_pUploadContext->UploadBuffer(indices, ibBytes, m_ib, m_ibUpload, D3D12_RESOURCE_STATE_INDEX_BUFFER))
-            return false;
-
-        m_ibView.BufferLocation = m_ib->GetGPUVirtualAddress();
-        m_ibView.SizeInBytes = (UINT)ibBytes;
-        m_ibView.Format = DXGI_FORMAT_R16_UINT;
-    }
+    if (!m_vMeshes[0].Initialize(*m_pUploadContext, triV, 3, triI, 3)) return false;
+    if (!m_vMeshes[1].Initialize(*m_pUploadContext, quadV, 4, quadI, 6)) return false;
 
     m_pUploadContext->EndAndWait();
 
-    // Après EndAndWait, tu peux libérer les upload buffers si tu veux
-    SafeRelease(m_vbUpload);
-    SafeRelease(m_ibUpload);
+    // plus besoin des upload buffers
+    for (auto& m : m_vMeshes) m.FinalizeUpload();
+
+    // Créer CB par mesh
+    for (auto& m : m_vMeshes)
+        if (!m.CreateConstantBuffer(m_pDxContext->GetDevice()))
+            return false;
+
+    // Matrices (view/proj simples)
+    using namespace DirectX;
+
+    XMMATRIX view = XMMatrixIdentity();
+    XMMATRIX proj = XMMatrixIdentity();
+
+    // triangle à gauche
+    XMMATRIX world0 = XMMatrixTranslation(-0.6f, 0.0f, 0.0f);
+    XMFLOAT4X4 wvp0T;
+    XMStoreFloat4x4(&wvp0T, XMMatrixTranspose(world0 * view * proj));
+    m_vMeshes[0].UpdateConstants(wvp0T);
+
+    // quad à droite
+    XMMATRIX world1 = XMMatrixTranslation(0.6f, 0.0f, 0.0f);
+    XMFLOAT4X4 wvp1T;
+    XMStoreFloat4x4(&wvp1T, XMMatrixTranspose(world1 * view * proj));
+    m_vMeshes[1].UpdateConstants(wvp1T);
 
     return true;
 }

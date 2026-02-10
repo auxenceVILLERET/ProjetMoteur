@@ -27,8 +27,8 @@ public:
     bool UploadBuffer(
         const void* srcData,
         uint64_t numBytes,
-        ID3D12Resource* outDefaultBuffer,
-        ID3D12Resource* outUploadBuffer,
+        ID3D12Resource*& outDefaultBuffer,
+        ID3D12Resource*& outUploadBuffer,
         D3D12_RESOURCE_STATES finalState = D3D12_RESOURCE_STATE_GENERIC_READ);
 
     // Barrière utilitaire

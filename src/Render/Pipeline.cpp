@@ -74,10 +74,16 @@ void Pipeline::Shutdown()
 
 bool Pipeline::BuildRootSignature(ID3D12Device* device)
 {
-    // Root signature minimaliste : 0 paramètres root, 0 static samplers
+    // 1 paramètre root: CBV b0 (visible vertex shader)
+    D3D12_ROOT_PARAMETER param = {};
+    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    param.Descriptor.ShaderRegister = 0; // b0
+    param.Descriptor.RegisterSpace = 0;
+    param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
     D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = 0;
-    desc.pParameters = nullptr;
+    desc.NumParameters = 1;
+    desc.pParameters = &param;
     desc.NumStaticSamplers = 0;
     desc.pStaticSamplers = nullptr;
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

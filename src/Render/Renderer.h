@@ -19,14 +19,9 @@ class SwapChainTargets;
 class Pipeline;
 class DescriptorHeapManager;
 class UploadContext;
+class Mesh;
 
 using namespace DirectX;
-
-struct Vertex
-{
-	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
-};
 
 class Renderer
 {
@@ -43,16 +38,6 @@ public:
 	bool CreateTestPipeline();
 	bool CreateTestMesh();
 
-	ID3D12Resource* m_vb = nullptr;
-	ID3D12Resource* m_vbUpload = nullptr;
-	D3D12_VERTEX_BUFFER_VIEW m_vbView = {};
-
-	// (optionnel) index buffer
-	ID3D12Resource* m_ib = nullptr;
-	ID3D12Resource* m_ibUpload = nullptr;
-	D3D12_INDEX_BUFFER_VIEW m_ibView = {};
-	UINT m_indexCount = 0;
-
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
 	SwapChainTargets* GetSwapChainTargets() const { return m_pSwapChainTargets; }
@@ -66,11 +51,15 @@ private:
 
 	Window* m_pWindow = nullptr;
 
+	std::vector<Mesh> m_vMeshes;
+
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;
 	Pipeline* m_pPipeline = nullptr;
 	DescriptorHeapManager* m_pDescriptorHeapManager = nullptr;
 	UploadContext* m_pUploadContext = nullptr;
+
+	float angle = 0.f;
 };
 
 #endif

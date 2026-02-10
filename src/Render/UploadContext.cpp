@@ -14,9 +14,7 @@ bool UploadContext::Initialize(ID3D12Device* device, ID3D12CommandQueue* queue)
     m_queue = queue;
 
     // Allocator + cmd list
-    HRESULT hr = m_device->CreateCommandAllocator(
-        D3D12_COMMAND_LIST_TYPE_DIRECT,
-        IID_PPV_ARGS(&m_alloc));
+    HRESULT hr = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_alloc));
     if (FAILED(hr)) return false;
 
     hr = m_device->CreateCommandList(
@@ -130,8 +128,8 @@ void UploadContext::Transition(ID3D12Resource* res,
 bool UploadContext::UploadBuffer(
     const void* srcData,
     uint64_t numBytes,
-    ID3D12Resource* outDefaultBuffer,
-    ID3D12Resource* outUploadBuffer,
+    ID3D12Resource*& outDefaultBuffer,
+    ID3D12Resource*& outUploadBuffer,
     D3D12_RESOURCE_STATES finalState)
 {
     if (m_recording == false)
@@ -139,6 +137,9 @@ bool UploadContext::UploadBuffer(
 
     if (srcData == nullptr || numBytes == 0)
         return false;
+
+    if (outDefaultBuffer) { outDefaultBuffer->Release(); outDefaultBuffer = nullptr; }
+    if (outUploadBuffer) { outUploadBuffer->Release();  outUploadBuffer = nullptr; }
 
     // Default heap (GPU)
     D3D12_HEAP_PROPERTIES defaultHeap = {};
