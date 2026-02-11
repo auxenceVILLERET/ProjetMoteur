@@ -13,6 +13,8 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
 
+	m_renderer = nullptr;
+	m_window = nullptr;
 }
 
 void App::Initialize()
@@ -27,7 +29,6 @@ void App::Update()
 {
 	UpdateWindow();
 	// Update your application here
-	
 
 	HandleInput();
 }
@@ -46,8 +47,10 @@ void App::UpdateWindow()
 
 void App::HandleInput()
 {
-	if(Input::GetKeyUp(Keyboard::A))
+	if(Input::GetKey(Keyboard::A))
 	{
 		std::cout << "A key was pressed!" << std::endl;
 	}
+
+	Input::Update();
 }
