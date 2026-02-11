@@ -35,9 +35,9 @@ public:
 
 	void Update();
 	void Render();
+	void DrawMesh(Mesh& mesh);
 
 	bool CreateTestPipeline();
-	bool CreateTestMesh();
 
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }

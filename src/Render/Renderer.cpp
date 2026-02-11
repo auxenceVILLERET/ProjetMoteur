@@ -9,7 +9,7 @@
 #include "Pipeline.h"
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
-#include "Mesh.h"
+#include "Engine/Mesh.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 
@@ -87,7 +87,6 @@ bool Renderer::Initialize(Window* window, Entity* camera)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
     m_pPipeline = new Pipeline();
     if (CreateTestPipeline() == false) return false;
-	if (CreateTestMesh() == false) return false;
 
     return true;
 }
@@ -208,27 +207,6 @@ bool Renderer::CreateTestPipeline()
     );
 }
 
-bool Renderer::CreateTestMesh()
-{
-    m_vMeshes.resize(1);
-
-    // Upload VB/IB en batch
-    m_pUploadContext->Begin();
-
-    if (!m_vMeshes[0].CreateCube(*m_pUploadContext)) return false;
-   
-    m_pUploadContext->EndAndWait();
-
-    // plus besoin des upload buffers
-    for (auto& m : m_vMeshes) m.FinalizeUpload();
-
-    // Creer CB par mesh
-    for (auto& m : m_vMeshes)
-        if (!m.CreateConstantBuffer(m_pDxContext->GetDevice()))
-            return false;
-
-	return true;
-}
 
 void Renderer::BeginFrame()
 {
@@ -309,6 +287,14 @@ void Renderer::EndFrame()
     m_pDxContext->WaitForGpu();
 
     m_pSwapChainTargets->UpdateCurrentBackBuffer();
+}
+
+void Renderer::DrawMesh(Mesh& mesh)
+{
+    // root param 0 = CBV(b0)
+    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+    cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
+    mesh.Draw(cmd);
 }
 
 #endif // !RENDERER_CPP_INCLUDED

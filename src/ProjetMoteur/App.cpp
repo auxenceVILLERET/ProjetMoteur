@@ -6,6 +6,8 @@
 #include "Core/InputsMethods.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 #include "Engine/ECS/Systems/CameraSystem.h"
+#include "Engine/RessourceManager.h"
+#include "Engine/ECS/Components/MeshRendererComponent.h"
 
 using namespace core;
 
@@ -28,6 +30,14 @@ void App::Initialize()
 	m_renderer = new Renderer();
 	m_renderer->Initialize(m_window, m_cam);
 	
+	UploadContext* uploader = m_renderer->GetUploadContext();
+
+	RessourceManager::Instance().Initialize(m_renderer, uploader);
+
+	Entity* cube = m_ecs->CreateEntity<Entity>();
+	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube());
+
+	RessourceManager::Instance().FinalizeUpload();
 }
 
 void App::Update()

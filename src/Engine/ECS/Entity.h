@@ -50,6 +50,7 @@ public:
 	void LookAt(float x, float y, float z); // look at a specific coords
 
 	void SetMatrix(float matrixPos, float value); // manually modifiy a value of the matrix
+	XMFLOAT4X4 GetMatrix() const { return m_matrix; } // get the matrix of the obj
 
 	void CoutRotation(); // DEBUG
 	void CoutMatrix(); // DEBUG

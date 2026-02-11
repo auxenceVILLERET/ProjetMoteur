@@ -351,3 +351,5 @@ void Mesh::Draw(ID3D12GraphicsCommandList* cmdList) const
 	cmdList->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
+
+
