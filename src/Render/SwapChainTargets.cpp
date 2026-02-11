@@ -138,7 +138,7 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
     depthDesc.Height = height;
     depthDesc.DepthOrArraySize = 1;
     depthDesc.MipLevels = 1;
-    depthDesc.Format = m_depthStencilFormat;
+    depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     depthDesc.SampleDesc.Count = 1;
     depthDesc.SampleDesc.Quality = 0;
     depthDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -146,13 +146,10 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
 
     D3D12_CLEAR_VALUE optClear = {};
     optClear.Format = m_depthStencilFormat;
-    optClear.DepthStencil.Depth = 1.0f;
+    optClear.DepthStencil.Depth = 1.f;
     optClear.DepthStencil.Stencil = 0;
 
-    D3D12_HEAP_PROPERTIES heapProps = {};
-    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-    heapProps.CreationNodeMask = 1;
-    heapProps.VisibleNodeMask = 1;
+    D3D12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 
     HRESULT hr = pDevice->CreateCommittedResource(
         &heapProps,

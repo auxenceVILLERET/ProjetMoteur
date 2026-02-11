@@ -143,35 +143,20 @@ void Renderer::Update()
 			m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
     }
 
-	angle += 0.01f;
+	angle += 0.05f;
 
-    // View/Proj (pour l’instant identité si tu es en clip space)
-    XMMATRIX view = XMMatrixIdentity();
-    XMMATRIX proj = XMMatrixIdentity();
+    XMMATRIX view = XMMatrixLookAtLH(
+        XMVectorSet(0, 0, -3, 1),  // camera position
+        XMVectorSet(0, 0, 0, 1),  // target
+        XMVectorSet(0, 1, 0, 0)); // up
 
-    // Exemple : mesh 0 tourne
-    {
-        XMMATRIX world =
-            XMMatrixRotationZ(angle) *
-            XMMatrixTranslation(-0.6f, 0.0f, 0.0f);
+	float aspect = static_cast<float>(m_pWindow->GetWidth()) / m_pWindow->GetHeight();
+    XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, aspect, 0.1f, 100.0f);
+	XMMATRIX world = XMMatrixRotationX(angle) * XMMatrixRotationY(angle) * XMMatrixTranslation(0.0f, 0.0f, 1.0f);
 
-        XMFLOAT4X4 wvpT;
-        XMStoreFloat4x4(&wvpT, XMMatrixTranspose(world * view * proj));
-        m_vMeshes[0].UpdateConstants(wvpT);
-    }
-
-    // Exemple : mesh 1 bouge en sinus
-    {
-        float x = 0.6f + 0.2f * sinf(angle);
-
-        XMMATRIX world =
-            XMMatrixScaling(1.0f, 1.0f, 1.0f) *
-            XMMatrixTranslation(x, 0.0f, 0.0f);
-
-        XMFLOAT4X4 wvpT;
-        XMStoreFloat4x4(&wvpT, XMMatrixTranspose(world * view * proj));
-        m_vMeshes[1].UpdateConstants(wvpT);
-    }
+    XMFLOAT4X4 viewProj;
+    XMStoreFloat4x4(&viewProj, XMMatrixTranspose(world * view * proj));
+    m_vMeshes[0].UpdateConstants(viewProj);
 }
 
 void Renderer::Render()
@@ -224,63 +209,24 @@ bool Renderer::CreateTestPipeline()
 
 bool Renderer::CreateTestMesh()
 {
-    m_vMeshes.clear();
-    m_vMeshes.resize(2);
-
-    // Mesh 0 : triangle
-    Vertex triV[] =
-    {
-        { { 0.0f,  0.5f, 0.0f }, { 1, 0, 0, 1 } },
-        { { 0.5f, -0.5f, 0.0f }, { 0, 1, 0, 1 } },
-        { { -0.5f,-0.5f, 0.0f }, { 0, 0, 1, 1 } },
-    };
-    uint16_t triI[] = { 0, 1, 2 };
-
-    // Mesh 1 : quad (2 triangles)
-    Vertex quadV[] =
-    {
-        { { -0.5f,  0.5f, 0.0f }, { 1, 1, 0, 1 } },
-        { {  0.5f,  0.5f, 0.0f }, { 0, 1, 1, 1 } },
-        { {  0.5f, -0.5f, 0.0f }, { 1, 0, 1, 1 } },
-        { { -0.5f, -0.5f, 0.0f }, { 1, 1, 1, 1 } },
-    };
-    uint16_t quadI[] = { 0,1,2, 0,2,3 };
+    m_vMeshes.resize(1);
 
     // Upload VB/IB en batch
     m_pUploadContext->Begin();
 
-    if (!m_vMeshes[0].Initialize(*m_pUploadContext, triV, 3, triI, 3)) return false;
-    if (!m_vMeshes[1].Initialize(*m_pUploadContext, quadV, 4, quadI, 6)) return false;
-
+    if (!m_vMeshes[0].CreateCube(*m_pUploadContext)) return false;
+   
     m_pUploadContext->EndAndWait();
 
     // plus besoin des upload buffers
     for (auto& m : m_vMeshes) m.FinalizeUpload();
 
-    // Créer CB par mesh
+    // Creer CB par mesh
     for (auto& m : m_vMeshes)
         if (!m.CreateConstantBuffer(m_pDxContext->GetDevice()))
             return false;
 
-    // Matrices (view/proj simples)
-    using namespace DirectX;
-
-    XMMATRIX view = XMMatrixIdentity();
-    XMMATRIX proj = XMMatrixIdentity();
-
-    // triangle à gauche
-    XMMATRIX world0 = XMMatrixTranslation(-0.6f, 0.0f, 0.0f);
-    XMFLOAT4X4 wvp0T;
-    XMStoreFloat4x4(&wvp0T, XMMatrixTranspose(world0 * view * proj));
-    m_vMeshes[0].UpdateConstants(wvp0T);
-
-    // quad à droite
-    XMMATRIX world1 = XMMatrixTranslation(0.6f, 0.0f, 0.0f);
-    XMFLOAT4X4 wvp1T;
-    XMStoreFloat4x4(&wvp1T, XMMatrixTranspose(world1 * view * proj));
-    m_vMeshes[1].UpdateConstants(wvp1T);
-
-    return true;
+	return true;
 }
 
 void Renderer::BeginFrame()
