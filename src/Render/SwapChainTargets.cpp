@@ -173,7 +173,6 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
         &dsvDesc,
         m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
-    // Transition depth buffer to DEPTH_WRITE.
     hr = pDirectCmdListAlloc->Reset();
     if (FAILED(hr))
         throw std::runtime_error("Command allocator reset failed.");
@@ -213,10 +212,6 @@ void SwapChainTargets::Resize(uint32_t width, uint32_t height)
     // Flush before changing any resources.
     m_pRenderer->GetDxContext()->FlushCommandQueue();
 
-    HRESULT hr = pCommandList->Reset(pDirectCmdListAlloc, nullptr);
-    if (FAILED(hr))
-        throw std::runtime_error("Command list reset failed.");
-
     width = m_pWindow->GetWidth();
     height = m_pWindow->GetHeight();
 
@@ -231,7 +226,7 @@ void SwapChainTargets::Resize(uint32_t width, uint32_t height)
     SafeRelease(m_depthStencilBuffer);
 
     // Resize swap chain.
-    hr = m_swapChain->ResizeBuffers(
+    HRESULT hr = m_swapChain->ResizeBuffers(
         SwapChainBufferCount,
         width,
         height,

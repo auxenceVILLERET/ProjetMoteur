@@ -13,10 +13,17 @@ void CameraComponent::SetAll(float nearPlane, float farPlane, float height, floa
 	m_frustum = new Frustum();
 }
 
+void CameraComponent::SetWindowSize(float width, float height)
+{
+	m_width = width; 
+	m_height = height; 
+	m_aspectRatio = width / height; 
+}
+
 void CameraComponent::Update()
 {
 	XMMATRIX view = XMLoadFloat4x4(&m_viewMatrix);
-	XMStoreFloat4x4(&m_viewMatrix, XMMatrixInverse(nullptr,view));
+	XMStoreFloat4x4(&m_viewMatrix, XMMatrixInverse(nullptr, view));
 	view *= XMLoadFloat4x4(&m_projectionMatrix);
 	XMStoreFloat4x4(&m_projectionMatrix, view);
 

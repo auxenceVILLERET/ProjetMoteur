@@ -13,6 +13,7 @@ public:
 	void SetViewMatrix(const XMFLOAT4X4& viewMatrix) { m_viewMatrix = viewMatrix; }
 	void SetProjectionMatrix(const XMFLOAT4X4& projectionMatrix) { m_projectionMatrix = projectionMatrix; }
 	void SetAll(float nearPlane, float farPlane, float height, float width, bool perspective);
+	void SetWindowSize(float width, float height);
 
 	
 	const XMFLOAT4X4& GetViewMatrix() const { return m_viewMatrix; }

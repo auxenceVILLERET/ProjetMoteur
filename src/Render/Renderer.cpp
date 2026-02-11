@@ -143,7 +143,10 @@ void Renderer::Update()
     if (m_pWindow)
     {
         if (m_pWindow->IsResizing())
-			m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+        {
+            m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+        }
     }
 
 	angle += 0.05f;
