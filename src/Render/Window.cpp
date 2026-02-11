@@ -2,13 +2,15 @@
 #define WINDOW_CPP_INCLUDED
 
 #include "Window.h"
+#include "Core/InputSystem.h"
+#include "Core/InputsMapper.h"
 
 Window* Window::s_pInstance = nullptr;
 
 Window::Window(int width, int height, const wchar_t* title)
 {
     if (s_pInstance != nullptr)
-        throw std::runtime_error("Window: une instance existe déjà.");
+        throw std::runtime_error("Window: une instance existe dï¿½jï¿½.");
 
     s_pInstance = this;
 
@@ -88,19 +90,39 @@ LRESULT Window::StaticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	using namespace core;
+
     switch (msg)
     {
     case WM_CLOSE:
         PostQuitMessage(0);
         return 0;
-  //  case WM_SIZE:
-		//RECT rc;
-		//GetClientRect(hwnd, &rc);
-		//m_width = rc.right - rc.left;
-		//m_height = rc.bottom - rc.top;
-  //      m_resizing = true;
-  //      break;
+    case WM_KEYDOWN:
+        InputSystem::SetKey(MapVKToKey(wParam), true);
+        break;
+
+    case WM_KEYUP:
+        InputSystem::SetKey(MapVKToKey(wParam), false);
+        break;
+
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+        InputSystem::SetMouseButton(
+            MapMouseButton(msg),
+            msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN
+        );
+        break;
+
+    case WM_MOUSEMOVE:
+        InputSystem::SetMousePosition(
+            LOWORD(lParam),
+            HIWORD(lParam)
+        );
+        break;
     }
+
 
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
