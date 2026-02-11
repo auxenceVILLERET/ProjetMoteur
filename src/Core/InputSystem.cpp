@@ -6,8 +6,8 @@ namespace core
     std::array<InputState::State, Keyboard::AMOUNT> InputSystem::s_keys{};
     std::array<InputState::State, Mouse::AMOUNT>    InputSystem::s_mouseButtons{};
 
-    int InputSystem::s_mouseX = 0;
-    int InputSystem::s_mouseY = 0;
+    float InputSystem::s_mouseX = 0;
+    float InputSystem::s_mouseY = 0;
 
     void InputSystem::NewFrame()
     {
