@@ -36,7 +36,6 @@ public:
 	void Update();
 	void Render();
 
-	bool CreateTestPipeline();
 	bool CreateTestMesh();
 
 	Window* GetWindow() const { return m_pWindow; }

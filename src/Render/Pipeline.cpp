@@ -12,6 +12,29 @@ static UINT ShaderCompileFlags()
 #endif
 }
 
+bool Pipeline::InitializePipeline(ID3D12Device* device)
+{
+    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
+
+    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
+    return InitializeGraphics(
+        device,
+        L"../../src/Render/Simple.hlsl", "VSMain",
+        L"../../src/Render/Simple.hlsl", "PSMain",
+        layout,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        true
+    );
+}
+
 bool Pipeline::InitializeGraphics(ID3D12Device* device, const std::wstring& vsFile, const std::string& vsEntry, const std::wstring& psFile, const std::string& psEntry, const std::vector<D3D12_INPUT_ELEMENT_DESC>& inputLayout, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, bool enableDepth)
 {
     if (device == nullptr) return false;

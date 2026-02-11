@@ -7,6 +7,9 @@ class Pipeline
 {
 public:
     Pipeline() = default;
+	~Pipeline() {Shutdown();}
+
+	bool InitializePipeline(ID3D12Device* device);
 
     bool InitializeGraphics(
         ID3D12Device* device,

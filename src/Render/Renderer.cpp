@@ -86,7 +86,7 @@ bool Renderer::Initialize(Window* window, Entity* camera)
     // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
     m_pPipeline = new Pipeline();
-    if (CreateTestPipeline() == false) return false;
+    if (m_pPipeline->InitializePipeline(m_pDxContext->GetDevice()) == false) return false;
 	if (CreateTestMesh() == false) return false;
 
     return true;
@@ -183,29 +183,6 @@ void Renderer::Render()
     }
 
     EndFrame();
-}
-
-bool Renderer::CreateTestPipeline()
-{
-    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
-    return m_pPipeline->InitializeGraphics(
-        m_pDxContext->GetDevice(),
-        L"../../src/Render/Simple.hlsl", "VSMain",
-        L"../../src/Render/Simple.hlsl", "PSMain",
-        layout,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        DXGI_FORMAT_D24_UNORM_S8_UINT,
-        true
-    );
 }
 
 bool Renderer::CreateTestMesh()
