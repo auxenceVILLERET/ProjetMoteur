@@ -1,5 +1,6 @@
 #pragma once
 #include "InputsEnums.h"
+#include <vector>
 
 namespace core
 {
