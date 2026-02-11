@@ -10,7 +10,6 @@ class CameraComponent : public Component
 {
 public:
 	void SetFOV(float fov) { m_fov = fov; }
-	void SetIsMainCamera(bool isMain) { m_isMainCamera = isMain; }
 	void SetViewMatrix(const XMFLOAT4X4& viewMatrix) { m_viewMatrix = viewMatrix; }
 	void SetProjectionMatrix(const XMFLOAT4X4& projectionMatrix) { m_projectionMatrix = projectionMatrix; }
 	void SetAll(float nearPlane, float farPlane, float height, float width, bool perspective);
@@ -21,10 +20,9 @@ public:
 	float GetFOV() const { return m_fov; }
 	float GetNearPlane() const { return m_nearPlane; }
 	float GetFarPlane() const { return m_farPlane; }
-	bool IsMainCamera() const { return m_isMainCamera; }
 	float GetAspectRatio() const { return m_aspectRatio; }
 
-	void Update(float dt) override;
+	void Update();
 	void UpdateProjectionMatrix();
 
 private:
@@ -36,7 +34,6 @@ private:
 	float m_width = 9.0f;
 
 	bool m_isPerspective = true;
-	bool m_isMainCamera = false;
 
 	XMFLOAT4X4 m_viewMatrix;
 	XMFLOAT4X4 m_projectionMatrix;

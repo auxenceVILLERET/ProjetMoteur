@@ -16,6 +16,8 @@ public:
 	void UpdateWindow();
 
 	void HandleInput();
+	void CreateCamera();
+
 private:
 	Engine& m_engine;
 	Window* m_window;

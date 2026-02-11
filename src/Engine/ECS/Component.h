@@ -3,8 +3,8 @@ class Entity;
 
 class Component
 {
-    virtual void Start() {}
-    virtual void Update(float dt) {}
+public:
+	virtual ~Component() = default;
 
     Entity* GetEntity() const { return m_Entity; }
 
