@@ -41,51 +41,6 @@ public:
 	uint32_t IndexCount() const { return m_indexCount; }
 	D3D12_GPU_VIRTUAL_ADDRESS GetCbAddress() const { return m_pCb ? m_pCb->GetGPUVirtualAddress() : 0; }
 
-	void Ico() 
-	{
-		// Spheroid
-		//icosahedron (20 faces)
-
-		// normalized
-		float a = 0.525731f; // 2PI/12
-		float b = 0.850651f;
-
-		//numbers of faces
-		static const int n = 12;
-
-		std::array<Vertex, n > vertices =
-		{
-			Vertex({ XMFLOAT3(-a, 0.0f, +b) }),
-			Vertex({ XMFLOAT3(+a, 0.0f, +b) }),
-			Vertex({ XMFLOAT3(-a, 0.0f, -b) }),
-			Vertex({ XMFLOAT3(+a, 0.0f, -b) }),
-
-			Vertex({ XMFLOAT3(0.0f, +b, +a) }),
-			Vertex({ XMFLOAT3(0.0f, +b, -a) }),
-			Vertex({ XMFLOAT3(0.0f, -b, +a) }),
-			Vertex({ XMFLOAT3(0.0f, -b, -a) }),
-
-			Vertex({ XMFLOAT3(+b,  +a, 0.0f) }),
-			Vertex({ XMFLOAT3(-b,  +a, 0.0f) }),
-			Vertex({ XMFLOAT3(+b,  -a, 0.0f) }),
-			Vertex({ XMFLOAT3(-b,  -a, 0.0f) }),
-		};
-
-		for (size_t i = 0; i < n; i++)
-		{
-			vertices[i].Color.x = ((i * (1.0f / n)));
-		}
-
-		std::array<std::uint16_t, 60> indices =
-		{
-			// DRAW TRIANGLES HERE
-
-			1,4,0,  4,9,0,  4,5,9,  8,5,4,  1,8,4,
-			1,10,8, 10,3,8, 8,3,5,  3,2,5,  3,7,2,
-			3,10,7, 10,6,7, 6,11,7, 6,0,11, 6,1,0,
-			10,1,6, 11,0,9, 2,11,9, 5,2,9,  11,2,7
-		};
-	}
 
 	void SetPosition(const XMFLOAT3& pos) { m_position = pos; }
 	void SetRotation(const XMFLOAT3& rot) { m_rotation = rot; }
