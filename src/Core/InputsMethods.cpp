@@ -1,5 +1,6 @@
 #include "InputsMethods.h"
 #include "InputSystem.h"
+#include <vector>
 
 namespace core
 {
@@ -36,17 +37,22 @@ namespace core
             return InputSystem::s_mouseButtons[button] == InputState::UP;
         }
 
-        int GetMouseX()
+        float GetMouseX()
         {
             return InputSystem::s_mouseX;
         }
 
-        int GetMouseY()
+        float GetMouseY()
         {
             return InputSystem::s_mouseY;
         }
 
-        void SetMousePosition(int x, int y)
+        std::vector<float> GetMousePosition()
+        {
+            return { InputSystem::s_mouseX, InputSystem::s_mouseY };
+        }
+
+        void SetMousePosition(float x, float y)
         {
             InputSystem::SetMousePosition(x, y);
         }

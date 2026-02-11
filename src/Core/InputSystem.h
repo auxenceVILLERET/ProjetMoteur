@@ -16,7 +16,7 @@ namespace core
         static std::array<InputState::State, Keyboard::AMOUNT> s_keys;
         static std::array<InputState::State, Mouse::AMOUNT>    s_mouseButtons;
 
-        static int s_mouseX;
-        static int s_mouseY;
+        static float s_mouseX;
+        static float s_mouseY;
     };
 }
