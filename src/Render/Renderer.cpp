@@ -10,6 +10,8 @@
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
 #include "Mesh.h"
+#include "Engine/ECS/Entity.h"
+#include "Engine/ECS/Components/CameraComponent.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -26,12 +28,13 @@ Renderer::~Renderer()
     Shutdown();
 }
 
-bool Renderer::Initialize(Window* window)
+bool Renderer::Initialize(Window* window, Entity* camera)
 {
-    if (window == nullptr)
+    if (window == nullptr || camera == nullptr)
         return false;
 
     m_pWindow = window;
+    m_pCamera = camera;
 
 #if defined(DEBUG) || defined(_DEBUG)
     {
@@ -145,14 +148,9 @@ void Renderer::Update()
 
 	angle += 0.05f;
 
-    XMMATRIX view = XMMatrixLookAtLH(
-        XMVectorSet(0, 0, -3, 1),  // camera position
-        XMVectorSet(0, 0, 0, 1),  // target
-        XMVectorSet(0, 1, 0, 0)); // up
-
-	float aspect = static_cast<float>(m_pWindow->GetWidth()) / m_pWindow->GetHeight();
-    XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, aspect, 0.1f, 100.0f);
-	XMMATRIX world = XMMatrixRotationX(angle) * XMMatrixRotationY(angle) * XMMatrixTranslation(0.0f, 0.0f, 1.0f);
+	XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
+	XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
+	XMMATRIX world = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
 
     XMFLOAT4X4 viewProj;
     XMStoreFloat4x4(&viewProj, XMMatrixTranspose(world * view * proj));

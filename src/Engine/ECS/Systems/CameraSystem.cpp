@@ -10,5 +10,6 @@ void CameraSystem::Update(ECS& ecs, float deltaTime)
 		if(camera == nullptr)
 			continue;
 		camera->Update();
+		camera->UpdateProjectionMatrix();
 	}
 }

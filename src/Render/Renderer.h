@@ -20,6 +20,7 @@ class Pipeline;
 class DescriptorHeapManager;
 class UploadContext;
 class Mesh;
+class Entity;
 
 using namespace DirectX;
 
@@ -29,7 +30,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	bool Initialize(Window* window);
+	bool Initialize(Window* window, Entity* camera);
 	void Shutdown();
 
 	void Update();
@@ -50,6 +51,7 @@ private:
     void EndFrame();
 
 	Window* m_pWindow = nullptr;
+	Entity* m_pCamera = nullptr;
 
 	std::vector<Mesh> m_vMeshes;
 

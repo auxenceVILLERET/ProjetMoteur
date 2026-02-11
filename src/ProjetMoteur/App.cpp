@@ -23,11 +23,11 @@ void App::Initialize()
 {
 	// Initialize your application here
 	m_window = new Window(800, 600, L"test");
-	m_renderer = new Renderer();
-	m_renderer->Initialize(m_window);
 	m_ecs = &m_engine.GetECS();
 	CreateCamera();
-
+	m_renderer = new Renderer();
+	m_renderer->Initialize(m_window, m_cam);
+	
 }
 
 void App::Update()
@@ -66,8 +66,11 @@ void App::CreateCamera()
 	m_cam->AddComponent<CameraComponent>();
 	m_ecs->AddSystem<CameraSystem>();
 
-	m_cam->SetPosition(0.0f, 0.0f, -5.0f);
+	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 
-	m_cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, 16.0f, 9.0f, true);
+	m_cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, m_window->GetHeight(), m_window->GetWidth(), true);
+	XMFLOAT4X4 identityMatrix;
+	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
+	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
 	
 }

@@ -7,7 +7,7 @@ void CameraComponent::SetAll(float nearPlane, float farPlane, float height, floa
 	m_farPlane = farPlane;
 	m_height = height;
 	m_width = width;
-	m_aspectRatio = m_height / m_width;
+	m_aspectRatio = m_width / m_height;
 	m_isPerspective = perspective;
 
 	m_frustum = new Frustum();
@@ -16,7 +16,7 @@ void CameraComponent::SetAll(float nearPlane, float farPlane, float height, floa
 void CameraComponent::Update()
 {
 	XMMATRIX view = XMLoadFloat4x4(&m_viewMatrix);
-	XMStoreFloat4x4(&m_viewMatrix, view);
+	XMStoreFloat4x4(&m_viewMatrix, XMMatrixInverse(nullptr,view));
 	view *= XMLoadFloat4x4(&m_projectionMatrix);
 	XMStoreFloat4x4(&m_projectionMatrix, view);
 

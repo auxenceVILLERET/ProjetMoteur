@@ -62,6 +62,10 @@ bool Window::ProcessMessages()
     {
         if (msg.message == WM_QUIT)
             return false;
+        if (msg.message == WM_SIZE)
+        {
+			m_resizing = true;
+		}
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
