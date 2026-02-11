@@ -25,6 +25,7 @@ void App::Initialize()
 	m_window = new Window(800, 600, L"test");
 	m_renderer = new Renderer();
 	m_renderer->Initialize(m_window);
+	m_ecs = &m_engine.GetECS();
 	CreateCamera();
 
 }
@@ -61,13 +62,12 @@ void App::HandleInput()
 
 void App::CreateCamera()
 {
-	ECS& ecs = m_engine.GetECS();
-	Entity* cam = ecs.CreateEntity<Entity>();
-	cam->AddComponent<CameraComponent>();
-	ecs.AddSystem<CameraSystem>();
+	m_cam = m_ecs->CreateEntity<Entity>();
+	m_cam->AddComponent<CameraComponent>();
+	m_ecs->AddSystem<CameraSystem>();
 
-	cam->SetPosition(0.0f, 0.0f, -5.0f);
+	m_cam->SetPosition(0.0f, 0.0f, -5.0f);
 
-	cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, 16.0f, 9.0f, true);
+	m_cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, 16.0f, 9.0f, true);
 	
 }

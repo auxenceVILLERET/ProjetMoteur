@@ -4,6 +4,8 @@
 
 class Window;
 class Renderer;
+class Entity;
+class ECS;
 
 class App
 {
@@ -22,5 +24,7 @@ private:
 	Engine& m_engine;
 	Window* m_window;
 	Renderer* m_renderer;
+	Entity* m_cam;
+	ECS* m_ecs;
 };
 
