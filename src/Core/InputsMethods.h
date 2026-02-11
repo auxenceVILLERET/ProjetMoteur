@@ -13,10 +13,11 @@ namespace core
         bool GetMouseButtonDown(Mouse::Button button);
         bool GetMouseButtonUp(Mouse::Button button);
 
-        int GetMouseX();
-        int GetMouseY();
+        float GetMouseX();
+        float GetMouseY();
+        std::vector<float> GetMousePosition();
 
-        void SetMousePosition(int x, int y);
+        void SetMousePosition(float x, float y);
 
         void Update();
     }
