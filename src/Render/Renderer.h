@@ -19,8 +19,8 @@ class SwapChainTargets;
 class Pipeline;
 class DescriptorHeapManager;
 class UploadContext;
-class Mesh;
 class Entity;
+class MeshRendererComponent;
 
 using namespace DirectX;
 
@@ -34,10 +34,11 @@ public:
 	void Shutdown();
 
 	void Update();
-	void Render();
+	void Render(std::vector<MeshRendererComponent*> vMesh);
+	void DrawObj(MeshRendererComponent& obj);
+	XMFLOAT4X4& BuildWorldViewProjMatrix(XMMATRIX& world);
 
 	bool CreateTestPipeline();
-	bool CreateTestMesh();
 
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
@@ -52,8 +53,6 @@ private:
 
 	Window* m_pWindow = nullptr;
 	Entity* m_pCamera = nullptr;
-
-	std::vector<Mesh> m_vMeshes;
 
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;
