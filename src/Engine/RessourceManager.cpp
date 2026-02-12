@@ -1,5 +1,7 @@
 #include "RessourceManager.h"
 #include "Engine/Mesh.h"
+#include "Render/Renderer.h" 
+#include "Render/DxContext.h"
 
 static RessourceManager* s_instance = nullptr;
 
@@ -18,13 +20,9 @@ void RessourceManager::Initialize(Renderer* renderer, UploadContext* uploader)
 
 Mesh* RessourceManager::GetCube()
 {
-	const std::string name = "cube";
-	auto it = m_meshes.find(name);
-	if (it != m_meshes.end())
-		return it->second.get();
-	Mesh* mesh = CreateCube();
-	m_meshes[name] = std::unique_ptr<Mesh>(mesh);
-	return mesh;
+	if (m_cubeMesh == nullptr) 
+		m_cubeMesh = CreateCube(); 
+	return m_cubeMesh;
 }
 
 Mesh* RessourceManager::CreateCube()
@@ -40,9 +38,5 @@ Mesh* RessourceManager::CreateCube()
 
 void RessourceManager::FinalizeUpload()
 {
-	for (auto& [name, mesh] : m_meshes)
-	{
-		mesh->FinalizeUpload();
-	}
+	m_cubeMesh->FinalizeUpload();
 }
-

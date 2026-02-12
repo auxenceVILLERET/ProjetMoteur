@@ -8,6 +8,9 @@
 #include "Engine/ECS/Systems/CameraSystem.h"
 #include "Engine/RessourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
+#include "Render/UploadContext.h" 
+#include "Mesh.h"
+#include "Engine/ECS/Systems/RenderSystem.h"
 
 using namespace core;
 
@@ -29,15 +32,22 @@ void App::Initialize()
 	CreateCamera();
 	m_renderer = new Renderer();
 	m_renderer->Initialize(m_window, m_cam);
-	
+
 	UploadContext* uploader = m_renderer->GetUploadContext();
+
+	uploader->Begin();
 
 	RessourceManager::Instance().Initialize(m_renderer, uploader);
 
-	Entity* cube = m_ecs->CreateEntity<Entity>();
-	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube());
+	m_cubeMesh = RessourceManager::Instance().GetCube();
 
+	uploader->EndAndWait();
 	RessourceManager::Instance().FinalizeUpload();
+
+	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
+
+	CreatePlayer();
+	CreateDummyEntity();
 }
 
 void App::Update()
@@ -57,7 +67,6 @@ void App::UpdateWindow()
 {
 	m_window->ProcessMessages();
 	m_renderer->Update();
-	m_renderer->Render();
 }
 
 void App::HandleInput()
@@ -78,9 +87,26 @@ void App::CreateCamera()
 
 	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 
+	m_cam->GetComponent<CameraComponent>()->SetFOV(45.0f);
+
 	m_cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, m_window->GetHeight(), m_window->GetWidth(), true);
 	XMFLOAT4X4 identityMatrix;
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
 	
+}
+
+void App::CreatePlayer()
+{
+	Entity* player = m_ecs->CreateEntity<Entity>();
+	player->AddComponent<MeshRendererComponent>()->SetMesh(m_cubeMesh, m_renderer);
+
+	player->SetPosition(0.0f, 0.0f, 5.0f);
+}
+
+void App::CreateDummyEntity()
+{
+	Entity* dummy = m_ecs->CreateEntity<Entity>();
+	dummy->AddComponent<MeshRendererComponent>()->SetMesh(m_cubeMesh, m_renderer);
+	dummy->SetPosition(2.0f, 0.0f, 5.0f);
 }

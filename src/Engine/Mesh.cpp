@@ -26,6 +26,7 @@ bool Mesh::Initialize(UploadContext& uploader, const Vertex* vertices, uint32_t 
 	m_ibView.SizeInBytes = (UINT)ibBytes;
 	m_ibView.Format = DXGI_FORMAT_R16_UINT;
 
+
 	return true;
 }
 

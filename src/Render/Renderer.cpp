@@ -147,19 +147,9 @@ void Renderer::Update()
 			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
         }
     }
-
-	angle += 0.05f;
-
-	XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
-	XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
-	XMMATRIX world = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-
-    XMFLOAT4X4 viewProj;
-    XMStoreFloat4x4(&viewProj, XMMatrixTranspose(world * view * proj));
-    m_vMeshes[0].UpdateConstants(viewProj);
 }
 
-void Renderer::Render()
+void Renderer::Render(std::vector<Mesh*> vMesh)
 {
     if (m_pDxContext == nullptr || m_pSwapChainTargets == nullptr) return;
     if (m_pWindow && m_pWindow->IsMinimized()) return;
@@ -171,14 +161,12 @@ void Renderer::Render()
 
     cmd->SetPipelineState(m_pPipeline->GetPSO());
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
-
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    for (const auto& mesh : m_vMeshes)
+
+    for (Mesh* m : vMesh)
     {
-        // root param 0 = CBV(b0)
-        cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
-        mesh.Draw(cmd);
+        DrawMesh(*m);
     }
 
     EndFrame();
@@ -206,7 +194,6 @@ bool Renderer::CreateTestPipeline()
         true
     );
 }
-
 
 void Renderer::BeginFrame()
 {
@@ -297,4 +284,15 @@ void Renderer::DrawMesh(Mesh& mesh)
     mesh.Draw(cmd);
 }
 
+XMFLOAT4X4& Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
+{
+    XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
+    XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
+    XMMATRIX wvp = world * view * proj;
+    wvp = XMMatrixTranspose(wvp);
+
+	XMFLOAT4X4 wvpFloat4x4;
+    XMStoreFloat4x4(&wvpFloat4x4, wvp);
+    return wvpFloat4x4;
+}
 #endif // !RENDERER_CPP_INCLUDED

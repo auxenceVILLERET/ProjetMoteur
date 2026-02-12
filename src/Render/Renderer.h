@@ -34,8 +34,9 @@ public:
 	void Shutdown();
 
 	void Update();
-	void Render();
+	void Render(std::vector<Mesh*> vMesh);
 	void DrawMesh(Mesh& mesh);
+	XMFLOAT4X4& BuildWorldViewProjMatrix(XMMATRIX& world);
 
 	bool CreateTestPipeline();
 
