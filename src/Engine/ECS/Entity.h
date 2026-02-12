@@ -54,6 +54,8 @@ public:
 	void CoutRotation(); // DEBUG
 	void CoutMatrix(); // DEBUG
 
+	void SetActive(bool active) { m_isActive = active; } 
+	bool IsActive() const { return m_isActive; }
 
 private:
 
@@ -72,6 +74,8 @@ private:
 	XMFLOAT4X4 m_matrix;
 	uint32_t m_Id = 0;
 	std::vector<Component*> m_Components;
+
+	bool m_isActive = true;
 };
 
 #include "Entity.inl"
