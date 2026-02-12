@@ -25,10 +25,46 @@ Mesh* RessourceManager::GetCube()
 	return m_cubeMesh;
 }
 
+Mesh* RessourceManager::GetCylinder() 
+{ 
+	if ( m_cylinderMesh == nullptr)
+		m_cylinderMesh = CreateCylinder();
+	return m_cylinderMesh;
+}
+
+Mesh* RessourceManager::GetSphere()
+{
+	if (m_sphereMesh == nullptr)
+		m_sphereMesh = CreateSphere();
+	return m_sphereMesh;
+}
+
 Mesh* RessourceManager::CreateCube()
 {
 	Mesh* mesh = new Mesh();
 	if (mesh->CreateCube(*m_uploader) == false)
+	{
+		delete mesh;
+		return nullptr;
+	}
+	return mesh;
+}
+
+Mesh* RessourceManager::CreateCylinder()
+{
+	Mesh* mesh = new Mesh();
+	if (mesh->CreateCylinder(*m_uploader) == false)
+	{
+		delete mesh;
+		return nullptr;
+	}
+	return mesh;
+}
+
+Mesh* RessourceManager::CreateSphere()
+{
+	Mesh* mesh = new Mesh();
+	if (mesh->CreateIco(*m_uploader) == false)
 	{
 		delete mesh;
 		return nullptr;

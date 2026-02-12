@@ -15,14 +15,21 @@ public:
 	void Initialize(Renderer* renderer, UploadContext* uploder);
 
 	Mesh* GetCube();
+	Mesh* GetCylinder();
+	Mesh* GetSphere();
+
 	void FinalizeUpload();
 
 private:
 	Mesh* CreateCube();
+	Mesh* CreateCylinder();
+	Mesh* CreateSphere();
 
 	Renderer* m_renderer = nullptr;
 	UploadContext* m_uploader = nullptr;
-	Mesh* m_cubeMesh = nullptr;
 
+	Mesh* m_cubeMesh = nullptr;
+	Mesh* m_cylinderMesh = nullptr;
+	Mesh* m_sphereMesh = nullptr;
 };
 

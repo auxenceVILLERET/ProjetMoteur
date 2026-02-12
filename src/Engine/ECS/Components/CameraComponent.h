@@ -39,6 +39,6 @@ private:
 	XMFLOAT4X4 m_viewMatrix;
 	XMFLOAT4X4 m_projectionMatrix;
 
-	Frustum* m_frustum;
+	Frustum* m_frustum = nullptr;
 };
 

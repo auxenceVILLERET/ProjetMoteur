@@ -32,14 +32,10 @@ public:
 	bool CreateIco(UploadContext& uploader);
 
 	void FinalizeUpload(); // libère les upload buffers (après EndAndWait)
-	bool CreateConstantBuffer(ID3D12Device* device);
-	void UpdateConstants(const DirectX::XMFLOAT4X4& worldViewProjT); // matrice déjà transposée
 
 	void Draw(ID3D12GraphicsCommandList* cmdList) const;
 
 	uint32_t IndexCount() const { return m_indexCount; }
-	D3D12_GPU_VIRTUAL_ADDRESS GetCbAddress() const { return m_pCb ? m_pCb->GetGPUVirtualAddress() : 0; }
-
 
 	void Release();
 
@@ -53,9 +49,4 @@ private:
 	D3D12_INDEX_BUFFER_VIEW m_ibView{};
 
 	uint32_t m_indexCount = 0;
-
-	ID3D12Resource* m_pCb = nullptr;
-	UINT8* m_pCbMapped = nullptr;
-	UINT m_cbSizeAligned = 0;
-
 };

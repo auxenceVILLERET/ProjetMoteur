@@ -3,7 +3,7 @@
 #include <vector>
 
 class Renderer;
-class Mesh;
+class MeshRendererComponent;
 
 class RenderSystem : public System
 {
@@ -12,6 +12,6 @@ public:
 	void SetRenderer(Renderer* renderer) { m_renderer = renderer; }
 private:
 	Renderer* m_renderer = nullptr;
-	std::vector<Mesh*> m_vMesh;
+	std::vector<MeshRendererComponent*> m_vObj;
 };
 

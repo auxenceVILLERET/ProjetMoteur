@@ -12,6 +12,7 @@
 #include "Engine/Mesh.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
+#include "Engine/ECS/Components/MeshRendererComponent.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -93,8 +94,6 @@ bool Renderer::Initialize(Window* window, Entity* camera)
 
 void Renderer::Shutdown()
 {
-    for (auto& m : m_vMeshes) m.Release();
-        m_vMeshes.clear();
 
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
@@ -144,12 +143,15 @@ void Renderer::Update()
         if (m_pWindow->IsResizing())
         {
             m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
-			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(
+                static_cast<float>(m_pWindow->GetWidth()),
+                static_cast<float>(m_pWindow->GetHeight())
+            );
         }
     }
 }
 
-void Renderer::Render(std::vector<Mesh*> vMesh)
+void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 {
     if (m_pDxContext == nullptr || m_pSwapChainTargets == nullptr) return;
     if (m_pWindow && m_pWindow->IsMinimized()) return;
@@ -164,12 +166,20 @@ void Renderer::Render(std::vector<Mesh*> vMesh)
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-    for (Mesh* m : vMesh)
+    for (MeshRendererComponent* m : vObj)
     {
-        DrawMesh(*m);
+        DrawObj(*m);
     }
 
     EndFrame();
+}
+
+void Renderer::DrawObj(MeshRendererComponent& obj)
+{
+    // root param 0 = CBV(b0)
+    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+    cmd->SetGraphicsRootConstantBufferView(0, obj.GetCbAddress());
+    obj.GetMesh()->Draw(cmd);
 }
 
 bool Renderer::CreateTestPipeline()
@@ -274,14 +284,6 @@ void Renderer::EndFrame()
     m_pDxContext->WaitForGpu();
 
     m_pSwapChainTargets->UpdateCurrentBackBuffer();
-}
-
-void Renderer::DrawMesh(Mesh& mesh)
-{
-    // root param 0 = CBV(b0)
-    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
-    cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
-    mesh.Draw(cmd);
 }
 
 XMFLOAT4X4& Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)

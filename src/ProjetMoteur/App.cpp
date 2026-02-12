@@ -19,9 +19,6 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetInitCallback(std::bind(&App::Initialize, this));
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
-
-	m_renderer = nullptr;
-	m_window = nullptr;
 }
 
 void App::Initialize()
@@ -39,7 +36,9 @@ void App::Initialize()
 
 	RessourceManager::Instance().Initialize(m_renderer, uploader);
 
-	m_cubeMesh = RessourceManager::Instance().GetCube();
+	RessourceManager::Instance().GetCube();
+	RessourceManager::Instance().GetCylinder();
+	RessourceManager::Instance().GetSphere();
 
 	uploader->EndAndWait();
 	RessourceManager::Instance().FinalizeUpload();
@@ -89,7 +88,13 @@ void App::CreateCamera()
 
 	m_cam->GetComponent<CameraComponent>()->SetFOV(45.0f);
 
-	m_cam->GetComponent<CameraComponent>()->SetAll(0.1f, 100.0f, m_window->GetHeight(), m_window->GetWidth(), true);
+	m_cam->GetComponent<CameraComponent>()->SetAll(
+		0.1f,
+		100.0f,
+		static_cast<float>(m_window->GetHeight()),
+		static_cast<float>(m_window->GetWidth()),
+		true
+	);
 	XMFLOAT4X4 identityMatrix;
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
@@ -99,14 +104,15 @@ void App::CreateCamera()
 void App::CreatePlayer()
 {
 	Entity* player = m_ecs->CreateEntity<Entity>();
-	player->AddComponent<MeshRendererComponent>()->SetMesh(m_cubeMesh, m_renderer);
+	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
 
-	player->SetPosition(0.0f, 0.0f, 5.0f);
+	player->SetPosition(-2.0f, 0.0f, 5.0f);
 }
 
 void App::CreateDummyEntity()
 {
 	Entity* dummy = m_ecs->CreateEntity<Entity>();
-	dummy->AddComponent<MeshRendererComponent>()->SetMesh(m_cubeMesh, m_renderer);
+	dummy->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	dummy->SetPosition(2.0f, 0.0f, 5.0f);
+	dummy->SetRotationX(XMConvertToRadians(45.0f));
 }
