@@ -12,6 +12,7 @@
 #include "Render/UploadContext.h" 
 #include "Mesh.h"
 #include "Engine/ECS/Systems/RenderSystem.h"
+#include "Engine/Scene/GameScene.h"
 
 using namespace core;
 
@@ -50,9 +51,9 @@ void App::Initialize()
 	RessourceManager::Instance().FinalizeUpload();
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
+	
+	m_sceneManager->CreateScene<GameScene>(L"GameScene");
 
-	CreatePlayer();
-	CreateDummyEntity();
 }
 
 void App::Update()
