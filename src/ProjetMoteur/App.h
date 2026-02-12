@@ -5,6 +5,8 @@
 class Window;
 class Renderer;
 class SceneManager;
+class Entity;
+class ECS;
 
 class App
 {
@@ -17,10 +19,14 @@ public:
 	void UpdateWindow();
 
 	void HandleInput();
+	void CreateCamera();
+
 private:
 	Engine& m_engine;
 	Window* m_window;
 	Renderer* m_renderer;
 	SceneManager* m_sceneManager;
+	Entity* m_cam;
+	ECS* m_ecs;
 };
 

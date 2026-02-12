@@ -9,6 +9,9 @@
 #include "Pipeline.h"
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
+#include "Mesh.h"
+#include "Engine/ECS/Entity.h"
+#include "Engine/ECS/Components/CameraComponent.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -25,12 +28,13 @@ Renderer::~Renderer()
     Shutdown();
 }
 
-bool Renderer::Initialize(Window* window)
+bool Renderer::Initialize(Window* window, Entity* camera)
 {
-    if (window == nullptr)
+    if (window == nullptr || camera == nullptr)
         return false;
 
     m_pWindow = window;
+    m_pCamera = camera;
 
 #if defined(DEBUG) || defined(_DEBUG)
     {
@@ -81,33 +85,18 @@ bool Renderer::Initialize(Window* window)
 
     // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
-    /*
     m_pPipeline = new Pipeline();
-
-    std::vector<D3D12_INPUT_ELEMENT_DESC> layout = {
-        // Exemple si tu as POSITION/COLOR :
-        // { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,   D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        // { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    bool ok = m_pPipeline->InitializeGraphics(
-        m_pDxContext->GetDevice(),
-        L"Shaders/MyShader.hlsl", "VSMain",
-        L"Shaders/MyShader.hlsl", "PSMain",
-        layout,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        DXGI_FORMAT_D24_UNORM_S8_UINT,
-        true
-    );
-
-    if (!ok) return false;
-    */
+    if (CreateTestPipeline() == false) return false;
+	if (CreateTestMesh() == false) return false;
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
+    for (auto& m : m_vMeshes) m.Release();
+        m_vMeshes.clear();
+
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
@@ -154,8 +143,21 @@ void Renderer::Update()
     if (m_pWindow)
     {
         if (m_pWindow->IsResizing())
-			m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+        {
+            m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+        }
     }
+
+	angle += 0.05f;
+
+	XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
+	XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
+	XMMATRIX world = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
+
+    XMFLOAT4X4 viewProj;
+    XMStoreFloat4x4(&viewProj, XMMatrixTranspose(world * view * proj));
+    m_vMeshes[0].UpdateConstants(viewProj);
 }
 
 void Renderer::Render()
@@ -165,9 +167,67 @@ void Renderer::Render()
 
     BeginFrame();
 
-    // draw calls (PSO, root signature, IA, DrawInstanced...)
+    // draw calls (PSO, root signature, IA, DrawInstanced...)*
+    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+
+    cmd->SetPipelineState(m_pPipeline->GetPSO());
+    cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    for (const auto& mesh : m_vMeshes)
+    {
+        // root param 0 = CBV(b0)
+        cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
+        mesh.Draw(cmd);
+    }
 
     EndFrame();
+}
+
+bool Renderer::CreateTestPipeline()
+{
+    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
+
+    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
+    return m_pPipeline->InitializeGraphics(
+        m_pDxContext->GetDevice(),
+        L"../../src/Render/Simple.hlsl", "VSMain",
+        L"../../src/Render/Simple.hlsl", "PSMain",
+        layout,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        true
+    );
+}
+
+bool Renderer::CreateTestMesh()
+{
+    m_vMeshes.resize(1);
+
+    // Upload VB/IB en batch
+    m_pUploadContext->Begin();
+
+    if (!m_vMeshes[0].CreateCube(*m_pUploadContext)) return false;
+   
+    m_pUploadContext->EndAndWait();
+
+    // plus besoin des upload buffers
+    for (auto& m : m_vMeshes) m.FinalizeUpload();
+
+    // Creer CB par mesh
+    for (auto& m : m_vMeshes)
+        if (!m.CreateConstantBuffer(m_pDxContext->GetDevice()))
+            return false;
+
+	return true;
 }
 
 void Renderer::BeginFrame()
@@ -204,12 +264,9 @@ void Renderer::BeginFrame()
 
     // Transition current back buffer: PRESENT -> RENDER_TARGET.
     ID3D12Resource* backBuffer = m_pSwapChainTargets->GetCurrentBackBuffer();
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Transition.pResource = backBuffer;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffer,
+        D3D12_RESOURCE_STATE_PRESENT,
+        D3D12_RESOURCE_STATE_RENDER_TARGET);
     pCommandList->ResourceBarrier(1, &barrier);
 
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);

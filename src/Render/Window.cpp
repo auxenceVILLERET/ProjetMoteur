@@ -10,7 +10,7 @@ Window* Window::s_pInstance = nullptr;
 Window::Window(int width, int height, const wchar_t* title)
 {
     if (s_pInstance != nullptr)
-        throw std::runtime_error("Window: une instance existe déjà.");
+        throw std::runtime_error("Window: une instance existe dï¿½jï¿½.");
 
     s_pInstance = this;
 
@@ -62,10 +62,6 @@ bool Window::ProcessMessages()
     {
         if (msg.message == WM_QUIT)
             return false;
-        if (msg.message == WM_SIZE)
-        {
-            m_resizing = true;
-		}
 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -101,6 +97,13 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_CLOSE:
         PostQuitMessage(0);
         return 0;
+    case WM_SIZE:
+        RECT rc;
+		GetClientRect(hwnd, &rc);
+        m_width = rc.right - rc.left;
+        m_height = rc.bottom - rc.top;
+		m_resizing = true;
+		break;
     case WM_KEYDOWN:
         InputSystem::SetKey(MapVKToKey(wParam), true);
         break;

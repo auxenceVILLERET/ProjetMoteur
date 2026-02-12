@@ -23,8 +23,8 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, const std::wstring& vsFi
         return false;
 
     // 2) Compile shaders
-    if (CompileShader(vsFile, vsEntry, "vs_5_1", m_vs) == false) return false;
-    if (CompileShader(psFile, psEntry, "ps_5_1", m_ps) == false) return false;
+    if (CompileShader(vsFile, vsEntry, "vs_5_0", m_vs) == false) return false;
+    if (CompileShader(psFile, psEntry, "ps_5_0", m_ps) == false) return false;
 
     // 3) Remplir le PSO
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -57,9 +57,6 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, const std::wstring& vsFi
     psoDesc.SampleDesc.Count = 1;
     psoDesc.SampleDesc.Quality = 0;
 
-    // ! CD3DX12_* est dans d3dx12.h (header helper Microsoft)
-    // Si tu ne l’as pas, je peux te donner des structs “à la main”.
-
     HRESULT hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pso));
     if (FAILED(hr))
         return false;
@@ -77,10 +74,16 @@ void Pipeline::Shutdown()
 
 bool Pipeline::BuildRootSignature(ID3D12Device* device)
 {
-    // Root signature minimaliste : 0 paramètres root, 0 static samplers
+    // 1 paramètre root: CBV b0 (visible vertex shader)
+    D3D12_ROOT_PARAMETER param = {};
+    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    param.Descriptor.ShaderRegister = 0; // b0
+    param.Descriptor.RegisterSpace = 0;
+    param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
     D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = 0;
-    desc.pParameters = nullptr;
+    desc.NumParameters = 1;
+    desc.pParameters = &param;
     desc.NumStaticSamplers = 0;
     desc.pStaticSamplers = nullptr;
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -96,7 +99,12 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
     );
 
     if (FAILED(hr))
+    {
+        if (error) OutputDebugStringA((char*)error->GetBufferPointer());
+        SafeRelease(error);
+        SafeRelease(serialized);
         return false;
+    }
 
     hr = device->CreateRootSignature(
         0,
@@ -105,6 +113,8 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
         IID_PPV_ARGS(&m_rootSig)
     );
 
+    SafeRelease(error);
+    SafeRelease(serialized);
     return SUCCEEDED(hr);
 }
 
@@ -126,6 +136,16 @@ bool Pipeline::CompileShader(const std::wstring& file, const std::string& entry,
         &outBlob,
         &errors
     );
+
+    if (FAILED(hr))
+    {
+        if (errors)
+        {
+            OutputDebugStringA((const char*)errors->GetBufferPointer());
+        }
+        SafeRelease(errors);
+        return false;
+    }
 
     SafeRelease(errors);
     return SUCCEEDED(hr);

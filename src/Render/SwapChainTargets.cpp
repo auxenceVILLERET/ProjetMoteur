@@ -138,7 +138,7 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
     depthDesc.Height = height;
     depthDesc.DepthOrArraySize = 1;
     depthDesc.MipLevels = 1;
-    depthDesc.Format = m_depthStencilFormat;
+    depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     depthDesc.SampleDesc.Count = 1;
     depthDesc.SampleDesc.Quality = 0;
     depthDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
@@ -146,13 +146,10 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
 
     D3D12_CLEAR_VALUE optClear = {};
     optClear.Format = m_depthStencilFormat;
-    optClear.DepthStencil.Depth = 1.0f;
+    optClear.DepthStencil.Depth = 1.f;
     optClear.DepthStencil.Stencil = 0;
 
-    D3D12_HEAP_PROPERTIES heapProps = {};
-    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-    heapProps.CreationNodeMask = 1;
-    heapProps.VisibleNodeMask = 1;
+    D3D12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
 
     HRESULT hr = pDevice->CreateCommittedResource(
         &heapProps,
@@ -176,7 +173,6 @@ void SwapChainTargets::CreateDepthStencil(uint32_t width, uint32_t height)
         &dsvDesc,
         m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
-    // Transition depth buffer to DEPTH_WRITE.
     hr = pDirectCmdListAlloc->Reset();
     if (FAILED(hr))
         throw std::runtime_error("Command allocator reset failed.");
@@ -216,10 +212,6 @@ void SwapChainTargets::Resize(uint32_t width, uint32_t height)
     // Flush before changing any resources.
     m_pRenderer->GetDxContext()->FlushCommandQueue();
 
-    HRESULT hr = pCommandList->Reset(pDirectCmdListAlloc, nullptr);
-    if (FAILED(hr))
-        throw std::runtime_error("Command list reset failed.");
-
     width = m_pWindow->GetWidth();
     height = m_pWindow->GetHeight();
 
@@ -234,7 +226,7 @@ void SwapChainTargets::Resize(uint32_t width, uint32_t height)
     SafeRelease(m_depthStencilBuffer);
 
     // Resize swap chain.
-    hr = m_swapChain->ResizeBuffers(
+    HRESULT hr = m_swapChain->ResizeBuffers(
         SwapChainBufferCount,
         width,
         height,
