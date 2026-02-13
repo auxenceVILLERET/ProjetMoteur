@@ -11,7 +11,9 @@ void RenderSystem::Update(ECS& ecs, float deltaTime)
 	m_vObj.clear();
 	for (Entity* entity : ecs.GetEntities()) 
 	{ 
-		if (entity == nullptr) continue;
+		if (entity == nullptr ) continue;
+		if (entity->IsActive() == false) continue;
+
 		MeshRendererComponent* meshRenderer = entity->GetComponent<MeshRendererComponent>();
 		if (meshRenderer != nullptr) 
 		{

@@ -6,15 +6,24 @@
 #include "Engine/ECS/ECS.h"
 
 
-void GameScene::OnEnter()
+void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 {
+	m_ecs = ecs;
+	m_renderer = renderer;
+
 	Entity* player = m_ecs->CreateEntity<Entity>();
 	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
 
 	player->SetPosition(-2.0f, 0.0f, 5.0f);
 	m_entities.push_back(player);
+}
 
-
+void GameScene::OnEnter()
+{
+	for(Entity* entity : m_entities) 
+	{
+		entity->SetActive(true);
+	}
 }
 
 void GameScene::OnExit()
@@ -22,9 +31,8 @@ void GameScene::OnExit()
 	// Clean up entities 
 	for (Entity* entity : m_entities) 
 	{
-		m_ecs->DestroyEntity(entity); 
+		entity->SetActive(false);
 	}
-	m_entities.clear();
 }
 
 void GameScene::Update(float dt)

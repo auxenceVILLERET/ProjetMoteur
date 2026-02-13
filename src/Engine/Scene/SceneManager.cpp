@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 #include "Scene.h"
 
-void SceneManager::ChangeScene(std::string& name)
+void SceneManager::ChangeScene(std::string name)
 {
 	m_nextSceneName = name;
 }

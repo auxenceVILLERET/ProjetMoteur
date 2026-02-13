@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "Engine/ECS/Systems/RenderSystem.h"
 #include "Engine/Scene/GameScene.h"
+#include "Engine/Scene/MenuScene.h"
 
 using namespace core;
 
@@ -35,6 +36,7 @@ void App::Initialize()
 	CreateCamera();
 	m_renderer = new Renderer();
 	m_sceneManager = new SceneManager();
+
 	m_renderer->Initialize(m_window, m_cam);
 
 	UploadContext* uploader = m_renderer->GetUploadContext();
@@ -52,8 +54,12 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 	
-	m_sceneManager->CreateScene<GameScene>(L"GameScene");
 
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
+
+
+	m_sceneManager->ChangeScene("Menu");
 }
 
 void App::Update()
@@ -80,9 +86,12 @@ void App::HandleInput()
 {
 	if(Input::GetKey(Keyboard::A))
 	{
-		std::cout << "A key was pressed!" << std::endl;
+		m_sceneManager->ChangeScene("Game");
 	}
-
+	if (Input::GetKey(Keyboard::E))
+	{
+		m_sceneManager->ChangeScene("Menu");
+	}
 	Input::Update();
 }
 

@@ -8,9 +8,9 @@ class SceneManager
 {
 public:
 	template<typename T>
-	T* CreateScene(std::string& name);
+	T* CreateScene(std::string name);
 
-	void ChangeScene(std::string& name);
+	void ChangeScene(std::string name);
 
 	void Update(float dt);
 
@@ -22,6 +22,7 @@ private:
 	Scene* m_currentScene;
 
 	std::unordered_map<std::string, Scene*> m_scenes;
+
 };
 
 #include "SceneManager.inl"

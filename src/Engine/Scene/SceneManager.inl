@@ -1,5 +1,5 @@
 template<typename T>
-T* SceneManager::CreateScene(std::string& name)
+T* SceneManager::CreateScene(std::string name)
 {
 	if (m_scenes.find(name) != m_scenes.end())
 	{
