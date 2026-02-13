@@ -8,7 +8,7 @@ using namespace DirectX;
 struct Vertex
 {
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color = { 1, 1, 1, 1 };
+	XMFLOAT2 UV;
 };
 
 struct ObjectConstants
@@ -31,8 +31,9 @@ public:
 	bool CreateCube(UploadContext& uploader);
 	bool CreateCylinder(UploadContext& uploader);
 	bool CreateIco(UploadContext& uploader);
+	bool CreateSphere(UploadContext& uploader);
 
-	void FinalizeUpload(); // libère les upload buffers (après EndAndWait)
+	void FinalizeUpload();
 	void Draw(ID3D12GraphicsCommandList* cmdList) const;
 
 	uint32_t IndexCount() const { return m_indexCount; }

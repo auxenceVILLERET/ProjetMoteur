@@ -64,7 +64,7 @@ Mesh* RessourceManager::CreateCylinder()
 Mesh* RessourceManager::CreateSphere()
 {
 	Mesh* mesh = new Mesh();
-	if (mesh->CreateIco(*m_uploader) == false)
+	if (mesh->CreateSphere(*m_uploader) == false)
 	{
 		delete mesh;
 		return nullptr;

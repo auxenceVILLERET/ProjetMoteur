@@ -16,11 +16,11 @@ bool Pipeline::InitializePipeline(ID3D12Device* device)
 {
     std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,
+      D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 28, // NEW (12+16)
+      D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
     // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
@@ -97,44 +97,68 @@ void Pipeline::Shutdown()
 
 bool Pipeline::BuildRootSignature(ID3D12Device* device)
 {
-    // 1 paramètre root: CBV b0 (visible vertex shader)
-    D3D12_ROOT_PARAMETER param = {};
-    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-    param.Descriptor.ShaderRegister = 0; // b0
-    param.Descriptor.RegisterSpace = 0;
-    param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+    // Param 0 : CBV b0 (VS)
+    D3D12_ROOT_PARAMETER params[2] = {};
+
+    params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    params[0].Descriptor.ShaderRegister = 0; // b0
+    params[0].Descriptor.RegisterSpace = 0;
+    params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+    // Param 1 : Descriptor table SRV t0 (PS)
+    D3D12_DESCRIPTOR_RANGE range = {};
+    range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range.NumDescriptors = 1;
+    range.BaseShaderRegister = 0; // t0
+    range.RegisterSpace = 0;
+    range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+    params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    params[1].DescriptorTable.NumDescriptorRanges = 1;
+    params[1].DescriptorTable.pDescriptorRanges = &range;
+    params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    // Static sampler s0
+    D3D12_STATIC_SAMPLER_DESC samp = {};
+    samp.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    samp.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.ShaderRegister = 0; // s0
+    samp.RegisterSpace = 0;
+    samp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    samp.MinLOD = 0.0f;
+    samp.MaxLOD = D3D12_FLOAT32_MAX;
+    samp.MaxAnisotropy = 1;
+    samp.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 
     D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = 1;
-    desc.pParameters = &param;
-    desc.NumStaticSamplers = 0;
-    desc.pStaticSamplers = nullptr;
+    desc.NumParameters = _countof(params);
+    desc.pParameters = params;
+    desc.NumStaticSamplers = 1;
+    desc.pStaticSamplers = &samp;
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     ID3DBlob* serialized = nullptr;
     ID3DBlob* error = nullptr;
 
-    HRESULT hr = D3D12SerializeRootSignature(
-        &desc,
-        D3D_ROOT_SIGNATURE_VERSION_1,
-        &serialized,
-        &error
-    );
-
+    HRESULT hr = D3D12SerializeRootSignature(&desc, D3D_ROOT_SIGNATURE_VERSION_1, &serialized, &error);
     if (FAILED(hr))
     {
-        if (error) OutputDebugStringA((char*)error->GetBufferPointer());
+        if (error) 
+            OutputDebugStringA((char*)error->GetBufferPointer());
         SafeRelease(error);
         SafeRelease(serialized);
         return false;
     }
 
-    hr = device->CreateRootSignature(
-        0,
-        serialized->GetBufferPointer(),
-        serialized->GetBufferSize(),
-        IID_PPV_ARGS(&m_rootSig)
-    );
+    hr = device->CreateRootSignature(0, serialized->GetBufferPointer(), serialized->GetBufferSize(), IID_PPV_ARGS(&m_rootSig));
+    if (FAILED(hr))
+    {
+        SafeRelease(error);
+        SafeRelease(serialized);
+        return false;
+	}
 
     SafeRelease(error);
     SafeRelease(serialized);

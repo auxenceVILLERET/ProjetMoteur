@@ -40,9 +40,9 @@ bool Mesh::Initialize(UploadContext& uploader, std::vector<Vertex> vertices, std
 bool Mesh::CreateTriangle(UploadContext& uploader)
 {
 	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex{ { 0.0f,  0.5f, 0.0f } });
-	vertices.push_back(Vertex{ { 0.5f, -0.5f, 0.0f } });
-	vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f } });
+	vertices.push_back(Vertex{ { 0.0f,  0.5f, 0.0f }, { 0.5f, 0.5f } });
+	vertices.push_back(Vertex{ { 0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } });
+	vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f } });
 
 	std::vector<uint32_t> indices = { 0,1,2 };
 
@@ -52,10 +52,10 @@ bool Mesh::CreateTriangle(UploadContext& uploader)
 bool Mesh::CreateQuad(UploadContext& uploader)
 {
 	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex{ { -0.5f,  0.5f, 0.0f } });
-	vertices.push_back(Vertex{ {  0.5f,  0.5f, 0.0f } });
-	vertices.push_back(Vertex{ {  0.5f, -0.5f, 0.0f } });
-	vertices.push_back(Vertex{ { -0.5f, -0.5f, 0.0f } });
+	vertices.push_back(Vertex{ { -0.5f,  0.5f, 0.0f }, { 0.0f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f,  0.5f, 0.0f }, { 1.0f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f } });
+	vertices.push_back(Vertex{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f } });
 
 	std::vector<uint32_t> indices =
 	{
@@ -68,175 +68,103 @@ bool Mesh::CreateQuad(UploadContext& uploader)
 
 bool Mesh::CreateCube(UploadContext& uploader)
 {
-	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex{ { -1.0f, -1.0f, -1.0f } });
-	vertices.push_back(Vertex{ { -1.0f, +1.0f, -1.0f } });
-	vertices.push_back(Vertex{ { +1.0f, +1.0f, -1.0f } });
-	vertices.push_back(Vertex{ { +1.0f, -1.0f, -1.0f } });
-	vertices.push_back(Vertex{ { -1.0f, -1.0f, +1.0f } });
-	vertices.push_back(Vertex{ { -1.0f, +1.0f, +1.0f } });
-	vertices.push_back(Vertex{ { +1.0f, +1.0f, +1.0f } });
-	vertices.push_back(Vertex{ { +1.0f, -1.0f, +1.0f } });
+	// 24 vertices (4 par face) pour avoir des UV corrects par face.
+	const float s = 1.0f;
 
-	std::vector<uint32_t> indices=
+	std::vector<Vertex> vertices;
+	vertices.reserve(24);
+
+	auto addFace = [&](XMFLOAT3 a, XMFLOAT3 b, XMFLOAT3 c, XMFLOAT3 d)
 	{
-		// front face
-		0, 1, 2,
-		0, 2, 3,
-		// back face
-		4,6,5,
-		4,7,6,
-		// left face
-		4,5,1,
-		4,1,0,
-		// right face
-		3,2,6,
-		3,6,7,
-		// top face
-		1,5,6,
-		1,6,2,
-		// bottom face
-		4,0,3,
-		4,3,7
+		vertices.push_back(Vertex{ a, {0.0f, 0.0f} });
+		vertices.push_back(Vertex{ b, {1.0f, 0.0f} });
+		vertices.push_back(Vertex{ c, {1.0f, 1.0f} });
+		vertices.push_back(Vertex{ d, {0.0f, 1.0f} });
 	};
+
+	// +Z (front)
+	addFace({-s, +s, +s}, {+s, +s, +s}, {+s, -s, +s}, {-s, -s, +s});
+	// -Z (back)
+	addFace({+s, +s, -s}, {-s, +s, -s}, {-s, -s, -s}, {+s, -s, -s});
+	// +X (right)
+	addFace({+s, +s, +s}, {+s, +s, -s}, {+s, -s, -s}, {+s, -s, +s});
+	// -X (left)
+	addFace({-s, +s, -s}, {-s, +s, +s}, {-s, -s, +s}, {-s, -s, -s});
+	// +Y (top)
+	addFace({-s, +s, -s}, {+s, +s, -s}, {+s, +s, +s}, {-s, +s, +s});
+	// -Y (bottom)
+	addFace({-s, -s, +s}, {+s, -s, +s}, {+s, -s, -s}, {-s, -s, -s});
+
+	std::vector<uint32_t> indices;
+	indices.reserve(36);
+
+	for (uint32_t face = 0; face < 6; ++face)
+	{
+		uint32_t base = face * 4;
+		indices.push_back(base + 0); indices.push_back(base + 1); indices.push_back(base + 2);
+		indices.push_back(base + 0); indices.push_back(base + 2); indices.push_back(base + 3);
+	}
+
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
+
 
 bool Mesh::CreateCylinder(UploadContext& uploader)
 {
+	// Cylindre simple (16 slices)
+	const uint32_t slices = 16;
+	const float radius = 1.0f;
+	const float y0 = 0.0f;
+	const float y1 = 1.0f;
+
 	std::vector<Vertex> vertices;
-	vertices.reserve(34); // 16 pour la base, 16 pour le haut, 2 pour les centres
+	vertices.reserve(slices * 2 + 2);
 
-	vertices.push_back(Vertex{ { 1.0000f, 0.0f,  0.0000f } });
-	vertices.push_back(Vertex{ { 0.9239f, 0.0f,  0.3827f } });
-	vertices.push_back(Vertex{ { 0.7071f, 0.0f,  0.7071f } });
-	vertices.push_back(Vertex{ { 0.3827f, 0.0f,  0.9239f } });
-	vertices.push_back(Vertex{ { 0.0000f, 0.0f,  1.0000f } });
-	vertices.push_back(Vertex{ { -0.3827f, 0.0f,  0.9239f } });
-	vertices.push_back(Vertex{ { -0.7071f, 0.0f,  0.7071f } });
-	vertices.push_back(Vertex{ { -0.9239f, 0.0f,  0.3827f } });
-	vertices.push_back(Vertex{ { -1.0000f, 0.0f,  0.0000f } });
-	vertices.push_back(Vertex{ { -0.9239f, 0.0f, -0.3827f } });
-	vertices.push_back(Vertex{ { -0.7071f, 0.0f, -0.7071f } });
-	vertices.push_back(Vertex{ { -0.3827f, 0.0f, -0.9239f } });
-	vertices.push_back(Vertex{ { 0.0000f, 0.0f, -1.0000f } });
-	vertices.push_back(Vertex{ { 0.3827f, 0.0f, -0.9239f } });
-	vertices.push_back(Vertex{ { 0.7071f, 0.0f, -0.7071f } });
-	vertices.push_back(Vertex{ { 0.9239f, 0.0f, -0.3827f } });
-
-	vertices.push_back(Vertex{ { 1.0000f, 1.0f,  0.0000f } });
-	vertices.push_back(Vertex{ { 0.9239f, 1.0f,  0.3827f } });
-	vertices.push_back(Vertex{ { 0.7071f, 1.0f,  0.7071f } });
-	vertices.push_back(Vertex{ { 0.3827f, 1.0f,  0.9239f } });
-	vertices.push_back(Vertex{ { 0.0000f, 1.0f,  1.0000f } });
-	vertices.push_back(Vertex{ { -0.3827f, 1.0f,  0.9239f } });
-	vertices.push_back(Vertex{ { -0.7071f, 1.0f,  0.7071f } });
-	vertices.push_back(Vertex{ { -0.9239f, 1.0f,  0.3827f } });
-	vertices.push_back(Vertex{ { -1.0000f, 1.0f,  0.0000f } });
-	vertices.push_back(Vertex{ { -0.9239f, 1.0f, -0.3827f } });
-	vertices.push_back(Vertex{ { -0.7071f, 1.0f, -0.7071f } });
-	vertices.push_back(Vertex{ { -0.3827f, 1.0f, -0.9239f } });
-	vertices.push_back(Vertex{ { 0.0000f, 1.0f, -1.0000f } });
-	vertices.push_back(Vertex{ { 0.3827f, 1.0f, -0.9239f } });
-	vertices.push_back(Vertex{ { 0.7071f, 1.0f, -0.7071f } });
-	vertices.push_back(Vertex{ { 0.9239f, 1.0f, -0.3827f } });
-
-	vertices.push_back(Vertex{ { 0.0f, 0.0f, 0.0f } }); // centre bas
-	vertices.push_back(Vertex{ { 0.0f, 1.0f, 0.0f } }); // centre haut
-
-	std::vector<uint32_t> indices =
+	for (uint32_t s = 0; s < slices; ++s)
 	{
-		// DRAW TRIANGLES HERE
-		0, 16, 1,
-		1, 16, 17,
+		float u = (float)s / (float)slices;
+		float ang = u * XM_2PI;
+		float x = cosf(ang) * radius;
+		float z = sinf(ang) * radius;
 
-		1, 17, 2,
-		2, 17, 18,
+		vertices.push_back(Vertex{ { x, y0, z }, { u, 1.0f } }); // bas
+		vertices.push_back(Vertex{ { x, y1, z }, { u, 0.0f } }); // haut
+	}
 
-		2, 18, 3,
-		3, 18, 19,
+	uint32_t centerBottom = (uint32_t)vertices.size();
+	vertices.push_back(Vertex{ { 0.0f, y0, 0.0f }, { 0.5f, 0.5f } });
 
-		3, 19, 4,
-		4, 19, 20,
+	uint32_t centerTop = (uint32_t)vertices.size();
+	vertices.push_back(Vertex{ { 0.0f, y1, 0.0f }, { 0.5f, 0.5f } });
 
-		4, 20, 5,
-		5, 20, 21,
+	std::vector<uint32_t> indices;
+	indices.reserve(slices * 12);
 
-		5, 21, 6,
-		6, 21, 22,
+	for (uint32_t s = 0; s < slices; ++s)
+	{
+		uint32_t sn = (s + 1) % slices;
 
-		6, 22, 7,
-		7, 22, 23,
+		uint32_t b0 = s * 2;
+		uint32_t t0 = s * 2 + 1;
+		uint32_t b1 = sn * 2;
+		uint32_t t1 = sn * 2 + 1;
 
-		7, 23, 8,
-		8, 23, 24,
+		// sides (CCW LH)
+		indices.push_back(b0); indices.push_back(t0); indices.push_back(t1);
+		indices.push_back(b0); indices.push_back(t1); indices.push_back(b1);
 
-		8, 24, 9,
-		9, 24, 25,
+		// cap bottom
+		indices.push_back(centerBottom); indices.push_back(b1); indices.push_back(b0);
 
-		9, 25, 10,
-		10, 25, 26,
-
-		10, 26, 11,
-		11, 26, 27,
-
-		11, 27, 12,
-		12, 27, 28,
-
-		12, 28, 13,
-		13, 28, 29,
-
-		13, 29, 14,
-		14, 29, 30,
-
-		14, 30, 15,
-		15, 30, 31,
-
-		// fermeture
-		15, 31, 0,
-		0, 31, 16,
-
-		// Cap bas (y = 0)
-		32, 0, 1,
-		32,  1,2,
-		32,  2,3,
-		32,  3,4,
-		32,  4,5,
-		32, 5, 6,
-		32, 6, 7,
-		32, 7, 8,
-		32,  8,9,
-		32,  9,10,
-		32,  10,11,
-		32,  11,12,
-		32,  12,13,
-		32,  13,14,
-		32, 14,15,
-		32,15, 0,
-
-		// Cap haut (y = 1)
-		33, 17, 16,
-		33, 18, 17,
-		33, 19, 18,
-		33, 20, 19,
-		33, 21, 20,
-		33, 22, 21,
-		33, 23, 22,
-		33, 24, 23,
-		33, 25, 24,
-		33, 26, 25,
-		33, 27, 26,
-		33, 28, 27,
-		33, 29, 28,
-		33, 30, 29,
-		33, 31, 30,
-		33, 16, 31,
-	};
+		// cap top
+		indices.push_back(centerTop); indices.push_back(t0); indices.push_back(t1);
+	}
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
-bool Mesh::CreateIco(UploadContext& uploader)
+
+bool Mesh::CreateSphere(UploadContext& uploader)
 {
 	uint32_t slices = 10;
 	uint32_t stacks = 9;
@@ -267,7 +195,7 @@ bool Mesh::CreateIco(UploadContext& uploader)
 
 			XMFLOAT3 pos = { x , y , z };
 
-			vertices.push_back(Vertex{ pos });
+			vertices.push_back(Vertex{ pos, { u, 1.0f - v } });
 		}
 	}
 
@@ -277,10 +205,10 @@ bool Mesh::CreateIco(UploadContext& uploader)
 	{
 		for (uint32_t slice = 0; slice < slices; ++slice)
 		{
-			uint16_t i0 = (uint16_t)(stack * ring + slice);
-			uint16_t i1 = (uint16_t)((stack + 1) * ring + slice);
-			uint16_t i2 = (uint16_t)((stack + 1) * ring + (slice + 1));
-			uint16_t i3 = (uint16_t)(stack * ring + (slice + 1));
+			uint32_t i0 = (uint16_t)(stack * ring + slice);
+			uint32_t i1 = (uint16_t)((stack + 1) * ring + slice);
+			uint32_t i2 = (uint16_t)((stack + 1) * ring + (slice + 1));
+			uint32_t i3 = (uint16_t)(stack * ring + (slice + 1));
 
 			indices.push_back(i0); indices.push_back(i1); indices.push_back(i2);
 			indices.push_back(i0); indices.push_back(i2); indices.push_back(i3);

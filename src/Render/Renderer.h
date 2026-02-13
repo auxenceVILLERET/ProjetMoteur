@@ -13,11 +13,12 @@
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#include "DescriptorHeapManager.h"
+
 class Window;
 class DxContext;
 class SwapChainTargets;
 class Pipeline;
-class DescriptorHeapManager;
 class UploadContext;
 class Entity;
 class MeshRendererComponent;
@@ -38,7 +39,8 @@ public:
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
-	bool CreateTestPipeline();
+	static bool LoadWIC_RGBA8(const wchar_t* filename, std::vector<uint8_t>& outRGBA, uint32_t& outW, uint32_t& outH);
+	bool CreateTestTexture();
 
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
@@ -53,6 +55,10 @@ private:
 
 	Window* m_pWindow = nullptr;
 	Entity* m_pCamera = nullptr;
+
+	ID3D12Resource* m_texture = nullptr;
+	ID3D12Resource* m_textureUpload = nullptr;
+	DescriptorHandle m_textureSrv;
 
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;
