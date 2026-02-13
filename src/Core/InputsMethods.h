@@ -23,6 +23,6 @@ namespace core
 
         void Update();
 
-        static std::vector<float> m_mousePosLastFrame = { .0f,.0f };
+        static std::vector<float> m_mousePosLastFrame;
     }
 }

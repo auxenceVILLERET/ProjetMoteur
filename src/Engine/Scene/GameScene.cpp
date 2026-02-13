@@ -119,5 +119,5 @@ void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
 	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
-	//m_cam->SetRotationX(XMConvertToRadians(delta[1]));
+	m_cam->SetRotationX(XMConvertToRadians(delta[1]));
 }
