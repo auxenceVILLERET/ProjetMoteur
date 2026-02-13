@@ -16,6 +16,7 @@ public:
 
 	ECS& GetECS() { return m_ecs; }
 	float GetDeltaTime();
+	float GetTotalTime();
 
 	void SetUpdateCallback(Callback callback) { m_updateCallback = callback; }
 	void SetInitCallback(Callback callback) { m_InitCallback = callback; }

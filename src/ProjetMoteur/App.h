@@ -20,10 +20,12 @@ public:
 	void UpdateWindow();
 
 	void HandleInput();
+
 	void CreateCamera();
 
-	void CreatePlayer();
-	void CreateDummyEntity();
+	//TEST CAMERA MOVING
+	void Movement();
+
 private:
 	Engine& m_engine;
 	Window* m_window;
@@ -31,5 +33,7 @@ private:
 	SceneManager* m_sceneManager;
 	Entity* m_cam;
 	ECS* m_ecs;
+
+	float m_speedPlayer = 0.1f;
 };
 

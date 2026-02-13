@@ -32,7 +32,7 @@ App::App(Engine& engine) : m_engine(engine)
 }
 
 void App::Initialize()
-{
+{	
 	// Initialize your application here
 	m_window = new Window(800, 600, L"test");
 	m_ecs = &m_engine.GetECS();
@@ -57,11 +57,9 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 	
-
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
-	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
-
-
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine);
+	
 	m_sceneManager->ChangeScene("Menu");
 
 	m_ecs->AddSystem<StateMachineSystem>();
@@ -71,9 +69,11 @@ void App::Update()
 {
 	UpdateWindow();
 	m_sceneManager->Update(m_engine.GetDeltaTime());
-	// Update your application here
 
+	// Update your application here
 	HandleInput();
+	//cam movement
+	Movement();
 }
 
 void App::Shutdown()
@@ -97,6 +97,7 @@ void App::HandleInput()
 	{
 		m_sceneManager->ChangeScene("Menu");
 	}
+	
 	Input::Update();
 }
 
@@ -122,18 +123,12 @@ void App::CreateCamera()
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
 }
 
-void App::CreatePlayer()
+// MOVEMENT OF THE CAMERA
+void App::Movement()
 {
-	Entity* player = m_ecs->CreateEntity<Entity>();
-	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	if (Input::GetKey(Keyboard::Z)) {
+		m_cam->MoveForward((1.0f * m_speedPlayer)); // WorldMatrix is not updated
+		m_cam->CoutMatrix();
 
-	player->SetPosition(-2.0f, 0.0f, 5.0f);
-}
-
-void App::CreateDummyEntity()
-{
-	Entity* dummy = m_ecs->CreateEntity<Entity>();
-	dummy->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	dummy->SetPosition(2.0f, 0.0f, 5.0f);
-	dummy->SetRotationX(XMConvertToRadians(45.0f));
+	}
 }
