@@ -4,6 +4,7 @@
 
 class Window;
 class Renderer;
+class SceneManager;
 class Entity;
 class ECS;
 class Mesh;
@@ -37,11 +38,12 @@ public:
 
 private:
 	Engine& m_engine;
-	Window* m_window = nullptr;
-	Renderer* m_renderer = nullptr;
-	Entity* m_cam = nullptr;
-	ECS* m_ecs = nullptr;
-
+	Window* m_window;
+	Renderer* m_renderer;
+	SceneManager* m_sceneManager;
+	Entity* m_cam;
+	ECS* m_ecs;
+	
 	Entity* m_cube;
 	Entity* m_sphere;
 	Entity* m_cylinder;
@@ -51,5 +53,6 @@ private:
 	std::vector<Entity*> m_rails;
 
 	float m_speedPlayer = 0.001f;
+
 };
 

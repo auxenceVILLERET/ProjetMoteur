@@ -30,14 +30,14 @@ private:
 	float m_fov = 45.0f;
 	float m_nearPlane = 0.1f;
 	float m_farPlane = 100.0f;
-	float m_aspectRatio = m_height / m_width;
 	float m_height = 16.0f;
 	float m_width = 9.0f;
+	float m_aspectRatio = m_height / m_width;
 
 	bool m_isPerspective = true;
 
-	XMFLOAT4X4 m_viewMatrix;
-	XMFLOAT4X4 m_projectionMatrix;
+	XMFLOAT4X4 m_viewMatrix = XMFLOAT4X4();
+	XMFLOAT4X4 m_projectionMatrix = XMFLOAT4X4();
 
 	Frustum* m_frustum = nullptr;
 };

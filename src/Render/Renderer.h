@@ -36,7 +36,7 @@ public:
 	void Update();
 	void Render(std::vector<MeshRendererComponent*> vMesh);
 	void DrawObj(MeshRendererComponent& obj);
-	XMFLOAT4X4& BuildWorldViewProjMatrix(XMMATRIX& world);
+	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
 	bool CreateTestPipeline();
 

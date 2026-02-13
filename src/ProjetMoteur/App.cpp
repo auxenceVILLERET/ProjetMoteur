@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Engine/Engine.h"
 #include "Core/InputsMethods.h"
+#include "Engine/Scene/SceneManager.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 #include "Engine/ECS/Systems/CameraSystem.h"
 #include "Engine/RessourceManager.h"
@@ -11,7 +12,8 @@
 #include "Render/UploadContext.h" 
 #include "Mesh.h"
 #include "Engine/ECS/Systems/RenderSystem.h"
-#include "GameTimer.h"
+#include "Engine/Scene/GameScene.h"
+#include "Engine/Scene/MenuScene.h"
 
 using namespace core;
 
@@ -21,7 +23,11 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
 
-	
+	m_renderer = nullptr;
+	m_window = nullptr;
+	m_sceneManager = nullptr;
+	m_cam = nullptr;
+	m_ecs = nullptr;
 }
 
 void App::Initialize()
@@ -31,6 +37,8 @@ void App::Initialize()
 	m_ecs = &m_engine.GetECS();
 	CreateCamera();
 	m_renderer = new Renderer();
+	m_sceneManager = new SceneManager();
+
 	m_renderer->Initialize(m_window, m_cam);
 
 	UploadContext* uploader = m_renderer->GetUploadContext();
@@ -47,16 +55,23 @@ void App::Initialize()
 	RessourceManager::Instance().FinalizeUpload();
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
-
+	
+	//TEST OBJECTS
 	m_cylinder = CreateCylinder();
 	m_cube = CreateCube();
 	m_sphere = CreateSphere();
 	m_moon = CreateMoon();
+
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
+	
+	m_sceneManager->ChangeScene("Menu");
 }
 
 void App::Update()
 {
 	UpdateWindow();
+	m_sceneManager->Update(m_engine.GetDeltaTime());
 	// Update your application here
 	
 	ProceduralRails();
@@ -87,6 +102,15 @@ void App::UpdateWindow()
 
 void App::HandleInput()
 {
+	if(Input::GetKey(Keyboard::A))
+	{
+		m_sceneManager->ChangeScene("Game");
+	}
+	if (Input::GetKey(Keyboard::E))
+	{
+		m_sceneManager->ChangeScene("Menu");
+	}
+	
 	Input::Update();
 }
 
@@ -110,7 +134,6 @@ void App::CreateCamera()
 	XMFLOAT4X4 identityMatrix;
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
-	
 }
 
 // TEST ENTITIES

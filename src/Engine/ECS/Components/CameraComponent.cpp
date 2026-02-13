@@ -1,5 +1,6 @@
 #include "CameraComponent.h"
 #include "Engine/Utils/Frustum.h"
+#include "Engine/ECS/Entity.h"
 
 void CameraComponent::SetAll(float nearPlane, float farPlane, float height, float width, bool perspective)
 {
@@ -22,12 +23,18 @@ void CameraComponent::SetWindowSize(float width, float height)
 
 void CameraComponent::Update()
 {
-	XMMATRIX view = XMLoadFloat4x4(&m_viewMatrix);
+	XMFLOAT4X4 transform = GetEntity()->GetMatrix();
+	XMMATRIX world = XMLoadFloat4x4(&transform);
 
-	XMStoreFloat4x4(&m_viewMatrix, XMMatrixInverse(nullptr, view));
-	view *= XMLoadFloat4x4(&m_projectionMatrix);
-	XMStoreFloat4x4(&m_projectionMatrix, view);
-	m_frustum->FromViewProjection(m_projectionMatrix);
+	XMMATRIX view = XMMatrixInverse(nullptr, world);
+	XMStoreFloat4x4(&m_viewMatrix, view);
+
+	XMMATRIX proj = XMLoadFloat4x4(&m_projectionMatrix);
+	XMMATRIX viewProj = view * proj;
+
+	XMFLOAT4X4 vp;
+	XMStoreFloat4x4(&vp, viewProj);
+	m_frustum->FromViewProjection(vp);
 }
 
 void CameraComponent::UpdateProjectionMatrix()
