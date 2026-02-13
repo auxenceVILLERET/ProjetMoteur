@@ -26,3 +26,8 @@ VertexOut VSMain(VertexIn v)
     o.uv = v.uv;
     return o;
 }
+
+float4 PSMain(VertexOut i) : SV_TARGET
+{
+    return gTex0.Sample(gSamp0, i.uv);
+}
