@@ -70,24 +70,18 @@ bool Renderer::Initialize(Window* window, Entity* camera)
 
     // 3) Descriptor heap manager (CBV/SRV/UAV shader-visible)
     m_pDescriptorHeapManager = new DescriptorHeapManager();
-    if (m_pDescriptorHeapManager->Initialize(
-        m_pDxContext->GetDevice(),
-        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-        1024,
-        true) == false)
-    {
+    if (m_pDescriptorHeapManager->Initialize(m_pDxContext->GetDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024, true) == false)
         return false;
-    }
 
     // 4) Upload context
     m_pUploadContext = new UploadContext();
     if (m_pUploadContext->Initialize(m_pDxContext->GetDevice(), m_pDxContext->GetCommandQueue()) == false)
         return false;
 
-    // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
-    //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
+    // 5) Pipeline
     m_pPipeline = new Pipeline();
-    if (CreateTestPipeline() == false) return false;
+    if (m_pPipeline->InitializePipeline(m_pDxContext->GetDevice()) == false)
+		return false;
 
     return true;
 }
