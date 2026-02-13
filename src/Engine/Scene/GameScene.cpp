@@ -4,6 +4,7 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
+#include "Engine/ECS/Components/PlayerComponent.h"
 
 
 void GameScene::Initialize(ECS* ecs, Renderer* renderer)
@@ -13,9 +14,11 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 
 	Entity* player = m_ecs->CreateEntity<Entity>();
 	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	player->AddComponent<PlayerComponent>();
 
 	player->SetPosition(-2.0f, 0.0f, 5.0f);
 	m_entities.push_back(player);
+
 }
 
 void GameScene::OnEnter()

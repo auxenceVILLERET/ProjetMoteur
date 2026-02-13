@@ -14,20 +14,6 @@ void StateMachine::ChangeState(State* newState)
 void StateMachine::Update(float dt)
 {
 	if (currentState)
-		currentState->Update(*this, dt);
+		currentState->Update(*this,m_ecs, dt);
 }
 
-State* StateMachine::GetCurrentState() const
-{
-	return currentState;
-}
-
-void StateMachine::SetOwner(Entity* entity)
-{
-	owner = entity;
-}
-
-Entity* StateMachine::GetOwner() const
-{
-	return owner;
-}

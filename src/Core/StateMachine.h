@@ -2,6 +2,7 @@
 
 class State;
 class Entity;
+class ECS;
 
 class StateMachine
 {
@@ -12,9 +13,11 @@ public:
 
 	void SetOwner(Entity* entity) { owner = entity; }
 	Entity* GetOwner() const { return owner; }
+	void SetECS(ECS* ecs) { m_ecs = ecs; }
 
 private:
 	Entity* owner = nullptr;
 	State* currentState = nullptr;
+	ECS* m_ecs = nullptr;
 };
 
