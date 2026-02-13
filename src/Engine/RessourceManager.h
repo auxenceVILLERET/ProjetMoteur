@@ -25,7 +25,6 @@ private:
 	Mesh* CreateCube();
 	Mesh* CreateCylinder();
 	Mesh* CreateSphere();
-	Mesh* CreateSphere2();
 
 	Renderer* m_renderer = nullptr;
 	UploadContext* m_uploader = nullptr;

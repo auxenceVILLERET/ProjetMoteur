@@ -23,16 +23,6 @@ public:
 
 	void CreateCamera();
 
-	//TEST ENTITIES
-	Entity* CreateSphere();
-	Entity* CreateCylinder();
-	Entity* CreateCube();
-	Entity* CreateMoon();
-
-	//RAILS
-	void CreateRail();
-	void ProceduralRails();
-
 	//TEST CAMERA MOVING
 	void Movement();
 
@@ -43,16 +33,7 @@ private:
 	SceneManager* m_sceneManager;
 	Entity* m_cam;
 	ECS* m_ecs;
-	
-	Entity* m_cube;
-	Entity* m_sphere;
-	Entity* m_cylinder;
-	Entity* m_moon;
-	
-	Entity* m_rail;
-	std::vector<Entity*> m_rails;
 
-	float m_speedPlayer = 0.001f;
-
+	float m_speedPlayer = 0.1f;
 };
 
