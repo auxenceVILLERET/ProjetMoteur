@@ -1,75 +1,84 @@
 #include "Mesh.h"
 #include "UploadContext.h"
 
-bool Mesh::Initialize(UploadContext& uploader, const Vertex* vertices, uint32_t vertexCount, const uint16_t* indices, uint32_t indexCount)
+bool Mesh::Initialize(UploadContext& uploader, std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 {
-	if (vertices == NULL || vertexCount == 0 || indices == NULL || indexCount == 0)
+	if (vertices.empty() || indices.empty())
 		return false;
 
 	Release();
-	m_indexCount = indexCount;
 
-	const uint64_t vbBytes = uint64_t(vertexCount) * sizeof(Vertex);
-	const uint64_t ibBytes = uint64_t(indexCount) * sizeof(uint16_t);
+	// Stockage CPU
+	m_vertices = std::move(vertices);
+	m_indices = std::move(indices);
 
-	if (uploader.UploadBuffer(vertices, vbBytes, m_pVb, m_pVbUpload, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) == false)
+	m_indexCount = (uint32_t)m_indices.size();
+
+	const uint64_t vbBytes = uint64_t(m_vertices.size()) * sizeof(Vertex);
+	const uint64_t ibBytes = uint64_t(m_indices.size()) * sizeof(uint32_t);
+
+	// Upload GPU
+	if (uploader.UploadBuffer(m_vertices.data(), vbBytes, m_pVb, m_pVbUpload,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) == false)
 		return false;
 
 	m_vbView.BufferLocation = m_pVb->GetGPUVirtualAddress();
 	m_vbView.SizeInBytes = (UINT)vbBytes;
 	m_vbView.StrideInBytes = sizeof(Vertex);
 
-	if (uploader.UploadBuffer(indices, ibBytes, m_pIb, m_pIbUpload, D3D12_RESOURCE_STATE_INDEX_BUFFER) == false)
+	if (uploader.UploadBuffer(m_indices.data(), ibBytes, m_pIb, m_pIbUpload,
+		D3D12_RESOURCE_STATE_INDEX_BUFFER) == false)
 		return false;
 
 	m_ibView.BufferLocation = m_pIb->GetGPUVirtualAddress();
 	m_ibView.SizeInBytes = (UINT)ibBytes;
-	m_ibView.Format = DXGI_FORMAT_R16_UINT;
-
+	m_ibView.Format = DXGI_FORMAT_R32_UINT;
 
 	return true;
 }
 
 bool Mesh::CreateTriangle(UploadContext& uploader)
 {
-	Vertex vertices[] =
-	{
-		{ { 0.0f,  0.5f, 0.0f }, { 1,0,0,1 } },
-		{ { 0.5f, -0.5f, 0.0f }, { 0,1,0,1 } },
-		{ { -0.5f,-0.5f, 0.0f }, { 0,0,1,1 } },
-	};
-	uint16_t indices[] = { 0,1,2 };
+	std::vector<Vertex> vertices;
+	vertices.push_back(Vertex{ { 0.0f,  0.5f, 0.0f } });
+	vertices.push_back(Vertex{ { 0.5f, -0.5f, 0.0f } });
+	vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f } });
 
-	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
+	std::vector<uint32_t> indices = { 0,1,2 };
+
+	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
 bool Mesh::CreateQuad(UploadContext& uploader)
 {
-	Vertex vertices[] =
+	std::vector<Vertex> vertices;
+	vertices.push_back(Vertex{ { -0.5f,  0.5f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f,  0.5f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f, -0.5f, 0.0f } });
+	vertices.push_back(Vertex{ { -0.5f, -0.5f, 0.0f } });
+
+	std::vector<uint32_t> indices =
 	{
-		{ { -0.5f,  0.5f, 0.0f }, { 1,1,0,1 } },
-		{ {  0.5f,  0.5f, 0.0f }, { 0,1,1,1 } },
-		{ {  0.5f, -0.5f, 0.0f }, { 1,0,1,1 } },
-		{ { -0.5f, -0.5f, 0.0f }, { 1,1,1,1 } },
+		0, 1, 2,
+		0, 2, 3
 	};
-	uint16_t indices[] = { 0,1,2, 0,2,3 };
-	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
+
+	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
 bool Mesh::CreateCube(UploadContext& uploader)
 {
-	Vertex vertices[] =
-	{
-		{ { -1.0f, -1.0f, -1.0f }, { 1,0,0,1 } },
-		{ { -1.0f, +1.0f, -1.0f }, { 0,1,0,1 } },
-		{ { +1.0f, +1.0f, -1.0f }, { 0,0,1,1 } },
-		{ { +1.0f, -1.0f, -1.0f }, { 1,1,0,1 } },
-		{ { -1.0f, -1.0f, +1.0f }, { 1,0,1,1 } },
-		{ { -1.0f, +1.0f, +1.0f }, { 0,1,1,1 } },
-		{ { +1.0f, +1.0f, +1.0f }, { 1,1,1,1 } },
-		{ { +1.0f, -1.0f, +1.0f }, { 0,0,0,1 } }
-	};
-	uint16_t indices[] =
+	std::vector<Vertex> vertices;
+	vertices.push_back(Vertex{ { -1.0f, -1.0f, -1.0f } });
+	vertices.push_back(Vertex{ { -1.0f, +1.0f, -1.0f } });
+	vertices.push_back(Vertex{ { +1.0f, +1.0f, -1.0f } });
+	vertices.push_back(Vertex{ { +1.0f, -1.0f, -1.0f } });
+	vertices.push_back(Vertex{ { -1.0f, -1.0f, +1.0f } });
+	vertices.push_back(Vertex{ { -1.0f, +1.0f, +1.0f } });
+	vertices.push_back(Vertex{ { +1.0f, +1.0f, +1.0f } });
+	vertices.push_back(Vertex{ { +1.0f, -1.0f, +1.0f } });
+
+	std::vector<uint32_t> indices=
 	{
 		// front face
 		0, 1, 2,
@@ -90,55 +99,52 @@ bool Mesh::CreateCube(UploadContext& uploader)
 		4,0,3,
 		4,3,7
 	};
-	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
+	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
 bool Mesh::CreateCylinder(UploadContext& uploader)
 {
-	Vertex vertices[] =
-	{
-		// Base (y = 0)
-		{ { 1.0000f, 0.0f,  0.0000f }, {1,0,0,1} },
-		{ { 0.9239f, 0.0f,  0.3827f }, {1,0.5f,0,1} },
-		{ { 0.7071f, 0.0f,  0.7071f }, {1,1,0,1} },
-		{ { 0.3827f, 0.0f,  0.9239f }, {0.5f,1,0,1} },
-		{ { 0.0000f, 0.0f,  1.0000f }, {0,1,0,1} },
-		{ { -0.3827f, 0.0f,  0.9239f }, {0,1,0.5f,1} },
-		{ { -0.7071f, 0.0f,  0.7071f }, {0,1,1,1} },
-		{ { -0.9239f, 0.0f,  0.3827f }, {0,0.5f,1,1} },
-		{ { -1.0000f, 0.0f,  0.0000f }, {0,0,1,1} },
-		{ { -0.9239f, 0.0f, -0.3827f }, {0.5f,0,1,1} },
-		{ { -0.7071f, 0.0f, -0.7071f }, {1,0,1,1} },
-		{ { -0.3827f, 0.0f, -0.9239f }, {1,0,0.5f,1} },
-		{ { 0.0000f, 0.0f, -1.0000f }, {1,0,0,1} },
-		{ { 0.3827f, 0.0f, -0.9239f }, {1,0.5f,0,1} },
-		{ { 0.7071f, 0.0f, -0.7071f }, {1,1,0,1} },
-		{ { 0.9239f, 0.0f, -0.3827f }, {0.5f,1,0,1} },
+	std::vector<Vertex> vertices;
+	vertices.reserve(34); // 16 pour la base, 16 pour le haut, 2 pour les centres
 
-		// Haut (y = 1)
-		{ { 1.0000f, 1.0f,  0.0000f }, {1,0,0,1} },
-		{ { 0.9239f, 1.0f,  0.3827f }, {1,0.5f,0,1} },
-		{ { 0.7071f, 1.0f,  0.7071f }, {1,1,0,1} },
-		{ { 0.3827f, 1.0f,  0.9239f }, {0.5f,1,0,1} },
-		{ { 0.0000f, 1.0f,  1.0000f }, {0,1,0,1} },
-		{ { -0.3827f, 1.0f,  0.9239f }, {0,1,0.5f,1} },
-		{ { -0.7071f, 1.0f,  0.7071f }, {0,1,1,1} },
-		{ { -0.9239f, 1.0f,  0.3827f }, {0,0.5f,1,1} },
-		{ { -1.0000f, 1.0f,  0.0000f }, {0,0,1,1} },
-		{ { -0.9239f, 1.0f, -0.3827f }, {0.5f,0,1,1} },
-		{ { -0.7071f, 1.0f, -0.7071f }, {1,0,1,1} },
-		{ { -0.3827f, 1.0f, -0.9239f }, {1,0,0.5f,1} },
-		{ { 0.0000f, 1.0f, -1.0000f }, {1,0,0,1} },
-		{ { 0.3827f, 1.0f, -0.9239f }, {1,0.5f,0,1} },
-		{ { 0.7071f, 1.0f, -0.7071f }, {1,1,0,1} },
-		{ { 0.9239f, 1.0f, -0.3827f }, {0.5f,1,0,1} },
+	vertices.push_back(Vertex{ { 1.0000f, 0.0f,  0.0000f } });
+	vertices.push_back(Vertex{ { 0.9239f, 0.0f,  0.3827f } });
+	vertices.push_back(Vertex{ { 0.7071f, 0.0f,  0.7071f } });
+	vertices.push_back(Vertex{ { 0.3827f, 0.0f,  0.9239f } });
+	vertices.push_back(Vertex{ { 0.0000f, 0.0f,  1.0000f } });
+	vertices.push_back(Vertex{ { -0.3827f, 0.0f,  0.9239f } });
+	vertices.push_back(Vertex{ { -0.7071f, 0.0f,  0.7071f } });
+	vertices.push_back(Vertex{ { -0.9239f, 0.0f,  0.3827f } });
+	vertices.push_back(Vertex{ { -1.0000f, 0.0f,  0.0000f } });
+	vertices.push_back(Vertex{ { -0.9239f, 0.0f, -0.3827f } });
+	vertices.push_back(Vertex{ { -0.7071f, 0.0f, -0.7071f } });
+	vertices.push_back(Vertex{ { -0.3827f, 0.0f, -0.9239f } });
+	vertices.push_back(Vertex{ { 0.0000f, 0.0f, -1.0000f } });
+	vertices.push_back(Vertex{ { 0.3827f, 0.0f, -0.9239f } });
+	vertices.push_back(Vertex{ { 0.7071f, 0.0f, -0.7071f } });
+	vertices.push_back(Vertex{ { 0.9239f, 0.0f, -0.3827f } });
 
-		// centres
-		{ { 0.0f, 0.0f, 0.0f }, {1,1,1,1} },
-		{ { 0.0f, 1.0f, 0.0f }, {1,1,1,1} },
-	};
+	vertices.push_back(Vertex{ { 1.0000f, 1.0f,  0.0000f } });
+	vertices.push_back(Vertex{ { 0.9239f, 1.0f,  0.3827f } });
+	vertices.push_back(Vertex{ { 0.7071f, 1.0f,  0.7071f } });
+	vertices.push_back(Vertex{ { 0.3827f, 1.0f,  0.9239f } });
+	vertices.push_back(Vertex{ { 0.0000f, 1.0f,  1.0000f } });
+	vertices.push_back(Vertex{ { -0.3827f, 1.0f,  0.9239f } });
+	vertices.push_back(Vertex{ { -0.7071f, 1.0f,  0.7071f } });
+	vertices.push_back(Vertex{ { -0.9239f, 1.0f,  0.3827f } });
+	vertices.push_back(Vertex{ { -1.0000f, 1.0f,  0.0000f } });
+	vertices.push_back(Vertex{ { -0.9239f, 1.0f, -0.3827f } });
+	vertices.push_back(Vertex{ { -0.7071f, 1.0f, -0.7071f } });
+	vertices.push_back(Vertex{ { -0.3827f, 1.0f, -0.9239f } });
+	vertices.push_back(Vertex{ { 0.0000f, 1.0f, -1.0000f } });
+	vertices.push_back(Vertex{ { 0.3827f, 1.0f, -0.9239f } });
+	vertices.push_back(Vertex{ { 0.7071f, 1.0f, -0.7071f } });
+	vertices.push_back(Vertex{ { 0.9239f, 1.0f, -0.3827f } });
 
-	uint16_t indices[] =
+	vertices.push_back(Vertex{ { 0.0f, 0.0f, 0.0f } }); // centre bas
+	vertices.push_back(Vertex{ { 0.0f, 1.0f, 0.0f } }); // centre haut
+
+	std::vector<uint32_t> indices =
 	{
 		// DRAW TRIANGLES HERE
 		0, 16, 1,
@@ -227,43 +233,61 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 		33, 16, 31,
 	};
 
-	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
+	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
 bool Mesh::CreateIco(UploadContext& uploader)
 {
-	float a = 0.525731f; // 2PI/12
-	float b = 0.850651f;
+	uint32_t slices = 10;
+	uint32_t stacks = 9;
 
-	Vertex vertices[] =
+	uint32_t vertCount = (stacks + 1) * (slices + 1);
+
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
+	vertices.reserve(vertCount);
+	indices.reserve(stacks * slices * 6);
+
+	for (uint32_t stack = 0; stack <= stacks; ++stack)
 	{
-		{ { -a, 0.0f, +b }, {1,0,0,1} },
-		{ { +a, 0.0f, +b }, {0,1,0,1} },
-		{ { -a, 0.0f, -b }, {0,0,1,1} },
-		{ { +a, 0.0f, -b }, {1,1,0,1} },
+		float v = (float)stack / (float)stacks;      // 0..1
+		float phi = v * XM_PI;                       // 0..PI
 
-		{ { 0.0f, +b, +a }, {1,0,1,1} },
-		{ { 0.0f, +b, -a }, {0,1,1,1} },
-		{ { 0.0f, -b, +a }, {1,0.5f,0,1} },
-		{ { 0.0f, -b, -a }, {0.5f,0,1,1} },
+		float y = cosf(phi);
+		float r = sinf(phi);
 
-		{ { +b, +a, 0.0f }, {1,1,1,1} },
-		{ { -b, +a, 0.0f }, {0.3f,1,0.3f,1} },
-		{ { +b, -a, 0.0f }, {1,0.3f,0.3f,1} },
-		{ { -b, -a, 0.0f }, {0.3f,0.3f,1,1} },
-	};
+		for (uint32_t slice = 0; slice <= slices; ++slice)
+		{
+			float u = (float)slice / (float)slices;  // 0..1
+			float theta = u * XM_2PI;                // 0..2PI
 
-	uint16_t indices[] =
+			float x = r * cosf(theta);
+			float z = r * sinf(theta);
+
+			XMFLOAT3 pos = { x , y , z };
+
+			vertices.push_back(Vertex{ pos });
+		}
+	}
+
+	// Indices
+	const uint32_t ring = slices + 1;
+	for (uint32_t stack = 0; stack < stacks; ++stack)
 	{
-		// DRAW TRIANGLES HERE
+		for (uint32_t slice = 0; slice < slices; ++slice)
+		{
+			uint16_t i0 = (uint16_t)(stack * ring + slice);
+			uint16_t i1 = (uint16_t)((stack + 1) * ring + slice);
+			uint16_t i2 = (uint16_t)((stack + 1) * ring + (slice + 1));
+			uint16_t i3 = (uint16_t)(stack * ring + (slice + 1));
 
-		1,4,0,  4,9,0,  4,5,9,  8,5,4,  1,8,4,
-		1,10,8, 10,3,8, 8,3,5,  3,2,5,  3,7,2,
-		3,10,7, 10,6,7, 6,11,7, 6,0,11, 6,1,0,
-		10,1,6, 11,0,9, 2,11,9, 5,2,9,  11,2,7
-	};
+			indices.push_back(i0); indices.push_back(i1); indices.push_back(i2);
+			indices.push_back(i0); indices.push_back(i2); indices.push_back(i3);
+		}
+	}
 
-	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
+	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
 void Mesh::Release()
@@ -272,7 +296,10 @@ void Mesh::Release()
 	SafeRelease(m_pVbUpload);
 	SafeRelease(m_pIb);
 	SafeRelease(m_pIbUpload);
+
 	m_indexCount = 0;
+	m_vertices.clear();
+	m_indices.clear();
 }
 
 void Mesh::FinalizeUpload()

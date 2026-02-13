@@ -22,8 +22,6 @@ public:
 	void HandleInput();
 	void CreateCamera();
 
-	void CreatePlayer();
-	void CreateDummyEntity();
 private:
 	Engine& m_engine;
 	Window* m_window;

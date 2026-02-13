@@ -13,7 +13,7 @@ void MenuScene::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* menuEntity = m_ecs->CreateEntity<Entity>();
 	menuEntity->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
 	
-	menuEntity->SetPosition(0.0f, 0.0f, 5.0f);
+	menuEntity->SetPosition(2.0f, 0.0f, 5.0f);
 	
 	m_entities.push_back(menuEntity);
 }

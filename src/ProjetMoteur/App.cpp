@@ -60,7 +60,6 @@ void App::Initialize()
 	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
 	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
 
-
 	m_sceneManager->ChangeScene("Menu");
 }
 
@@ -68,8 +67,6 @@ void App::Update()
 {
 	UpdateWindow();
 	m_sceneManager->Update(m_engine.GetDeltaTime());
-	// Update your application here
-
 	HandleInput();
 }
 
@@ -117,20 +114,4 @@ void App::CreateCamera()
 	XMFLOAT4X4 identityMatrix;
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
-}
-
-void App::CreatePlayer()
-{
-	Entity* player = m_ecs->CreateEntity<Entity>();
-	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-
-	player->SetPosition(-2.0f, 0.0f, 5.0f);
-}
-
-void App::CreateDummyEntity()
-{
-	Entity* dummy = m_ecs->CreateEntity<Entity>();
-	dummy->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	dummy->SetPosition(2.0f, 0.0f, 5.0f);
-	dummy->SetRotationX(XMConvertToRadians(45.0f));
 }

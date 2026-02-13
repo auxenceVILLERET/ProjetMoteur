@@ -14,7 +14,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* player = m_ecs->CreateEntity<Entity>();
 	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
 
-	player->SetPosition(-2.0f, 0.0f, 5.0f);
+	player->SetPosition(0.0f, 0.0f, 5.0f);
 	m_entities.push_back(player);
 }
 
@@ -37,5 +37,5 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
-
+	m_entities[0]->SetRotationX(sinf(dt));
 }
