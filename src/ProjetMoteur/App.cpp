@@ -117,7 +117,6 @@ void App::CreateCamera()
 	XMFLOAT4X4 identityMatrix;
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
-	
 }
 
 void App::CreatePlayer()

@@ -165,7 +165,6 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-
     for (MeshRendererComponent* m : vObj)
     {
         DrawObj(*m);
