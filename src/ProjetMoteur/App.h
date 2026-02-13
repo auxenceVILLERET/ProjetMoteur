@@ -19,15 +19,31 @@ public:
 	void UpdateWindow();
 
 	void HandleInput();
+
 	void CreateCamera();
 
-	void CreatePlayer();
-	void CreateDummyEntity();
+	void CreateSphere();
+	void CreateCylinder();
+	Entity* CreateCube();
+
+	void CreateRail();
+	void ProceduralRails();
+
+	void Movement();
+
 private:
 	Engine& m_engine;
 	Window* m_window = nullptr;
 	Renderer* m_renderer = nullptr;
 	Entity* m_cam = nullptr;
 	ECS* m_ecs = nullptr;
+
+	Entity* m_cube;
+	Entity* m_sphere;
+	
+	Entity* m_rail;
+	std::vector<Entity*> m_rails;
+
+	float m_speedPlayer = 0.1f;
 };
 

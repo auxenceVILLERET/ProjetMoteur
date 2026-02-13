@@ -39,6 +39,13 @@ Mesh* RessourceManager::GetSphere()
 	return m_sphereMesh;
 }
 
+Mesh* RessourceManager::GetSphere2()
+{
+	if (m_sphere2Mesh == nullptr)
+		m_sphere2Mesh = CreateSphere2();
+	return m_sphere2Mesh;
+}
+
 Mesh* RessourceManager::CreateCube()
 {
 	Mesh* mesh = new Mesh();
@@ -65,6 +72,17 @@ Mesh* RessourceManager::CreateSphere()
 {
 	Mesh* mesh = new Mesh();
 	if (mesh->CreateIco(*m_uploader) == false)
+	{
+		delete mesh;
+		return nullptr;
+	}
+	return mesh;
+}
+
+Mesh* RessourceManager::CreateSphere2()
+{
+	Mesh* mesh = new Mesh();
+	if (mesh->CreateIco2(*m_uploader) == false)
 	{
 		delete mesh;
 		return nullptr;

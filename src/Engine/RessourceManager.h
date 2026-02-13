@@ -17,6 +17,7 @@ public:
 	Mesh* GetCube();
 	Mesh* GetCylinder();
 	Mesh* GetSphere();
+	Mesh* GetSphere2();
 
 	void FinalizeUpload();
 
@@ -24,6 +25,7 @@ private:
 	Mesh* CreateCube();
 	Mesh* CreateCylinder();
 	Mesh* CreateSphere();
+	Mesh* CreateSphere2();
 
 	Renderer* m_renderer = nullptr;
 	UploadContext* m_uploader = nullptr;
@@ -31,5 +33,6 @@ private:
 	Mesh* m_cubeMesh = nullptr;
 	Mesh* m_cylinderMesh = nullptr;
 	Mesh* m_sphereMesh = nullptr;
+	Mesh* m_sphere2Mesh = nullptr;
 };
 

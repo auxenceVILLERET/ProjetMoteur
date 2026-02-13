@@ -30,6 +30,7 @@ public:
 	bool CreateCube(UploadContext& uploader);
 	bool CreateCylinder(UploadContext& uploader);
 	bool CreateIco(UploadContext& uploader);
+	bool CreateIco2(UploadContext& uploader);
 
 	void FinalizeUpload(); // libère les upload buffers (après EndAndWait)
 

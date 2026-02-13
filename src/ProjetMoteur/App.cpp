@@ -45,16 +45,26 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 
-	CreatePlayer();
-	CreateDummyEntity();
+	CreateSphere();
+	CreateCylinder();
+	m_cube = CreateCube();
 }
 
 void App::Update()
 {
 	UpdateWindow();
 	// Update your application here
-
+	
+	ProceduralRails();
 	HandleInput();
+
+	//Test on entities
+	m_cube->SetRotationX(XMConvertToRadians(.1f));
+	m_cube->SetRotationY(XMConvertToRadians(.1f));
+	m_cube->SetRotationZ(XMConvertToRadians(.1f));
+
+	//cam movement
+	Movement();
 }
 
 void App::Shutdown()
@@ -70,11 +80,6 @@ void App::UpdateWindow()
 
 void App::HandleInput()
 {
-	if(Input::GetKey(Keyboard::A))
-	{
-		std::cout << "A key was pressed!" << std::endl;
-	}
-
 	Input::Update();
 }
 
@@ -101,7 +106,8 @@ void App::CreateCamera()
 	
 }
 
-void App::CreatePlayer()
+// TEST ENTITIES
+void App::CreateSphere()
 {
 	Entity* player = m_ecs->CreateEntity<Entity>();
 	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
@@ -109,10 +115,48 @@ void App::CreatePlayer()
 	player->SetPosition(-2.0f, 0.0f, 5.0f);
 }
 
-void App::CreateDummyEntity()
+void App::CreateCylinder()
 {
 	Entity* dummy = m_ecs->CreateEntity<Entity>();
 	dummy->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	dummy->SetPosition(2.0f, 0.0f, 5.0f);
 	dummy->SetRotationX(XMConvertToRadians(45.0f));
+}
+
+Entity* App::CreateCube() {
+	Entity* cube = m_ecs->CreateEntity<Entity>();
+	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
+	cube->SetPosition(0.0f, 1.0f, 5.0f);
+	cube->SetScale(.5f);
+	return cube;
+}
+///////////////////
+
+// RAIL GENERATION
+void App::CreateRail() 
+{
+	m_rail = m_ecs->CreateEntity<Entity>();
+	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
+	m_rail->SetRotationX(XM_PIDIV2);
+}
+
+void App::ProceduralRails()
+{
+	if (Input::GetKeyDown(Keyboard::SPACE)) {
+		CreateRail();
+		m_rail->SetPosition(0.0f, -1.0f, m_rail->GetScale().y * m_rails.size());
+		m_rails.push_back(m_rail);
+		std::cout << " newrail " << std::endl;
+	}
+}
+///////////////////
+
+// MOVEMENT OF THE CAMERA
+void App::Movement()
+{
+	if (Input::GetKey(Keyboard::Z)) {
+		m_cam->MoveForward(1.0f * m_speedPlayer);
+		// WorldMatrix is not updated
+	}
 }

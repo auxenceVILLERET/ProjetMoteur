@@ -55,7 +55,7 @@ public:
 	void CoutMatrix(); // DEBUG
 
 
-private:
+public:
 	void UpdateBasisFromQuaternion();
 	void UpdateWorldMatrix();
 
