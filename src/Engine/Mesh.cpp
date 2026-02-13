@@ -1,13 +1,9 @@
-#ifndef MESH_CPP_INCLUDED
-#define MESH_CPP_INCLUDED
-
 #include "Mesh.h"
-
 #include "UploadContext.h"
 
 bool Mesh::Initialize(UploadContext& uploader, const Vertex* vertices, uint32_t vertexCount, const uint16_t* indices, uint32_t indexCount)
 {
-	if (vertices == NULL || vertexCount == 0 || indices == NULL|| indexCount == 0)
+	if (vertices == NULL || vertexCount == 0 || indices == NULL || indexCount == 0)
 		return false;
 
 	Release();
@@ -30,6 +26,7 @@ bool Mesh::Initialize(UploadContext& uploader, const Vertex* vertices, uint32_t 
 	m_ibView.SizeInBytes = (UINT)ibBytes;
 	m_ibView.Format = DXGI_FORMAT_R16_UINT;
 
+
 	return true;
 }
 
@@ -41,7 +38,7 @@ bool Mesh::CreateTriangle(UploadContext& uploader)
 		{ { 0.5f, -0.5f, 0.0f }, { 0,1,0,1 } },
 		{ { -0.5f,-0.5f, 0.0f }, { 0,0,1,1 } },
 	};
-	uint16_t indices[] = {0,1,2};
+	uint16_t indices[] = { 0,1,2 };
 
 	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
 }
@@ -55,7 +52,7 @@ bool Mesh::CreateQuad(UploadContext& uploader)
 		{ {  0.5f, -0.5f, 0.0f }, { 1,0,1,1 } },
 		{ { -0.5f, -0.5f, 0.0f }, { 1,1,1,1 } },
 	};
-	uint16_t indices[] = {0,1,2, 0,2,3};
+	uint16_t indices[] = { 0,1,2, 0,2,3 };
 	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
 }
 
@@ -101,50 +98,45 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 	Vertex vertices[] =
 	{
 		// Base (y = 0)
-	   Vertex({ XMFLOAT3(1.0000f, 0.0f,  0.0000f) }),
-	   Vertex({ XMFLOAT3(0.9239f, 0.0f,  0.3827f) }),
-	   Vertex({ XMFLOAT3(0.7071f, 0.0f,  0.7071f) }),
-	   Vertex({ XMFLOAT3(0.3827f, 0.0f,  0.9239f) }),
-	   Vertex({ XMFLOAT3(0.0000f, 0.0f,  1.0000f) }),
-	   Vertex({ XMFLOAT3(-0.3827f, 0.0f,  0.9239f) }),
-	   Vertex({ XMFLOAT3(-0.7071f, 0.0f,  0.7071f) }),
-	   Vertex({ XMFLOAT3(-0.9239f, 0.0f,  0.3827f) }),
-	   Vertex({ XMFLOAT3(-1.0000f, 0.0f,  0.0000f) }),
-	   Vertex({ XMFLOAT3(-0.9239f, 0.0f, -0.3827f) }),
-	   Vertex({ XMFLOAT3(-0.7071f, 0.0f, -0.7071f) }),
-	   Vertex({ XMFLOAT3(-0.3827f, 0.0f, -0.9239f) }),
-	   Vertex({ XMFLOAT3(0.0000f, 0.0f, -1.0000f) }),
-	   Vertex({ XMFLOAT3(0.3827f, 0.0f, -0.9239f) }),
-	   Vertex({ XMFLOAT3(0.7071f, 0.0f, -0.7071f) }),
-	   Vertex({ XMFLOAT3(0.9239f, 0.0f, -0.3827f) }),
+		{ { 1.0000f, 0.0f,  0.0000f }, {1,0,0,1} },
+		{ { 0.9239f, 0.0f,  0.3827f }, {1,0.5f,0,1} },
+		{ { 0.7071f, 0.0f,  0.7071f }, {1,1,0,1} },
+		{ { 0.3827f, 0.0f,  0.9239f }, {0.5f,1,0,1} },
+		{ { 0.0000f, 0.0f,  1.0000f }, {0,1,0,1} },
+		{ { -0.3827f, 0.0f,  0.9239f }, {0,1,0.5f,1} },
+		{ { -0.7071f, 0.0f,  0.7071f }, {0,1,1,1} },
+		{ { -0.9239f, 0.0f,  0.3827f }, {0,0.5f,1,1} },
+		{ { -1.0000f, 0.0f,  0.0000f }, {0,0,1,1} },
+		{ { -0.9239f, 0.0f, -0.3827f }, {0.5f,0,1,1} },
+		{ { -0.7071f, 0.0f, -0.7071f }, {1,0,1,1} },
+		{ { -0.3827f, 0.0f, -0.9239f }, {1,0,0.5f,1} },
+		{ { 0.0000f, 0.0f, -1.0000f }, {1,0,0,1} },
+		{ { 0.3827f, 0.0f, -0.9239f }, {1,0.5f,0,1} },
+		{ { 0.7071f, 0.0f, -0.7071f }, {1,1,0,1} },
+		{ { 0.9239f, 0.0f, -0.3827f }, {0.5f,1,0,1} },
 
-	   // Haut (y = 1)
-	   Vertex({ XMFLOAT3(1.0000f, 1.0f,  0.0000f) }),
-	   Vertex({ XMFLOAT3(0.9239f, 1.0f,  0.3827f) }),
-	   Vertex({ XMFLOAT3(0.7071f, 1.0f,  0.7071f) }),
-	   Vertex({ XMFLOAT3(0.3827f, 1.0f,  0.9239f) }),
-	   Vertex({ XMFLOAT3(0.0000f, 1.0f,  1.0000f) }),
-	   Vertex({ XMFLOAT3(-0.3827f, 1.0f,  0.9239f) }),
-	   Vertex({ XMFLOAT3(-0.7071f, 1.0f,  0.7071f) }),
-	   Vertex({ XMFLOAT3(-0.9239f, 1.0f,  0.3827f) }),
-	   Vertex({ XMFLOAT3(-1.0000f, 1.0f,  0.0000f) }),
-	   Vertex({ XMFLOAT3(-0.9239f, 1.0f, -0.3827f) }),
-	   Vertex({ XMFLOAT3(-0.7071f, 1.0f, -0.7071f) }),
-	   Vertex({ XMFLOAT3(-0.3827f, 1.0f, -0.9239f) }),
-	   Vertex({ XMFLOAT3(0.0000f, 1.0f, -1.0000f) }),
-	   Vertex({ XMFLOAT3(0.3827f, 1.0f, -0.9239f) }),
-	   Vertex({ XMFLOAT3(0.7071f, 1.0f, -0.7071f) }),
-	   Vertex({ XMFLOAT3(0.9239f, 1.0f, -0.3827f) }),
+		// Haut (y = 1)
+		{ { 1.0000f, 1.0f,  0.0000f }, {1,0,0,1} },
+		{ { 0.9239f, 1.0f,  0.3827f }, {1,0.5f,0,1} },
+		{ { 0.7071f, 1.0f,  0.7071f }, {1,1,0,1} },
+		{ { 0.3827f, 1.0f,  0.9239f }, {0.5f,1,0,1} },
+		{ { 0.0000f, 1.0f,  1.0000f }, {0,1,0,1} },
+		{ { -0.3827f, 1.0f,  0.9239f }, {0,1,0.5f,1} },
+		{ { -0.7071f, 1.0f,  0.7071f }, {0,1,1,1} },
+		{ { -0.9239f, 1.0f,  0.3827f }, {0,0.5f,1,1} },
+		{ { -1.0000f, 1.0f,  0.0000f }, {0,0,1,1} },
+		{ { -0.9239f, 1.0f, -0.3827f }, {0.5f,0,1,1} },
+		{ { -0.7071f, 1.0f, -0.7071f }, {1,0,1,1} },
+		{ { -0.3827f, 1.0f, -0.9239f }, {1,0,0.5f,1} },
+		{ { 0.0000f, 1.0f, -1.0000f }, {1,0,0,1} },
+		{ { 0.3827f, 1.0f, -0.9239f }, {1,0.5f,0,1} },
+		{ { 0.7071f, 1.0f, -0.7071f }, {1,1,0,1} },
+		{ { 0.9239f, 1.0f, -0.3827f }, {0.5f,1,0,1} },
 
-	   // top and bottom middle point
-	   Vertex({ XMFLOAT3(0.0f, 0.0f, 0.0f) }),
-	   Vertex({ XMFLOAT3(0.0f, 1.0f, 0.0f) }),
+		// centres
+		{ { 0.0f, 0.0f, 0.0f }, {1,1,1,1} },
+		{ { 0.0f, 1.0f, 0.0f }, {1,1,1,1} },
 	};
-
-	for (size_t i = 0; i < _countof(vertices); i++)
-	{
-		vertices[i].Color.x = ((i * (1.0f / _countof(vertices))));
-	}
 
 	uint16_t indices[] =
 	{
@@ -245,26 +237,21 @@ bool Mesh::CreateIco(UploadContext& uploader)
 
 	Vertex vertices[] =
 	{
-		Vertex({ XMFLOAT3(-a, 0.0f, +b) }),
-		Vertex({ XMFLOAT3(+a, 0.0f, +b) }),
-		Vertex({ XMFLOAT3(-a, 0.0f, -b) }),
-		Vertex({ XMFLOAT3(+a, 0.0f, -b) }),
+		{ { -a, 0.0f, +b }, {1,0,0,1} },
+		{ { +a, 0.0f, +b }, {0,1,0,1} },
+		{ { -a, 0.0f, -b }, {0,0,1,1} },
+		{ { +a, 0.0f, -b }, {1,1,0,1} },
 
-		Vertex({ XMFLOAT3(0.0f, +b, +a) }),
-		Vertex({ XMFLOAT3(0.0f, +b, -a) }),
-		Vertex({ XMFLOAT3(0.0f, -b, +a) }),
-		Vertex({ XMFLOAT3(0.0f, -b, -a) }),
+		{ { 0.0f, +b, +a }, {1,0,1,1} },
+		{ { 0.0f, +b, -a }, {0,1,1,1} },
+		{ { 0.0f, -b, +a }, {1,0.5f,0,1} },
+		{ { 0.0f, -b, -a }, {0.5f,0,1,1} },
 
-		Vertex({ XMFLOAT3(+b,  +a, 0.0f) }),
-		Vertex({ XMFLOAT3(-b,  +a, 0.0f) }),
-		Vertex({ XMFLOAT3(+b,  -a, 0.0f) }),
-		Vertex({ XMFLOAT3(-b,  -a, 0.0f) }),
+		{ { +b, +a, 0.0f }, {1,1,1,1} },
+		{ { -b, +a, 0.0f }, {0.3f,1,0.3f,1} },
+		{ { +b, -a, 0.0f }, {1,0.3f,0.3f,1} },
+		{ { -b, -a, 0.0f }, {0.3f,0.3f,1,1} },
 	};
-
-	for (size_t i = 0; i < _countof(vertices); i++)
-	{
-		vertices[i].Color.x = ((i * (1.0f / _countof(vertices))));
-	}
 
 	uint16_t indices[] =
 	{
@@ -279,57 +266,6 @@ bool Mesh::CreateIco(UploadContext& uploader)
 	return Initialize(uploader, vertices, _countof(vertices), indices, _countof(indices));
 }
 
-bool Mesh::CreateConstantBuffer(ID3D12Device* device)
-{
-	if (device == nullptr) return false;
-
-	// align 256 bytes obligatoire pour CBV en D3D12
-	m_cbSizeAligned = (sizeof(ObjectConstants) + 255) & ~255u;
-
-	D3D12_HEAP_PROPERTIES heapProps = {};
-	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-
-	D3D12_RESOURCE_DESC desc = {};
-	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	desc.Width = m_cbSizeAligned;
-	desc.Height = 1;
-	desc.DepthOrArraySize = 1;
-	desc.MipLevels = 1;
-	desc.SampleDesc.Count = 1;
-	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-	HRESULT hr = device->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&desc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&m_pCb));
-
-	if (FAILED(hr) || m_pCb == nullptr)
-		return false;
-
-	hr = m_pCb->Map(0, nullptr, reinterpret_cast<void**>(&m_pCbMapped));
-	if (FAILED(hr) || m_pCbMapped == nullptr)
-		return false;
-
-	// init à identité
-	ObjectConstants oc{};
-	DirectX::XMStoreFloat4x4(&oc.WorldViewProj, DirectX::XMMatrixIdentity());
-	memcpy(m_pCbMapped, &oc, sizeof(oc));
-
-	return true;
-}
-
-void Mesh::UpdateConstants(const DirectX::XMFLOAT4X4& worldViewProjT)
-{
-	if (m_pCbMapped == nullptr) return;
-
-	ObjectConstants oc{};
-	oc.WorldViewProj = worldViewProjT;
-	memcpy(m_pCbMapped, &oc, sizeof(oc));
-}
-
 void Mesh::Release()
 {
 	SafeRelease(m_pVb);
@@ -337,9 +273,6 @@ void Mesh::Release()
 	SafeRelease(m_pIb);
 	SafeRelease(m_pIbUpload);
 	m_indexCount = 0;
-	SafeRelease(m_pCb);
-	m_pCbMapped = nullptr;
-	m_cbSizeAligned = 0;
 }
 
 void Mesh::FinalizeUpload()
@@ -355,6 +288,5 @@ void Mesh::Draw(ID3D12GraphicsCommandList* cmdList) const
 	cmdList->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
 }
 
-#endif // !MESH_CPP_INCLUDED
 
 

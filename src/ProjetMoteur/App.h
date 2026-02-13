@@ -4,8 +4,10 @@
 
 class Window;
 class Renderer;
+class SceneManager;
 class Entity;
 class ECS;
+class Mesh;
 
 class App
 {
@@ -20,10 +22,13 @@ public:
 	void HandleInput();
 	void CreateCamera();
 
+	void CreatePlayer();
+	void CreateDummyEntity();
 private:
 	Engine& m_engine;
 	Window* m_window;
 	Renderer* m_renderer;
+	SceneManager* m_sceneManager;
 	Entity* m_cam;
 	ECS* m_ecs;
 };

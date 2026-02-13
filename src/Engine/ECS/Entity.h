@@ -49,13 +49,17 @@ public:
 
 	void LookAt(float x, float y, float z); // look at a specific coords
 
-	void SetMatrix(float matrixPos, float value); // manually modifiy a value of the matrix
+	XMFLOAT4X4 GetMatrix() const { return m_matrix; } // get the matrix of the obj
 
 	void CoutRotation(); // DEBUG
 	void CoutMatrix(); // DEBUG
 
+	void SetActive(bool active) { m_isActive = active; } 
+	bool IsActive() const { return m_isActive; }
 
 private:
+	void UpdateBasisFromQuaternion();
+	void UpdateWorldMatrix();
 
 	//position
 	XMFLOAT3 m_position;
@@ -72,6 +76,8 @@ private:
 	XMFLOAT4X4 m_matrix;
 	uint32_t m_Id = 0;
 	std::vector<Component*> m_Components;
+
+	bool m_isActive = true;
 };
 
 #include "Entity.inl"

@@ -9,9 +9,10 @@
 #include "Pipeline.h"
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
-#include "Mesh.h"
+#include "Engine/Mesh.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
+#include "Engine/ECS/Components/MeshRendererComponent.h"
 
 inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT offsetInDescriptors, UINT descriptorSize)
 {
@@ -86,16 +87,13 @@ bool Renderer::Initialize(Window* window, Entity* camera)
     // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
     //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
     m_pPipeline = new Pipeline();
-    if (m_pPipeline->InitializePipeline(m_pDxContext->GetDevice()) == false) return false;
-	if (CreateTestMesh() == false) return false;
+    if (CreateTestPipeline() == false) return false;
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
-    for (auto& m : m_vMeshes) m.Release();
-        m_vMeshes.clear();
 
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
@@ -145,22 +143,15 @@ void Renderer::Update()
         if (m_pWindow->IsResizing())
         {
             m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
-			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
+			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(
+                static_cast<float>(m_pWindow->GetWidth()),
+                static_cast<float>(m_pWindow->GetHeight())
+            );
         }
     }
-
-	angle += 0.05f;
-
-	XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
-	XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
-	XMMATRIX world = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-
-    XMFLOAT4X4 viewProj;
-    XMStoreFloat4x4(&viewProj, XMMatrixTranspose(world * view * proj));
-    m_vMeshes[0].UpdateConstants(viewProj);
 }
 
-void Renderer::Render()
+void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 {
     if (m_pDxContext == nullptr || m_pSwapChainTargets == nullptr) return;
     if (m_pWindow && m_pWindow->IsMinimized()) return;
@@ -172,39 +163,46 @@ void Renderer::Render()
 
     cmd->SetPipelineState(m_pPipeline->GetPSO());
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
-
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    for (const auto& mesh : m_vMeshes)
+
+    for (MeshRendererComponent* m : vObj)
     {
-        // root param 0 = CBV(b0)
-        cmd->SetGraphicsRootConstantBufferView(0, mesh.GetCbAddress());
-        mesh.Draw(cmd);
+        DrawObj(*m);
     }
 
     EndFrame();
 }
 
-bool Renderer::CreateTestMesh()
+void Renderer::DrawObj(MeshRendererComponent& obj)
 {
-    m_vMeshes.resize(1);
+    // root param 0 = CBV(b0)
+    ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+    cmd->SetGraphicsRootConstantBufferView(0, obj.GetCbAddress());
+    obj.GetMesh()->Draw(cmd);
+}
 
-    // Upload VB/IB en batch
-    m_pUploadContext->Begin();
+bool Renderer::CreateTestPipeline()
+{
+    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
-    if (!m_vMeshes[0].CreateCube(*m_pUploadContext)) return false;
-   
-    m_pUploadContext->EndAndWait();
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+    };
 
-    // plus besoin des upload buffers
-    for (auto& m : m_vMeshes) m.FinalizeUpload();
-
-    // Creer CB par mesh
-    for (auto& m : m_vMeshes)
-        if (!m.CreateConstantBuffer(m_pDxContext->GetDevice()))
-            return false;
-
-	return true;
+    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
+    return m_pPipeline->InitializeGraphics(
+        m_pDxContext->GetDevice(),
+        L"../../src/Render/Simple.hlsl", "VSMain",
+        L"../../src/Render/Simple.hlsl", "PSMain",
+        layout,
+        DXGI_FORMAT_R8G8B8A8_UNORM,
+        DXGI_FORMAT_D24_UNORM_S8_UINT,
+        true
+    );
 }
 
 void Renderer::BeginFrame()
@@ -288,4 +286,15 @@ void Renderer::EndFrame()
     m_pSwapChainTargets->UpdateCurrentBackBuffer();
 }
 
+XMFLOAT4X4 Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
+{
+    XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
+    XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
+    XMMATRIX wvp = world * view * proj;
+    wvp = XMMatrixTranspose(wvp);
+
+    XMFLOAT4X4 wvpFloat4x4;
+    XMStoreFloat4x4(&wvpFloat4x4, wvp);
+    return wvpFloat4x4;
+}
 #endif // !RENDERER_CPP_INCLUDED
