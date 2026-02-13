@@ -19,7 +19,7 @@ private:
 	void LoadScene();
 
 	std::string m_nextSceneName;
-	Scene* m_currentScene;
+	Scene* m_currentScene = nullptr;
 
 	std::unordered_map<std::string, Scene*> m_scenes;
 

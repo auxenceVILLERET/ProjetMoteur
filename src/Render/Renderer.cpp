@@ -286,14 +286,14 @@ void Renderer::EndFrame()
     m_pSwapChainTargets->UpdateCurrentBackBuffer();
 }
 
-XMFLOAT4X4& Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
+XMFLOAT4X4 Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
 {
     XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
     XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
     XMMATRIX wvp = world * view * proj;
     wvp = XMMatrixTranspose(wvp);
 
-	XMFLOAT4X4 wvpFloat4x4;
+    XMFLOAT4X4 wvpFloat4x4;
     XMStoreFloat4x4(&wvpFloat4x4, wvp);
     return wvpFloat4x4;
 }

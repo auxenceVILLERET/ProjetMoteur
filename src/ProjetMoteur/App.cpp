@@ -26,6 +26,8 @@ App::App(Engine& engine) : m_engine(engine)
 	m_renderer = nullptr;
 	m_window = nullptr;
 	m_sceneManager = nullptr;
+	m_cam = nullptr;
+	m_ecs = nullptr;
 }
 
 void App::Initialize()

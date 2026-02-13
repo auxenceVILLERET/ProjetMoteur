@@ -16,7 +16,7 @@ public:
 
 
 protected:
-	Renderer* m_renderer; 
-	ECS* m_ecs;
+	Renderer* m_renderer = nullptr; 
+	ECS* m_ecs = nullptr;
 };
 
