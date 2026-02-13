@@ -5,12 +5,13 @@
 
 class Entity;
 class Engine;
+class Camera;
 
 class GameScene : public Scene
 {
 public:
 	~GameScene() = default;
-	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine) override;
+	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
 	void OnEnter() override; 
 	void OnExit() override;
 	void Update(float dt) override;
@@ -25,6 +26,7 @@ private:
 
 	Entity* m_rail;
 	std::vector<Entity*> m_rails;
+	Entity* m_cam;
 
 	float m_speedPlayer = 0.001f;
 
@@ -38,5 +40,8 @@ private:
 	//RAILS
 	void CreateRail();
 	void ProceduralRails();
+
+	//LOOK WITH MOUSE
+	void MoveCamera();
 };
 

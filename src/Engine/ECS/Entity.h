@@ -52,6 +52,7 @@ public:
 	void SetRotationZ(float angle); // set the rotation
 
 	void LookAt(float x, float y, float z); // look at a specific coords
+	void OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius);
 
 	XMFLOAT4X4 GetMatrix() const { return m_matrix; } // get the matrix of the obj
 

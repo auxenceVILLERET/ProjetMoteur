@@ -9,13 +9,14 @@
 
 using namespace core;
 
-void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine)
+void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
 {
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_engine = engine;
+	m_cam = camera;
 
-	//TEST OBJECTS
+	// -[TEST OBJECTS]- //
 	m_cylinder = CreateCylinder();
 	m_cube = CreateCube();
 	m_sphere = CreateSphere();
@@ -48,12 +49,15 @@ void GameScene::Update(float dt)
 
 	m_sphere->SetPositionY(0.5 + cos(m_engine->GetTotalTime()) * 0.5);
 
-	m_moon->SetPositionY(m_cylinder->GetPosition().y + .75f);
+	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * m_engine->GetDeltaTime()), 1);
+
+	m_cylinder->SetRotationY(XMConvertToRadians(45.f * m_engine->GetDeltaTime()));
 
 	ProceduralRails();
+	MoveCamera();
 }
 
-// TEST ENTITIES
+// -[TEST ENTITIES]- //
 Entity* GameScene::CreateSphere()
 {
 	Entity* sphere = m_ecs->CreateEntity<Entity>();
@@ -68,7 +72,6 @@ Entity* GameScene::CreateCylinder()
 	Entity* cylinder = m_ecs->CreateEntity<Entity>();
 	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
-	cylinder->SetRotationX(XMConvertToRadians(45.0f));
 	cylinder->SetScale(.3f);
 	m_entities.push_back(cylinder);
 	return cylinder;
@@ -91,9 +94,8 @@ Entity* GameScene::CreateMoon() {
 	m_entities.push_back(moon);
 	return moon;
 }
-///////////////////
 
-// RAIL GENERATION
+// -[RAIL GENERATION]- //
 void GameScene::CreateRail()
 {
 	m_rail = m_ecs->CreateEntity<Entity>();
@@ -111,4 +113,11 @@ void GameScene::ProceduralRails()
 		m_rails.push_back(m_rail);
 	}
 }
-///////////////////
+
+// -[CAMERA]- //
+void GameScene::MoveCamera()
+{
+	std::vector<float> delta = Input::GetMouseDelta();
+	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
+	//m_cam->SetRotationX(XMConvertToRadians(delta[1]));
+}

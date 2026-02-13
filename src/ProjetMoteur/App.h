@@ -34,6 +34,6 @@ private:
 	Entity* m_cam;
 	ECS* m_ecs;
 
-	float m_speedPlayer = 0.1f;
+	float m_speedPlayer = 2.0f;
 };
 

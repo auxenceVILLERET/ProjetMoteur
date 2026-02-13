@@ -56,8 +56,8 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 	
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine);
-	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine);
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
 	
 	m_sceneManager->ChangeScene("Menu");
 }
@@ -123,9 +123,8 @@ void App::CreateCamera()
 // MOVEMENT OF THE CAMERA
 void App::Movement()
 {
-	if (Input::GetKey(Keyboard::Z)) {
-		m_cam->MoveForward((1.0f * m_speedPlayer)); // WorldMatrix is not updated
-		m_cam->CoutMatrix();
-
+	if (Input::GetKey(Keyboard::Z)) 
+	{
+		m_cam->MoveForward((1.0f * m_speedPlayer * m_engine.GetDeltaTime()));
 	}
 }

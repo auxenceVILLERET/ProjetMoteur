@@ -17,7 +17,6 @@ public:
 	Mesh* GetCube();
 	Mesh* GetCylinder();
 	Mesh* GetSphere();
-	Mesh* GetSphere2();
 
 	void FinalizeUpload();
 

@@ -5,7 +5,7 @@
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
 
-void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine)
+void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
 {
 	m_engine = engine;
 	m_ecs = ecs;

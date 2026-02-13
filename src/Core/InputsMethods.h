@@ -17,9 +17,12 @@ namespace core
         float GetMouseX();
         float GetMouseY();
         std::vector<float> GetMousePosition();
+        std::vector<float> GetMouseDelta();
 
         void SetMousePosition(float x, float y);
 
         void Update();
+
+        static std::vector<float> m_mousePosLastFrame = { .0f,.0f };
     }
 }
