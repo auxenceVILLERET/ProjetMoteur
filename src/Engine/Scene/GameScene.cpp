@@ -91,8 +91,8 @@ Entity* GameScene::CreateCube() {
 	cube->SetPosition(0.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
 	cube->AddComponent<StateMachineComponent>();
-	cube->GetComponent<StateMachineComponent>()->SetStateMachine(cube, m_ecs);
 	StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
+	smc->SetStateMachine(cube, m_ecs);
 	smc->GetStateMachine()->SetOwner(cube);
 	smc->GetStateMachine()->ChangeState(new EnemyIdleState());
 
