@@ -30,6 +30,24 @@ void Entity::SetPosition(float x, float y, float z)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetPositionX(float x)
+{
+	m_position.x = x;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetPositionY(float y)
+{
+	m_position.y = y;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetPositionZ(float z)
+{
+	m_position.z = z;
+	UpdateWorldMatrix();
+}
+
 void Entity::MoveForward(float dist)
 {
 	m_position.x += m_forward.x * dist;

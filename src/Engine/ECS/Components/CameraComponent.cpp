@@ -23,10 +23,10 @@ void CameraComponent::SetWindowSize(float width, float height)
 void CameraComponent::Update()
 {
 	XMMATRIX view = XMLoadFloat4x4(&m_viewMatrix);
+
 	XMStoreFloat4x4(&m_viewMatrix, XMMatrixInverse(nullptr, view));
 	view *= XMLoadFloat4x4(&m_projectionMatrix);
 	XMStoreFloat4x4(&m_projectionMatrix, view);
-
 	m_frustum->FromViewProjection(m_projectionMatrix);
 }
 

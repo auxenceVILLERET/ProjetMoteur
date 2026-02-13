@@ -11,6 +11,7 @@
 #include "Render/UploadContext.h" 
 #include "Mesh.h"
 #include "Engine/ECS/Systems/RenderSystem.h"
+#include "GameTimer.h"
 
 using namespace core;
 
@@ -19,10 +20,12 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetInitCallback(std::bind(&App::Initialize, this));
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
+
+	
 }
 
 void App::Initialize()
-{
+{	
 	// Initialize your application here
 	m_window = new Window(800, 600, L"test");
 	m_ecs = &m_engine.GetECS();
@@ -45,9 +48,10 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 
-	CreateSphere();
-	CreateCylinder();
+	m_cylinder = CreateCylinder();
 	m_cube = CreateCube();
+	m_sphere = CreateSphere();
+	m_moon = CreateMoon();
 }
 
 void App::Update()
@@ -59,10 +63,13 @@ void App::Update()
 	HandleInput();
 
 	//Test on entities
-	m_cube->SetRotationX(XMConvertToRadians(.1f));
-	m_cube->SetRotationY(XMConvertToRadians(.1f));
-	m_cube->SetRotationZ(XMConvertToRadians(.1f));
+	m_cube->SetRotationX(XMConvertToRadians(.01f));
+	m_cube->SetRotationY(XMConvertToRadians(.05f));
+	m_cube->SetRotationZ(XMConvertToRadians(.05f));
 
+	m_sphere->SetPositionY( 0.5 + cos(m_engine.GetTotalTime()) * 0.5 );
+	m_moon->SetPositionY(m_cylinder->GetPosition().y + .75f);
+	
 	//cam movement
 	Movement();
 }
@@ -107,20 +114,22 @@ void App::CreateCamera()
 }
 
 // TEST ENTITIES
-void App::CreateSphere()
+Entity* App::CreateSphere()
 {
-	Entity* player = m_ecs->CreateEntity<Entity>();
-	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-
-	player->SetPosition(-2.0f, 0.0f, 5.0f);
+	Entity* sphere = m_ecs->CreateEntity<Entity>();
+	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	sphere->SetPosition(-2.0f, 0.0f, 5.0f);
+	return sphere;
 }
 
-void App::CreateCylinder()
+Entity* App::CreateCylinder()
 {
-	Entity* dummy = m_ecs->CreateEntity<Entity>();
-	dummy->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	dummy->SetPosition(2.0f, 0.0f, 5.0f);
-	dummy->SetRotationX(XMConvertToRadians(45.0f));
+	Entity* cylinder = m_ecs->CreateEntity<Entity>();
+	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
+	cylinder->SetRotationX(XMConvertToRadians(45.0f));
+	cylinder->SetScale(.3f);
+	return cylinder;
 }
 
 Entity* App::CreateCube() {
@@ -129,6 +138,14 @@ Entity* App::CreateCube() {
 	cube->SetPosition(0.0f, 1.0f, 5.0f);
 	cube->SetScale(.5f);
 	return cube;
+}
+
+Entity* App::CreateMoon() {
+	Entity* moon = m_ecs->CreateEntity<Entity>();
+	moon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	moon->SetPosition(m_cylinder->GetPosition().x, m_cylinder->GetPosition().y, m_cylinder->GetPosition().z);
+	moon->SetScale(.1f);
+	return moon;
 }
 ///////////////////
 
@@ -147,7 +164,6 @@ void App::ProceduralRails()
 		CreateRail();
 		m_rail->SetPosition(0.0f, -1.0f, m_rail->GetScale().y * m_rails.size());
 		m_rails.push_back(m_rail);
-		std::cout << " newrail " << std::endl;
 	}
 }
 ///////////////////
@@ -156,7 +172,8 @@ void App::ProceduralRails()
 void App::Movement()
 {
 	if (Input::GetKey(Keyboard::Z)) {
-		m_cam->MoveForward(1.0f * m_speedPlayer);
-		// WorldMatrix is not updated
+		m_cam->MoveForward((1.0f * m_speedPlayer)); // WorldMatrix is not updated
+		m_cam->CoutMatrix();
+
 	}
 }

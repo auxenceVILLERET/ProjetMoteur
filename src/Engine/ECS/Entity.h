@@ -25,11 +25,15 @@ public:
 
 	//POSITION
 	void SetPosition(float x, float y, float z); // set XYZ
+	void SetPositionX(float x); // set XYZ
+	void SetPositionY(float y); // set Y
+	void SetPositionZ(float z); // set Z
+
 	void MoveForward(float dist); // move along the "forward" of the obj
 	void MoveUp(float dist); // move along the "up" of the obj
 	void MoveRight(float dist); // move along the "right" of the obj
-	XMFLOAT3 GetPosition() const { return m_position; } // get the position of the obj
 
+	XMFLOAT3 GetPosition() const { return m_position; } // get the position of the obj
 
 	void CoutPosition(); // DEBUG
 
