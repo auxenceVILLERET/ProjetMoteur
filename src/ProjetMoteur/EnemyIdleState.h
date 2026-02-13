@@ -3,6 +3,7 @@
 
 class StateMachine;
 class ECS;
+class Entity;
 
 class EnemyIdleState : public State
 {

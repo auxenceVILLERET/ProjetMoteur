@@ -7,6 +7,9 @@
 #include "Engine/ECS/Components/PlayerComponent.h"
 #include "Engine/Engine.h"
 #include "Core/InputsMethods.h"
+#include "Engine/ECS/Components/StateMachineComponent.h"
+#include "ProjetMoteur/EnemyIdleState.h"
+#include "ProjetMoteur/EnemyChaseState.h"
 
 using namespace core;
 
@@ -47,11 +50,16 @@ void GameScene::Update(float dt)
 	m_cube->SetRotationY(XMConvertToRadians(.05f));
 	m_cube->SetRotationZ(XMConvertToRadians(.05f));
 
-	m_sphere->SetPositionY(0.5 + cos(m_engine->GetTotalTime()) * 0.5);
 
 	m_moon->SetPositionY(m_cylinder->GetPosition().y + .75f);
 
 	ProceduralRails();
+
+	if(Input::GetKeyDown(Keyboard::UP_ARROW))
+	{
+		m_sphere->MoveForward(.5f);
+	}
+
 }
 
 // TEST ENTITIES
@@ -59,7 +67,9 @@ Entity* GameScene::CreateSphere()
 {
 	Entity* sphere = m_ecs->CreateEntity<Entity>();
 	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	sphere->SetPosition(-2.0f, 0.0f, 5.0f);
+	sphere->SetPosition(0.0f, 0.0f, 0.0f);
+	sphere->AddComponent<PlayerComponent>();
+
 	m_entities.push_back(sphere);
 	return sphere;
 }
@@ -78,8 +88,14 @@ Entity* GameScene::CreateCylinder()
 Entity* GameScene::CreateCube() {
 	Entity* cube = m_ecs->CreateEntity<Entity>();
 	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
-	cube->SetPosition(0.0f, 1.0f, 5.0f);
+	cube->SetPosition(0.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
+	cube->AddComponent<StateMachineComponent>();
+	cube->GetComponent<StateMachineComponent>()->SetStateMachine(cube, m_ecs);
+	StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
+	smc->GetStateMachine()->SetOwner(cube);
+	smc->GetStateMachine()->ChangeState(new EnemyIdleState());
+
 	m_entities.push_back(cube);
 	return cube;
 }
