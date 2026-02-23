@@ -86,6 +86,9 @@ void App::UpdateWindow()
 {
 	m_window->ProcessMessages();
 	m_renderer->Update();
+
+	if(m_window->IsOpen() == false)
+		m_engine.Shutdown();
 }
 
 void App::HandleInput()
