@@ -10,6 +10,8 @@
 #include "Engine/ECS/Components/StateMachineComponent.h"
 #include "ProjetMoteur/EnemyIdleState.h"
 #include "ProjetMoteur/EnemyChaseState.h"
+#include "Engine/ECS/Components/RigidBodyComponent.h"
+#include "Engine/Projectile.h"
 
 using namespace core;
 
@@ -24,6 +26,9 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine)
 	m_cube = CreateCube();
 	m_sphere = CreateSphere();
 	m_moon = CreateMoon();
+
+	m_projectile = new Projectile();
+	m_projectile->Initialize(0.1f, Shape::SPHERE, 2.0f, 3.0f, m_engine, m_ecs, m_renderer);
 }
 
 void GameScene::OnEnter()
@@ -45,6 +50,7 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
+	m_projectile->UpdateDistance();
 	//Test on entities
 	m_cube->SetRotationX(XMConvertToRadians(.01f));
 	m_cube->SetRotationY(XMConvertToRadians(.05f));
@@ -57,9 +63,16 @@ void GameScene::Update(float dt)
 
 	if(Input::GetKeyDown(Keyboard::UP_ARROW))
 	{
-		m_sphere->MoveForward(.5f);
+		m_sphere->MoveForward(0.5f);
 	}
+	if(Input::GetMouseButtonDown(Mouse::LEFT))
+	{
+		Entity* temp = m_projectile->GetAvaibleProjectile();
+		if (temp == nullptr) return; // No projectile available in the pool
 
+		temp->SetPosition(m_sphere->GetPosition().x, m_sphere->GetPosition().y, m_sphere->GetPosition().z);
+		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
+	}
 }
 
 // TEST ENTITIES
@@ -88,13 +101,13 @@ Entity* GameScene::CreateCylinder()
 Entity* GameScene::CreateCube() {
 	Entity* cube = m_ecs->CreateEntity<Entity>();
 	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
-	cube->SetPosition(0.0f, 0.0f, 10.0f);
+	cube->SetPosition(2.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
-	cube->AddComponent<StateMachineComponent>();
-	StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
+	//cube->AddComponent<StateMachineComponent>();
+	/*StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
 	smc->SetStateMachine(cube, m_ecs);
 	smc->GetStateMachine()->SetOwner(cube);
-	smc->GetStateMachine()->ChangeState(new EnemyIdleState());
+	smc->GetStateMachine()->ChangeState(new EnemyIdleState());*/
 
 	m_entities.push_back(cube);
 	return cube;

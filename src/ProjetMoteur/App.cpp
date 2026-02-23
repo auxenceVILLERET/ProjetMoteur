@@ -15,6 +15,7 @@
 #include "Engine/Scene/GameScene.h"
 #include "Engine/Scene/MenuScene.h"
 #include "Engine/ECS/Systems/StateMachineSystem.h"
+#include "Engine/ECS/Systems/PhysicSystem.h"
 
 using namespace core;
 
@@ -63,6 +64,7 @@ void App::Initialize()
 	m_sceneManager->ChangeScene("Menu");
 
 	m_ecs->AddSystem<StateMachineSystem>();
+	m_ecs->AddSystem<PhysicSystem>();
 }
 
 void App::Update()

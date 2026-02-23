@@ -5,6 +5,9 @@
 
 class Entity;
 class Engine;
+class Projectile;
+class Renderer;
+
 
 class GameScene : public Scene
 {
@@ -28,6 +31,7 @@ private:
 
 	float m_speedPlayer = 0.001f;
 
+	Projectile* m_projectile;
 
 	//TEST ENTITIES
 	Entity* CreateSphere();

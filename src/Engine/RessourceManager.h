@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include "Engine/Utils/Shape.h"
 
 class Mesh;
 class Renderer;
@@ -17,7 +18,7 @@ public:
 	Mesh* GetCube();
 	Mesh* GetCylinder();
 	Mesh* GetSphere();
-	Mesh* GetSphere2();
+	Mesh* GetMeshByShape(Shape type);
 
 	void FinalizeUpload();
 

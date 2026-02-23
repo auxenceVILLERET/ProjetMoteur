@@ -39,6 +39,21 @@ Mesh* RessourceManager::GetSphere()
 	return m_sphereMesh;
 }
 
+Mesh* RessourceManager::GetMeshByShape(Shape shape)
+{
+	switch (shape)
+	{
+	case CUBE:
+		return GetCube();
+	case CYLINDER:
+		return GetCylinder();
+	case SPHERE:
+		return GetSphere();
+	default:
+		return nullptr;
+	}
+}
+
 Mesh* RessourceManager::CreateCube()
 {
 	Mesh* mesh = new Mesh();
