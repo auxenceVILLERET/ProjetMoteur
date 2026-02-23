@@ -33,7 +33,7 @@ void Engine::Run()
 
 void Engine::Shutdown()
 {
-
+	m_isRunning = false;
 }
 
 float Engine::GetDeltaTime()

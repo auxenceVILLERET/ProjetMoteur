@@ -96,6 +96,7 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
     case WM_CLOSE:
         PostQuitMessage(0);
+		m_isOpen = false;
         return 0;
     case WM_SIZE:
         RECT rc;

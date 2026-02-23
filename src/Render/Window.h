@@ -28,6 +28,7 @@ public:
 	void SetResizing(bool resizing) { m_resizing = resizing; }
 	void SetFullscreen(bool fullscreen) { m_fullscreen = fullscreen; }
 
+	bool IsOpen() const { return m_isOpen; }
 private:
     static LRESULT CALLBACK StaticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
     LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -43,6 +44,7 @@ private:
     bool m_maximized = false;   // is the application maximized?
     bool m_resizing = false;    // are the resize bars being dragged?
     bool m_fullscreen = false;  // fullscreen enabled
+	bool m_isOpen = true;      // is the application running?
 };
 
 #endif // !ENGINE_WINDOW_H
