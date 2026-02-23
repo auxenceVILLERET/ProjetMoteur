@@ -46,16 +46,15 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
-	dt = m_engine->GetDeltaTime();
-
+	deltaTime = dt;
 	//Test on entities
 	m_cube->SetRotationX(XMConvertToRadians(.01f));
 	m_cube->SetRotationLocalY(XMConvertToRadians(.05f));
 	m_cube->SetRotationZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * dt), 1);	
-	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * dt));
-	m_cylinder->SetRotationY(XMConvertToRadians(45.f * dt));
+	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * deltaTime), 1);
+	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * deltaTime));
+	m_cylinder->SetRotationY(XMConvertToRadians(45.f * deltaTime));
 
 	ProceduralRails();
 	MoveCamera();
@@ -153,9 +152,10 @@ void GameScene::MoveCamera()
 	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
 	m_cam->SetRotationLocalX(XMConvertToRadians(delta[1]));
 
+
 	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
 	{
-		m_cam->MoveForward((1.0f * m_speedPlayer * dt));
+		m_cam->MoveForward((1.0f * m_speedPlayer * deltaTime));
 	}
 }
 

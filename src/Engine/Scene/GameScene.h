@@ -17,7 +17,7 @@ public:
 	void Update(float dt) override;
 
 private:
-	float dt; // deltaTime
+	float deltaTime; // deltaTime
 
 	std::vector<Entity*> m_entities;
 
