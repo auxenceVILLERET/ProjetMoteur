@@ -34,7 +34,7 @@ App::App(Engine& engine) : m_engine(engine)
 void App::Initialize()
 {	
 	// Initialize your application here
-	m_window = new Window(800, 600, L"test");
+	m_window = new Window(800, 600, L"LAB ENGINE GAMEPLAY");
 	m_ecs = &m_engine.GetECS();
 	CreateCamera();
 	m_renderer = new Renderer();
@@ -67,12 +67,13 @@ void App::Initialize()
 
 void App::Update()
 {
+	//update your application here
+
 	UpdateWindow();
 	m_sceneManager->Update(m_engine.GetDeltaTime());
 
-	// Update your application here
 	HandleInput();
-	//cam movement
+	//camera/player movement
 	Movement();
 }
 
@@ -96,6 +97,9 @@ void App::HandleInput()
 	if (Input::GetKey(Keyboard::E))
 	{
 		m_sceneManager->ChangeScene("Menu");
+	}
+	if (Input::GetKey(Keyboard::ESC)) {
+		//shutdown
 	}
 	
 	Input::Update();
@@ -126,7 +130,7 @@ void App::CreateCamera()
 // MOVEMENT OF THE CAMERA
 void App::Movement()
 {
-	if (Input::GetKey(Keyboard::Z)) 
+	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
 	{
 		m_cam->MoveForward((1.0f * m_speedPlayer * m_engine.GetDeltaTime()));
 	}

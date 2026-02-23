@@ -61,7 +61,7 @@ namespace core
 			if (m_mousePosLastFrame == current || m_mousePosLastFrame.size() < 1) { m_mousePosLastFrame = current; return delta; }
 			delta = { current[0] - m_mousePosLastFrame[0] , current[1] - m_mousePosLastFrame[1] };
 			m_mousePosLastFrame = current;
-			std::cout << delta[0] << " " << delta[1] << std::endl;
+
 			return delta;
 		}
 

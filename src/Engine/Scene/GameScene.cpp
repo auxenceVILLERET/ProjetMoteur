@@ -20,6 +20,8 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_engine = engine;
 	m_cam = camera;
 
+
+
 	// -[TEST OBJECTS]- //
 	m_cylinder = CreateCylinder();
 	m_cube = CreateCube();
@@ -55,6 +57,7 @@ void GameScene::Update(float dt)
 	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * m_engine->GetDeltaTime()), 1);
 
 	m_cylinder->SetRotationY(XMConvertToRadians(45.f * m_engine->GetDeltaTime()));
+	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * m_engine->GetDeltaTime()));
 
 	ProceduralRails();
 	MoveCamera();
@@ -119,6 +122,9 @@ void GameScene::CreateRail()
 	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
 	m_rail->SetRotationX(XM_PIDIV2);
+
+	m_rail->SetRotationY(XMConvertToRadians(rand()));
+
 	m_entities.push_back(m_rail);
 }
 
@@ -126,8 +132,13 @@ void GameScene::ProceduralRails()
 {
 	if (Input::GetKeyDown(Keyboard::SPACE)) {
 		CreateRail();
+		if (m_rails.size() > 0) {
+			m_rail->Translate(1, 0, 0);
+		}
+		
 		m_rail->SetPosition(0.0f, -1.0f, m_rail->GetScale().y * m_rails.size());
 		m_rails.push_back(m_rail);
+		m_rails.back()->CoutRotation();
 	}
 }
 
@@ -135,6 +146,9 @@ void GameScene::ProceduralRails()
 void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
-	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
+
+	// Kinda Cheating, can cause problem if player is being rotated;
+
+	m_cam->SetRotationLocalY(XMConvertToRadians(delta[0]));
 	m_cam->SetRotationX(XMConvertToRadians(delta[1]));
 }

@@ -72,6 +72,13 @@ void Entity::MoveRight(float dist)
 	UpdateWorldMatrix();
 }
 
+void Entity::Translate(float x, float y, float z)
+{
+	m_position.x += x;
+	m_position.y += y;
+	m_position.z += z;
+}
+
 void Entity::CoutPosition()
 {
 	std::cout << "Position : [" << m_position.x << "][" << m_position.y << "][" << m_position.z << "]\n" << std::endl;
@@ -123,6 +130,15 @@ void Entity::SetRotationX(float angle)
     UpdateWorldMatrix();
 }
 
+void Entity::SetRotationLocalX(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
 void Entity::SetRotationY(float angle)
 {
 	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
@@ -132,11 +148,29 @@ void Entity::SetRotationY(float angle)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetRotationLocalY(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
 void Entity::SetRotationZ(float angle)
 {
 	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), angle);
 	q = XMQuaternionNormalize(XMQuaternionMultiply(q, dq));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::SetRotationLocalZ(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
 	XMStoreFloat4(&m_quaternion, q);
 	UpdateWorldMatrix();
 }

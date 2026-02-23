@@ -33,6 +33,8 @@ public:
 	void MoveUp(float dist); // move along the "up" of the obj
 	void MoveRight(float dist); // move along the "right" of the obj
 
+	void Translate(float x, float y, float z);
+
 	XMFLOAT3 GetPosition() const { return m_position; } // get the position of the obj
 
 	void CoutPosition(); // DEBUG
@@ -47,9 +49,12 @@ public:
 	void CoutScale(); // DEBUG
 
 	//ROTATION
-	void SetRotationX(float angle); // set the rotation
-	void SetRotationY(float angle); // set the rotation
-	void SetRotationZ(float angle); // set the rotation
+	void SetRotationX(float angle); // set the rotation in world
+	void SetRotationLocalX(float angle); // set the rotation locally
+	void SetRotationY(float angle); // set the rotation in world
+	void SetRotationLocalY(float angle); // set the rotation locally
+	void SetRotationZ(float angle); // set the rotation in world
+	void SetRotationLocalZ(float angle); // set the rotation locally
 
 	void LookAt(float x, float y, float z); // look at a specific coords
 	void OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius);
