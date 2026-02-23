@@ -22,7 +22,7 @@ struct VertexOut
 VertexOut VSMain(VertexIn v)
 {
     VertexOut o;
-    o.pos = mul(gWorldViewProj, float4(v.pos, 1.0));
+    o.pos = mul(float4(v.pos, 1.0), gWorldViewProj);
     o.uv = v.uv;
     return o;
 }

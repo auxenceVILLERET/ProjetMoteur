@@ -68,42 +68,47 @@ bool Mesh::CreateQuad(UploadContext& uploader)
 
 bool Mesh::CreateCube(UploadContext& uploader)
 {
-	// 24 vertices (4 par face) pour avoir des UV corrects par face.
-	const float s = 1.0f;
+	const float s = 0.5f;
 
 	std::vector<Vertex> vertices;
 	vertices.reserve(24);
 
-	auto addFace = [&](XMFLOAT3 a, XMFLOAT3 b, XMFLOAT3 c, XMFLOAT3 d)
-	{
-		vertices.push_back(Vertex{ a, {0.0f, 0.0f} });
-		vertices.push_back(Vertex{ b, {1.0f, 0.0f} });
-		vertices.push_back(Vertex{ c, {1.0f, 1.0f} });
-		vertices.push_back(Vertex{ d, {0.0f, 1.0f} });
-	};
-
-	// +Z (front)
-	addFace({-s, +s, +s}, {+s, +s, +s}, {+s, -s, +s}, {-s, -s, +s});
-	// -Z (back)
-	addFace({+s, +s, -s}, {-s, +s, -s}, {-s, -s, -s}, {+s, -s, -s});
-	// +X (right)
-	addFace({+s, +s, +s}, {+s, +s, -s}, {+s, -s, -s}, {+s, -s, +s});
-	// -X (left)
-	addFace({-s, +s, -s}, {-s, +s, +s}, {-s, -s, +s}, {-s, -s, -s});
-	// +Y (top)
-	addFace({-s, +s, -s}, {+s, +s, -s}, {+s, +s, +s}, {-s, +s, +s});
-	// -Y (bottom)
-	addFace({-s, -s, +s}, {+s, -s, +s}, {+s, -s, -s}, {-s, -s, -s});
-
 	std::vector<uint32_t> indices;
 	indices.reserve(36);
 
-	for (uint32_t face = 0; face < 6; ++face)
-	{
-		uint32_t base = face * 4;
-		indices.push_back(base + 0); indices.push_back(base + 1); indices.push_back(base + 2);
-		indices.push_back(base + 0); indices.push_back(base + 2); indices.push_back(base + 3);
-	}
+	auto addFace = [&](XMFLOAT3 a, XMFLOAT3 b, XMFLOAT3 c, XMFLOAT3 d)
+		{
+			// 4 vertices par face
+			uint32_t base = (uint32_t)vertices.size();
+
+			// UV cohérents (V inversé souvent pratique selon chargement)
+			vertices.push_back(Vertex{ a, {0.0f, 1.0f} }); // bas-gauche
+			vertices.push_back(Vertex{ b, {0.0f, 0.0f} }); // haut-gauche
+			vertices.push_back(Vertex{ c, {1.0f, 0.0f} }); // haut-droit
+			vertices.push_back(Vertex{ d, {1.0f, 1.0f} }); // bas-droit
+
+			// 2 triangles
+			indices.push_back(base + 0); indices.push_back(base + 1); indices.push_back(base + 2);
+			indices.push_back(base + 0); indices.push_back(base + 2); indices.push_back(base + 3);
+		};
+
+	// BACK  (-Z)
+	addFace({ -s, -s, -s }, { -s, +s, -s }, { +s, +s, -s }, { +s, -s, -s });
+
+	// RIGHT (+X)
+	addFace({ +s, -s, -s }, { +s, +s, -s }, { +s, +s, +s }, { +s, -s, +s });
+
+	// FRONT (+Z)
+	addFace({ +s, -s, +s }, { +s, +s, +s }, { -s, +s, +s }, { -s, -s, +s });
+
+	// LEFT  (-X)
+	addFace({ -s, -s, +s }, { -s, +s, +s }, { -s, +s, -s }, { -s, -s, -s });
+
+	// TOP   (+Y)
+	addFace({ -s, +s, -s }, { -s, +s, +s }, { +s, +s, +s }, { +s, +s, -s });
+
+	// BOTTOM(-Y)
+	addFace({ -s, -s, +s }, { -s, -s, -s }, { +s, -s, -s }, { +s, -s, +s });
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }

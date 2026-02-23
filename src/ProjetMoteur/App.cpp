@@ -56,7 +56,6 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 	
-
 	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
 	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
 

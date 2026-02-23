@@ -23,6 +23,5 @@ private:
 	ID3D12Resource* m_pCb = nullptr;
 	UINT8* m_pCbMapped = nullptr;
 	UINT m_cbSizeAligned = 0;
-
 };
 

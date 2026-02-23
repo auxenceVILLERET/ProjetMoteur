@@ -166,10 +166,13 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     cmd->SetPipelineState(m_pPipeline->GetPSO());
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
-    ID3D12DescriptorHeap* heaps[] = { m_pDescriptorHeapManager->GetHeap() };
-    cmd->SetDescriptorHeaps(1, heaps);
-    // root param 1 = SRV table (t0)
-    cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
+
+    ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
+    cmd->SetDescriptorHeaps(1, &heaps);
+    if (m_textureSrv.IsValid())
+    {
+        cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
+	}
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
@@ -204,10 +207,19 @@ bool Renderer::LoadWIC_RGBA8(const wchar_t* filename, std::vector<uint8_t>& outR
     if (FAILED(hr)) return false;
 
     hr = factory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder);
-    if (FAILED(hr)) { factory->Release(); return false; }
+    if (FAILED(hr)) 
+    { 
+        factory->Release();
+        return false;
+    }
 
     hr = decoder->GetFrame(0, &frame);
-    if (FAILED(hr)) { decoder->Release(); factory->Release(); return false; }
+    if (FAILED(hr)) 
+    { 
+        decoder->Release(); 
+        factory->Release(); 
+        return false;
+    }
 
     UINT w = 0, h = 0;
     frame->GetSize(&w, &h);
@@ -215,11 +227,24 @@ bool Renderer::LoadWIC_RGBA8(const wchar_t* filename, std::vector<uint8_t>& outR
     outH = (uint32_t)h;
 
     hr = factory->CreateFormatConverter(&converter);
-    if (FAILED(hr)) { frame->Release(); decoder->Release(); factory->Release(); return false; }
+    if (FAILED(hr)) 
+    { 
+        frame->Release(); 
+        decoder->Release(); 
+        factory->Release(); 
+        return false; 
+    }
 
     hr = converter->Initialize(frame, GUID_WICPixelFormat32bppRGBA,
         WICBitmapDitherTypeNone, nullptr, 0.0, WICBitmapPaletteTypeCustom);
-    if (FAILED(hr)) { converter->Release(); frame->Release(); decoder->Release(); factory->Release(); return false; }
+    if (FAILED(hr))
+    { 
+        converter->Release();
+        frame->Release();
+        decoder->Release(); 
+        factory->Release(); 
+        return false; 
+    }
 
     outRGBA.resize((size_t)outW * (size_t)outH * 4);
     hr = converter->CopyPixels(nullptr, outW * 4, (UINT)outRGBA.size(), outRGBA.data());
@@ -236,12 +261,13 @@ bool Renderer::CreateTestTexture()
 {
     ID3D12Device* device = m_pDxContext->GetDevice();
     UploadContext* up = m_pUploadContext;
-    if (!device || !up) return false;
+
+    if (device == nullptr || up == nullptr) return false;
 
     // 1) Load image (RGBA8)
     std::vector<uint8_t> rgba;
     uint32_t w = 0, h = 0;
-    if (LoadWIC_RGBA8(L"texture.png", rgba, w, h) == false)
+    if (LoadWIC_RGBA8(L"../../res/testTexture.png", rgba, w, h) == false)
         return false;
 
     // 2) Create default texture
@@ -274,7 +300,8 @@ bool Renderer::CreateTestTexture()
         nullptr,
         IID_PPV_ARGS(&m_texture)
     );
-    if (FAILED(hr)) return false;
+    if (FAILED(hr))
+        return false;
 
     // 3) Create upload buffer for texture (footprints)
     UINT64 uploadSize = 0;
@@ -307,13 +334,16 @@ bool Renderer::CreateTestTexture()
         nullptr,
         IID_PPV_ARGS(&m_textureUpload)
     );
-    if (FAILED(hr)) return false;
+    if (FAILED(hr)) 
+        return false;
 
     // 4) Copy pixels into upload buffer respecting RowPitch
     uint8_t* mapped = nullptr;
     D3D12_RANGE r = { 0, 0 };
     hr = m_textureUpload->Map(0, &r, (void**)&mapped);
-    if (FAILED(hr)) return false;
+
+    if (FAILED(hr)) 
+        return false;
 
     const uint8_t* src = rgba.data();
     uint8_t* dst = mapped + footprint.Offset;
@@ -346,9 +376,9 @@ bool Renderer::CreateTestTexture()
     up->EndAndWait();
 
     // 6) Create SRV in your shader-visible CBV/SRV/UAV heap
-    if (!m_textureSrv.IsValid())
+    if (m_textureSrv.IsValid() == false)
         m_textureSrv = m_pDescriptorHeapManager->Allocate();
-    if (!m_textureSrv.IsValid())
+    if (m_textureSrv.IsValid() == false)
         return false;
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
@@ -359,11 +389,10 @@ bool Renderer::CreateTestTexture()
 
     device->CreateShaderResourceView(m_texture, &srv, m_textureSrv.cpu);
 
-    // (Option) tu peux libérer l’upload après EndAndWait
     SafeRelease(m_textureUpload);
 
     return true;
-}
+} 
 
 void Renderer::BeginFrame()
 {
@@ -457,4 +486,5 @@ XMFLOAT4X4 Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
     XMStoreFloat4x4(&wvpFloat4x4, wvp);
     return wvpFloat4x4;
 }
+
 #endif // !RENDERER_CPP_INCLUDED

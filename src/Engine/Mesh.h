@@ -30,7 +30,6 @@ public:
 	bool CreateQuad(UploadContext& uploader);
 	bool CreateCube(UploadContext& uploader);
 	bool CreateCylinder(UploadContext& uploader);
-	bool CreateIco(UploadContext& uploader);
 	bool CreateSphere(UploadContext& uploader);
 
 	void FinalizeUpload();

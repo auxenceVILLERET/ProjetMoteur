@@ -40,7 +40,7 @@ bool DescriptorHeapManager::Initialize(ID3D12Device* device,
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.NumDescriptors = numDescriptors;
     desc.Type = heapType;
-    if (shaderVisible && heapType == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER)
+    if (shaderVisible && heapType == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV)
     {
         // Sampler heaps must be shader-visible, so ignore the flag if set incorrectly.
         desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
