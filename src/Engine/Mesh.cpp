@@ -113,7 +113,6 @@ bool Mesh::CreateCube(UploadContext& uploader)
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
-
 bool Mesh::CreateCylinder(UploadContext& uploader)
 {
 	// Cylindre simple (16 slices)
@@ -167,7 +166,6 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
-
 
 bool Mesh::CreateSphere(UploadContext& uploader)
 {

@@ -39,7 +39,6 @@ public:
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
-	static bool LoadWIC_RGBA8(const wchar_t* filename, std::vector<uint8_t>& outRGBA, uint32_t& outW, uint32_t& outH);
 	bool CreateTestTexture();
 
 	Window* GetWindow() const { return m_pWindow; }
@@ -65,8 +64,6 @@ private:
 	Pipeline* m_pPipeline = nullptr;
 	DescriptorHeapManager* m_pDescriptorHeapManager = nullptr;
 	UploadContext* m_pUploadContext = nullptr;
-
-	float angle = 0.f;
 };
 
 #endif
