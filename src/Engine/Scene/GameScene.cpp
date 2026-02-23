@@ -20,8 +20,6 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_engine = engine;
 	m_cam = camera;
 
-
-
 	// -[TEST OBJECTS]- //
 	m_cylinder = CreateCylinder();
 	m_cube = CreateCube();
@@ -48,16 +46,16 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
+	dt = m_engine->GetDeltaTime();
+
 	//Test on entities
 	m_cube->SetRotationX(XMConvertToRadians(.01f));
-	m_cube->SetRotationY(XMConvertToRadians(.05f));
+	m_cube->SetRotationLocalY(XMConvertToRadians(.05f));
 	m_cube->SetRotationZ(XMConvertToRadians(.05f));
 
-
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * m_engine->GetDeltaTime()), 1);
-
-	m_cylinder->SetRotationY(XMConvertToRadians(45.f * m_engine->GetDeltaTime()));
-	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * m_engine->GetDeltaTime()));
+	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * dt), 1);	
+	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * dt));
+	m_cylinder->SetRotationY(XMConvertToRadians(45.f * dt));
 
 	ProceduralRails();
 	MoveCamera();
@@ -66,7 +64,6 @@ void GameScene::Update(float dt)
 	{
 		m_sphere->MoveForward(.5f);
 	}
-
 }
 
 // -[TEST ENTITIES]- //
@@ -122,9 +119,6 @@ void GameScene::CreateRail()
 	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
 	m_rail->SetRotationX(XM_PIDIV2);
-
-	m_rail->SetRotationY(XMConvertToRadians(rand()));
-
 	m_entities.push_back(m_rail);
 }
 
@@ -132,14 +126,21 @@ void GameScene::ProceduralRails()
 {
 	if (Input::GetKeyDown(Keyboard::SPACE)) {
 		CreateRail();
-		if (m_rails.size() > 0) {
-			m_rail->Translate(1, 0, 0);
-		}
-		
-		m_rail->SetPosition(0.0f, -1.0f, m_rail->GetScale().y * m_rails.size());
+		float nextPos = 0 ;
+		if (m_rails.size() > 0) nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
+
+		m_rail->SetPosition(0.0f, -1.0f, nextPos);
 		m_rails.push_back(m_rail);
-		m_rails.back()->CoutRotation();
+
+		if (m_rails.size() > m_maxRails) {
+			DeleteRails();
+		}
 	}
+}
+
+void GameScene::DeleteRails() {
+	m_rails.front()->~Entity();
+	m_rails.erase(m_rails.begin(), m_rails.begin() + 1);
 }
 
 // -[CAMERA]- //
@@ -147,8 +148,23 @@ void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
 
-	// Kinda Cheating, can cause problem if player is being rotated;
+	// Kinda Cheating, can cause problem when player is being rotated;
 
-	m_cam->SetRotationLocalY(XMConvertToRadians(delta[0]));
-	m_cam->SetRotationX(XMConvertToRadians(delta[1]));
+	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
+	m_cam->SetRotationLocalX(XMConvertToRadians(delta[1]));
+
+	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
+	{
+		m_cam->MoveForward((1.0f * m_speedPlayer * dt));
+	}
 }
+
+// -[SHOOTING]- //
+void GameScene::ShootBullet() {
+	// Shot bullets here
+	if (Input::GetMouseButton(Mouse::LEFT)) {
+		
+	}
+}
+
+

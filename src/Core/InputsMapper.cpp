@@ -88,6 +88,8 @@ namespace core
         case VK_LWIN: return Keyboard::LWINDOW;
         case VK_RWIN: return Keyboard::RWINDOW;
 
+        case VK_OEM_102: return Keyboard::OPERATOR_ARROW;
+
             // ===== Numpad =====
         case VK_NUMPAD0: return Keyboard::NUMPAD0;
         case VK_NUMPAD1: return Keyboard::NUMPAD1;

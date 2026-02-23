@@ -41,6 +41,7 @@ struct Keyboard {
         LSHIFT, RSHIFT,
         LALT, RALT,
         LWINDOW, RWINDOW,
+        OPERATOR_ARROW,
 
         UP, LEFT, DOWN, RIGHT,
 

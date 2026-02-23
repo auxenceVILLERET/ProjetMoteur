@@ -73,8 +73,6 @@ void App::Update()
 	m_sceneManager->Update(m_engine.GetDeltaTime());
 
 	HandleInput();
-	//camera/player movement
-	Movement();
 }
 
 void App::Shutdown()
@@ -130,11 +128,4 @@ void App::CreateCamera()
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
 }
 
-// MOVEMENT OF THE CAMERA
-void App::Movement()
-{
-	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
-	{
-		m_cam->MoveForward((1.0f * m_speedPlayer * m_engine.GetDeltaTime()));
-	}
-}
+

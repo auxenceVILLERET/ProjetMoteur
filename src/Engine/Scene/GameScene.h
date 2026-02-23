@@ -17,6 +17,8 @@ public:
 	void Update(float dt) override;
 
 private:
+	float dt; // deltaTime
+
 	std::vector<Entity*> m_entities;
 
 	Entity* m_cube;
@@ -28,7 +30,11 @@ private:
 	std::vector<Entity*> m_rails;
 	Entity* m_cam;
 
-	float m_speedPlayer = 0.001f;
+	float m_maxRails = 5;
+
+	Entity* m_bullet;
+
+	float m_speedPlayer = 1.f;
 
 
 	//TEST ENTITIES
@@ -40,8 +46,10 @@ private:
 	//RAILS
 	void CreateRail();
 	void ProceduralRails();
+	void DeleteRails();
 
 	//LOOK WITH MOUSE
 	void MoveCamera();
+	void ShootBullet();
 };
 
