@@ -41,7 +41,15 @@ struct Keyboard {
         LSHIFT, RSHIFT,
         LALT, RALT,
         LWINDOW, RWINDOW,
+        APPS,
+        
         OPERATOR_ARROW,
+        PARENTHESE, PLUS,
+        ACCENT, DOLLAR,
+        PERCENT, STAR,
+        COMMA, PERIOD, SLASH, EXCLAMATION,
+
+        
 
         UP, LEFT, DOWN, RIGHT,
 

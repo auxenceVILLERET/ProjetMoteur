@@ -36,7 +36,8 @@ namespace core
         case 'Y': return Keyboard::Y;
         case 'Z': return Keyboard::Z;
 
-            // ===== Chiffres =====
+        // ===== Chiffres =====
+
         case '0': return Keyboard::_0;
         case '1': return Keyboard::_1;
         case '2': return Keyboard::_2;
@@ -76,19 +77,29 @@ namespace core
         case VK_TAB:    return Keyboard::TAB;
 
             // ===== Modifiers =====
-        case VK_LCONTROL: return Keyboard::LCTRL;
-        case VK_RCONTROL: return Keyboard::RCTRL;
-
-        case VK_LSHIFT: return Keyboard::LSHIFT;
-        case VK_RSHIFT: return Keyboard::RSHIFT;
-
-        case VK_LMENU: return Keyboard::LALT;
-        case VK_RMENU: return Keyboard::RALT;
+        case VK_CONTROL: return Keyboard::LCTRL; // Right RCTRL,RSHIFT and RALT dont seem to work,
+        case VK_SHIFT: return Keyboard::LSHIFT; //  So I return the same for both
+        case VK_MENU: return Keyboard::LALT;
 
         case VK_LWIN: return Keyboard::LWINDOW;
-        case VK_RWIN: return Keyboard::RWINDOW;
+        case VK_RWIN: return Keyboard::RWINDOW; // not on AZERTY
 
-        case VK_OEM_102: return Keyboard::OPERATOR_ARROW;
+        case VK_APPS: return Keyboard::APPS;
+
+            // ===== OEM CASES =====
+        case VK_OEM_102: return Keyboard::OPERATOR_ARROW; // " >/< " key on AZERTY keyboard
+        case VK_OEM_7: return Keyboard::SUP2;
+        case VK_OEM_PLUS: return Keyboard::PLUS;
+        case VK_OEM_4: return Keyboard::PARENTHESE;
+        case VK_OEM_6: return Keyboard::ACCENT;
+        case VK_OEM_1: return Keyboard::DOLLAR;
+        case VK_OEM_3: return Keyboard::PERCENT;
+        case VK_OEM_5: return Keyboard::STAR;
+        case VK_OEM_COMMA: return Keyboard::COMMA;
+        case VK_OEM_PERIOD: return Keyboard::PERIOD;
+        case VK_OEM_2: return Keyboard::SLASH;
+        case VK_OEM_8: return Keyboard::EXCLAMATION;
+
 
             // ===== Numpad =====
         case VK_NUMPAD0: return Keyboard::NUMPAD0;
@@ -111,6 +122,7 @@ namespace core
         case VK_NUMLOCK: return Keyboard::NUMLOCK;
         case VK_CAPITAL: return Keyboard::CAPSLOCK;
         case VK_SCROLL:  return Keyboard::SCROLL_LOCK;
+        case VK_PAUSE:   return Keyboard::PAUSE;
 
         case VK_INSERT: return Keyboard::INSERT;
         case VK_DELETE: return Keyboard::DELETE_;
