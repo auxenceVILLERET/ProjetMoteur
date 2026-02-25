@@ -49,15 +49,23 @@ public:
 	void CoutScale(); // DEBUG
 
 	//ROTATION
-	void SetRotationX(float angle); // set the rotation in world
-	void SetRotationLocalX(float angle); // set the rotation locally
-	void SetRotationY(float angle); // set the rotation in world
-	void SetRotationLocalY(float angle); // set the rotation locally
-	void SetRotationZ(float angle); // set the rotation in world
-	void SetRotationLocalZ(float angle); // set the rotation locally
+	void RotateX(float angle); // Rotate in world
+	void RotateLocalX(float angle); // Rotate locally
+	void RotateY(float angle); // Rotate in world
+	void RotateLocalY(float angle); // Rotate locally
+	void RotateZ(float angle); // Rotate in world
+	void RotateLocalZ(float angle); // Rotate locally
+
+	void SetRotation(XMFLOAT4 quaternion);
+	void SetRotationX(float angle);
+	void SetRotationY(float angle);
+	void SetRotationZ(float angle);
+
 
 	void LookAt(float x, float y, float z); // look at a specific coords
 	void OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius);
+
+	XMFLOAT4 GetRotation();
 
 	XMFLOAT4X4 GetMatrix() const { return m_matrix; } // get the matrix of the obj
 

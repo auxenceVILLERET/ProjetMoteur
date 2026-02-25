@@ -11,6 +11,8 @@
 #include "ProjetMoteur/EnemyIdleState.h"
 #include "ProjetMoteur/EnemyChaseState.h"
 
+#include <iostream>
+
 using namespace core;
 
 void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
@@ -49,17 +51,18 @@ void GameScene::Update(float dt)
 {
 	deltaTime = dt;
 	//Test on entities
-	m_cube->SetRotationX(XMConvertToRadians(.01f));
-	m_cube->SetRotationLocalY(XMConvertToRadians(.05f));
-	m_cube->SetRotationZ(XMConvertToRadians(.05f));
+	m_cube->RotateX(XMConvertToRadians(.01f));
+	m_cube->RotateLocalY(XMConvertToRadians(.05f));
+	m_cube->RotateZ(XMConvertToRadians(.05f));
 
 	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * deltaTime), 1);
-	m_moon->SetRotationLocalY(XMConvertToRadians(60.f * deltaTime));
-	m_cylinder->SetRotationY(XMConvertToRadians(45.f * deltaTime));
+	m_moon->RotateLocalY(XMConvertToRadians(60.f * deltaTime));
+	m_cylinder->RotateY(XMConvertToRadians(45.f * deltaTime));
 
 	ProceduralRails();
 	MoveCamera();
-	ShootBullet();
+	
+	Debug();
 
 	if(Input::GetKeyDown(Keyboard::UP_ARROW))
 	{
@@ -131,7 +134,7 @@ void GameScene::CreateRail()
 	m_rail = m_ecs->CreateEntity<Entity>();
 	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
-	m_rail->SetRotationX(XM_PIDIV2);
+	m_rail->RotateX(XM_PIDIV2);
 	m_entities.push_back(m_rail);
 }
 
@@ -163,9 +166,8 @@ void GameScene::MoveCamera()
 
 	// Kinda Cheating, can cause problem when player is being rotated;
 
-	m_cam->SetRotationY(XMConvertToRadians(delta[0]));
-	m_cam->SetRotationLocalX(XMConvertToRadians(delta[1]));
-
+	m_cam->RotateY(XMConvertToRadians(delta[0]));
+	m_cam->RotateLocalX(XMConvertToRadians(delta[1]));
 
 	// WASD / ZQSD movement
 	float directionForward = 0;
@@ -193,12 +195,10 @@ void GameScene::MoveCamera()
 	m_cam->MoveForward((directionForward * m_speedPlayer * deltaTime));
 }
 
-// -[SHOOTING]- //
-void GameScene::ShootBullet() {
-	// Shot bullets here
+// -[DEBUG]- //
+void GameScene::Debug() {
 	if (Input::GetMouseButton(Mouse::LEFT)) {
-			m_cam->CoutRotation();
-			m_cam->CoutMatrix();
+
 	}
 }
 

@@ -29,6 +29,8 @@ private:
 
 	Entity* m_rail;
 	std::vector<Entity*> m_rails;
+
+	Entity* m_body;
 	Entity* m_cam;
 
 	float m_maxRails = 5;
@@ -52,6 +54,6 @@ private:
 
 	//LOOK WITH MOUSE
 	void MoveCamera();
-	void ShootBullet();
+	void Debug();
 };
 
