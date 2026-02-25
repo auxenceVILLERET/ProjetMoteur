@@ -20,7 +20,8 @@ public:
 	Entity* GetAvaibleProjectile();
 	void CreatePulling(int poolSize);
 
-	void UpdateDistance();
+	void UpdateDistance(float dt);
+	void Update(float dt);
 
 protected:
 	std::vector<Entity*> m_projectiles;

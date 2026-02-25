@@ -12,6 +12,7 @@
 #include "ProjetMoteur/EnemyChaseState.h"
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/Projectile.h"
+#include "Engine/ECS/Components/ColliderComponent.h"
 
 using namespace core;
 
@@ -50,7 +51,7 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
-	m_projectile->UpdateDistance();
+	m_projectile->Update(dt);
 	//Test on entities
 	m_cube->SetRotationX(XMConvertToRadians(.01f));
 	m_cube->SetRotationY(XMConvertToRadians(.05f));
@@ -70,7 +71,7 @@ void GameScene::Update(float dt)
 		Entity* temp = m_projectile->GetAvaibleProjectile();
 		if (temp == nullptr) return; // No projectile available in the pool
 
-		temp->SetPosition(m_sphere->GetPosition().x, m_sphere->GetPosition().y, m_sphere->GetPosition().z);
+		temp->SetPosition(0.0f,0.0f,0.0f);
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
 	}
 }
@@ -82,6 +83,7 @@ Entity* GameScene::CreateSphere()
 	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
 	sphere->SetPosition(0.0f, 0.0f, 0.0f);
 	sphere->AddComponent<PlayerComponent>();
+	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 
 	m_entities.push_back(sphere);
 	return sphere;

@@ -7,11 +7,17 @@ void ColliderSystem::Update(ECS& ecs, float deltaTime)
 {
 	for (Entity* entity : ecs.GetEntities())
 	{
+		if(entity == nullptr || !entity->IsActive())
+			continue;
+
 		ColliderComponent* collider = entity->GetComponent<ColliderComponent>();
 		if (collider == nullptr)
 			continue;
 		for (Entity* otherEntity : ecs.GetEntities())
 		{
+			if(otherEntity == nullptr || !otherEntity->IsActive())
+				continue;
+
 			if (entity == otherEntity)
 				continue;
 
@@ -22,10 +28,14 @@ void ColliderSystem::Update(ECS& ecs, float deltaTime)
 			if(CheckSphereCollision(entity, otherEntity))
 			{
 				// Handle sphere collision
+				collider->TriggerCollisionEnter(entity, otherEntity);
+				otherCollider->TriggerCollisionEnter(otherEntity, entity);
 			}
 			else if(CheckBoxCollision(entity, otherEntity))
 			{
 				// Handle box collision
+				collider->TriggerCollisionEnter(entity, otherEntity);
+				otherCollider->TriggerCollisionEnter(otherEntity, entity);
 			}
 
 		}

@@ -16,6 +16,7 @@
 #include "Engine/Scene/MenuScene.h"
 #include "Engine/ECS/Systems/StateMachineSystem.h"
 #include "Engine/ECS/Systems/PhysicSystem.h"
+#include "Engine/ECS/Systems/ColliderSystem.h"
 
 using namespace core;
 
@@ -65,6 +66,7 @@ void App::Initialize()
 
 	m_ecs->AddSystem<StateMachineSystem>();
 	m_ecs->AddSystem<PhysicSystem>();
+	m_ecs->AddSystem<ColliderSystem>();
 }
 
 void App::Update()

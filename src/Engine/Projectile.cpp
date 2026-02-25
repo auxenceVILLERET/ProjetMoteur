@@ -7,6 +7,8 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/ECS/Components/ProjectileComponent.h"
+#include "Engine/ECS/Components/ColliderComponent.h"
+#include "Engine/ECS/Components/PlayerComponent.h"
 
 void Projectile::Initialize(float size, Shape shape, int poolSize,float distanceMax,Engine* engine, ECS* ecs, Renderer* renderer)
 {
@@ -44,14 +46,14 @@ void Projectile::CreatePulling(int poolSize)
 		projectile->AddComponent<RigidBodyComponent>()->SetUseGravity(false);
 		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);
 		projectile->GetComponent<ProjectileComponent>()->SetDistanceTraveled(0.0f);
+		projectile->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+
 		m_projectiles.push_back(projectile);
 	}
 }
 
-void Projectile::UpdateDistance()
+void Projectile::UpdateDistance(float dt)
 {
-	float dt = m_engine->GetDeltaTime();
-
 	for (Entity* projectile : m_projectiles)
 	{
 		if (projectile->IsActive())
@@ -68,6 +70,27 @@ void Projectile::UpdateDistance()
 				projectile->SetActive(false);
 				projectileComp->SetDistanceTraveled(0.0f);
 			}
+		}
+	}
+}
+
+void Projectile::Update(float dt)
+{
+	UpdateDistance(dt);
+
+	for(Entity* projectile : m_projectiles)
+	{
+		if (projectile->IsActive())
+		{
+			ColliderComponent* collider = projectile->GetComponent<ColliderComponent>();
+			collider->OnCollisionEnter = [this](Entity* self, Entity* other)
+			{
+				if(other->GetComponent<PlayerComponent>())
+				{
+					other->SetActive(false);
+					self->SetActive(false);
+				}
+			};
 		}
 	}
 }
