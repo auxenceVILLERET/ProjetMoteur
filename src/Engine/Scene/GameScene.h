@@ -28,6 +28,7 @@ private:
 	Entity* m_sphere;
 	Entity* m_cylinder;
 	Entity* m_moon;
+	Entity* m_moonMoon;
 	Entity* m_floor;
 
 	Entity* m_rail;
@@ -49,6 +50,7 @@ private:
 	Entity* CreateCylinder();
 	Entity* CreateCube();
 	Entity* CreateMoon();
+	Entity* CreateMoonMoon();
 	Entity* CreateFloor();
 
 	//RAILS

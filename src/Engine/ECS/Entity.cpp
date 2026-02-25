@@ -30,6 +30,14 @@ void Entity::SetPosition(float x, float y, float z)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetPosition(XMFLOAT3 vector)
+{
+	m_position.x = vector.x;
+	m_position.y = vector.y;
+	m_position.z = vector.z;
+	UpdateWorldMatrix();
+}
+
 void Entity::SetPositionX(float x)
 {
 	m_position.x = x;
@@ -101,13 +109,13 @@ void Entity::Scale(float scale)
 	UpdateWorldMatrix();
 }
 
-void Entity::SetScaleVector(XMFLOAT3 vectorScale)
+void Entity::SetScale(XMFLOAT3 vectorScale)
 {
 	m_scale = vectorScale;
 	UpdateWorldMatrix();
 }
 
-void Entity::ScaleVector(XMFLOAT3 vectorScale)
+void Entity::Scale(XMFLOAT3 vectorScale)
 {
 	m_scale.x *= vectorScale.x;
 	m_scale.y *= vectorScale.y;

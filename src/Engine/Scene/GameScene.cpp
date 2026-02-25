@@ -30,6 +30,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_cube = CreateCube();
 	m_sphere = CreateSphere();
 	m_moon = CreateMoon();
+	m_moonMoon = CreateMoonMoon();
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
@@ -57,14 +58,18 @@ void GameScene::Update(float dt)
 {
 	m_deltaTime = dt;
 
-	m_projectile->Update(deltaTime);
+	m_projectile->Update(m_deltaTime);
 	//Test on entities
 	m_cube->RotateX(XMConvertToRadians(.01f));
 	m_cube->RotateLocalY(XMConvertToRadians(.05f));
 	m_cube->RotateZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * m_deltaTime), 1);
+	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(10.f * m_deltaTime), 1);
 	m_moon->RotateLocalY(XMConvertToRadians(60.f * m_deltaTime));
+
+	m_moonMoon->OrbitAround(m_moon->GetPosition(), m_moon->m_up, XMConvertToRadians(100.f * m_deltaTime), .25);
+	m_moonMoon->RotateLocalY(XMConvertToRadians(90.f * m_deltaTime));
+
 	m_cylinder->RotateY(XMConvertToRadians(45.f * m_deltaTime));
 
 	ProceduralRails();
@@ -114,11 +119,6 @@ Entity* GameScene::CreateCube() {
 	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
 	cube->SetPosition(2.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
-	//cube->AddComponent<StateMachineComponent>();
-	/*StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
-	smc->SetStateMachine(cube, m_ecs);
-	smc->GetStateMachine()->SetOwner(cube);
-	smc->GetStateMachine()->ChangeState(new EnemyIdleState());*/
 
 	m_entities.push_back(cube);
 	return cube;
@@ -133,24 +133,31 @@ Entity* GameScene::CreateMoon() {
 	return moon;
 }
 
+Entity* GameScene::CreateMoonMoon() {
+	Entity* moonMoon = m_ecs->CreateEntity<Entity>();
+	moonMoon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	moonMoon->SetPosition(m_moon->GetPosition().x, m_moon->GetPosition().y, m_moon->GetPosition().z);
+	moonMoon->SetScale(.05f);
+	m_entities.push_back(moonMoon);
+	return moonMoon;
+}
+
 Entity* GameScene::CreateFloor()
 {
 	Entity* floor = m_ecs->CreateEntity<Entity>();
 	floor->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
 	floor->SetPosition(0,-2.5f,0);
-	floor->SetScaleVector({ 50,0.1f,50 });
+	floor->SetScale({ 50,0.1f,50 });
 	m_entities.push_back(floor);
 	return floor;
 }
-
-
 
 // -[RAIL GENERATION]- //
 void GameScene::CreateRail()
 {
 	m_rail = m_ecs->CreateEntity<Entity>();
 	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
+	m_rail->SetScale({ .1f, 3.0f, .1f });
 	m_rail->RotateX(XM_PIDIV2);
 	m_entities.push_back(m_rail);
 }
@@ -160,7 +167,13 @@ void GameScene::ProceduralRails()
 	if (Input::GetKeyDown(Keyboard::SPACE)) {
 		CreateRail();
 		float nextPos = 0 ;
-		if (m_rails.size() > 0) nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
+		
+			if (m_rails.size() > 0)
+			{ 
+				nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
+				m_cam->SetPosition({ m_rails.back()->GetPosition() });
+				m_cam->Translate(0, 1, 0);
+			}
 
 		m_rail->SetPosition(0.0f, -1.0f, nextPos);
 		m_rails.push_back(m_rail);
