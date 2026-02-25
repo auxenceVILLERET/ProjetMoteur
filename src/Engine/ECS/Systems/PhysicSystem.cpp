@@ -15,7 +15,7 @@ void PhysicSystem::Update(ECS& ecs, float deltaTime)
 
 			if(rigidBody->IsUsingGravity())
 			{
-				vel.y -= rigidBody->GetMass() * deltaTime; 
+				vel.y -= 10.0f * deltaTime; 
 			}
 			pos.x += vel.x * deltaTime;
 			pos.y += vel.y * deltaTime;

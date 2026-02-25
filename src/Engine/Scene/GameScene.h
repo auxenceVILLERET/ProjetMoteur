@@ -6,6 +6,9 @@
 class Entity;
 class Engine;
 class Camera;
+class Projectile;
+class Renderer;
+
 
 class GameScene : public Scene
 {
@@ -17,7 +20,7 @@ public:
 	void Update(float dt) override;
 
 private:
-	float deltaTime; // deltaTime
+	float m_deltaTime; // deltaTime
 
 	std::vector<Entity*> m_entities;
 
@@ -39,6 +42,7 @@ private:
 
 	float m_speedPlayer = 1.f;
 
+	Projectile* m_projectile;
 
 	//TEST ENTITIES
 	Entity* CreateSphere();
