@@ -19,15 +19,8 @@ struct VertexOut
     float2 uv : TEXCOORD0;
 };
 
-VertexOut VSMain(VertexIn v)
-{
-    VertexOut o;
-    o.pos = mul(float4(v.pos, 1.0), gWorldViewProj);
-    o.uv = v.uv;
-    return o;
-}
-
 float4 PSMain(VertexOut i) : SV_TARGET
 {
-    return gTex0.Sample(gSamp0, i.uv);
+    float4 tex = gTex0.Sample(gSamp0, i.uv);
+    return tex;
 }

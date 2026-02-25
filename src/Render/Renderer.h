@@ -36,6 +36,7 @@ public:
 
 	void Update();
 	void Render(std::vector<MeshRendererComponent*> vMesh);
+	void DrawUI(ID3D12GraphicsCommandList* cmdList);
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 

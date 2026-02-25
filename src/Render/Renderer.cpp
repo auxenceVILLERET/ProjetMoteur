@@ -7,7 +7,6 @@
 #include "DxContext.h"
 #include "SwapChainTargets.h"
 #include "Pipeline.h"
-#include "DescriptorHeapManager.h"
 #include "UploadContext.h"
 #include "Mesh.h"
 #include "Texture2D.h"
@@ -168,15 +167,29 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
+
     cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
-    {
         DrawObj(*m);
-    }
+
+    DrawUI(cmd);
 
     EndFrame();
+}
+
+void Renderer::DrawUI(ID3D12GraphicsCommandList* cmd)
+{
+    // PSO/Root UI
+    cmd->SetPipelineState(m_pPipeline->GetUIPSO());
+    cmd->SetGraphicsRootSignature(m_pPipeline->GetUIRootSignature());
+
+    // Heap SRV : idéalement le même heap global que tu utilises déjà
+    ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
+    cmd->SetDescriptorHeaps(1, &heaps);
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Renderer::DrawObj(MeshRendererComponent& obj)
