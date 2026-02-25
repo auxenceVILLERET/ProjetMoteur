@@ -3,15 +3,15 @@
 
 #include "Renderer.h"
 
-
-
 #include "Window.h"
 #include "DxContext.h"
 #include "SwapChainTargets.h"
 #include "Pipeline.h"
 #include "DescriptorHeapManager.h"
 #include "UploadContext.h"
-#include "Engine/Mesh.h"
+#include "Mesh.h"
+#include "Texture2D.h"
+#include "RenderResourceManager.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
@@ -85,8 +85,8 @@ bool Renderer::Initialize(Window* window, Entity* camera)
     if (m_pPipeline->InitializePipeline(m_pDxContext->GetDevice()) == false)
 		return false;
 
-    if (CreateTestTexture() == false)
-		return false;
+	//6) Render resource manager
+    RenderResourceManager::Instance().Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager);
 
     return true;
 }
@@ -168,10 +168,7 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
-    if (m_textureSrv.IsValid())
-    {
-        cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
-	}
+    cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
@@ -184,10 +181,28 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
 void Renderer::DrawObj(MeshRendererComponent& obj)
 {
-    // root param 0 = CBV(b0)
     ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+
+    // Root param 0 = CBV(b0)
     cmd->SetGraphicsRootConstantBufferView(0, obj.GetCbAddress());
-    obj.GetMesh()->Draw(cmd);
+
+    // Resolve GPU resources
+    Mesh* mesh = RenderResourceManager::Instance().ResolveMesh(obj.GetMeshHandle());
+    if (mesh == nullptr) return;
+
+    Texture2D* tex = nullptr;
+	if (obj.GetTextureHandle())
+        tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
+
+    // Root param 1 = SRV(t0) (si texture)
+    if (tex)
+    {
+        ID3D12DescriptorHeap* heaps[] = { m_pDescriptorHeapManager->GetHeap() };
+        cmd->SetDescriptorHeaps(1, heaps);
+        cmd->SetGraphicsRootDescriptorTable(1, tex->GetSrv().gpu);
+    }
+
+    mesh->Draw(cmd);
 }
 
 void Renderer::BeginFrame()

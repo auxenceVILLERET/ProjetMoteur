@@ -7,7 +7,7 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 #include "Engine/ECS/Systems/CameraSystem.h"
-#include "Engine/RessourceManager.h"
+#include "Engine/ResourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/UploadContext.h" 
 #include "Mesh.h"
@@ -23,6 +23,7 @@ App::App(Engine& engine) : m_engine(engine)
 	engine.SetUpdateCallback(std::bind(&App::Update, this));
 	engine.SetShutdownCallback(std::bind(&App::Shutdown, this));
 
+	m_resourceManager = &ResourceManager::Instance();
 	m_renderer = nullptr;
 	m_window = nullptr;
 	m_sceneManager = nullptr;
@@ -40,19 +41,6 @@ void App::Initialize()
 	m_sceneManager = new SceneManager();
 
 	m_renderer->Initialize(m_window, m_cam);
-
-	UploadContext* uploader = m_renderer->GetUploadContext();
-
-	uploader->Begin();
-
-	RessourceManager::Instance().Initialize(m_renderer, uploader);
-
-	RessourceManager::Instance().GetCube();
-	RessourceManager::Instance().GetCylinder();
-	RessourceManager::Instance().GetSphere();
-
-	uploader->EndAndWait();
-	RessourceManager::Instance().FinalizeUpload();
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 	

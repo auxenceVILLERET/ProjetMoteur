@@ -1,8 +1,10 @@
-#pragma once
+#ifndef MESH_RENDERER_COMPONENT_H_INCLUDED
+#define MESH_RENDERER_COMPONENT_H_INCLUDED
+
 #include "Engine/ECS/Component.h"
+#include "Engine/ResourceManager.h"
 #include "Render/Helpers/d3dUtil.h" 
 
-class Mesh;
 class Renderer;
 
 using namespace DirectX;
@@ -10,18 +12,23 @@ using namespace DirectX;
 class MeshRendererComponent : public Component
 {
 public:
-	void SetMesh(Mesh* newMesh, Renderer* renderer);
-	Mesh* GetMesh() const { return m_mesh; }
+    void SetMesh(MeshHandle h, Renderer* renderer);
+    void SetTexture(TextureHandle h) { m_texture = h; }
 
-	bool CreateConstantBuffer(ID3D12Device* device);
-	void UpdateConstants(const XMFLOAT4X4& worldViewProjT); // matrice déjà transposée
-	D3D12_GPU_VIRTUAL_ADDRESS GetCbAddress() const { return m_pCb ? m_pCb->GetGPUVirtualAddress() : 0; }
+    MeshHandle GetMeshHandle() const { return m_mesh; }
+    TextureHandle GetTextureHandle() const { return m_texture; }
+
+    // constant buffer
+    bool CreateConstantBuffer(ID3D12Device* device);
+    void UpdateConstants(XMFLOAT4X4& worldViewProjT);
+    D3D12_GPU_VIRTUAL_ADDRESS GetCbAddress() const { return m_pCb ? m_pCb->GetGPUVirtualAddress() : 0; }
 
 private:
-	Mesh* m_mesh = nullptr;
+    MeshHandle m_mesh{};
+    TextureHandle m_texture{};
 
-	ID3D12Resource* m_pCb = nullptr;
-	UINT8* m_pCbMapped = nullptr;
-	UINT m_cbSizeAligned = 0;
+    ID3D12Resource* m_pCb = nullptr;
+    UINT8* m_pCbMapped = nullptr;
 };
 
+#endif

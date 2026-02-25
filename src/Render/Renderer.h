@@ -39,8 +39,6 @@ public:
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
-	bool CreateTestTexture();
-
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
 	SwapChainTargets* GetSwapChainTargets() const { return m_pSwapChainTargets; }

@@ -3,21 +3,23 @@
 
 #include <cstdint>
 #include <vector>
-#include <string>
 #include <d3d12.h>
-#include "DescriptorHeapManager.h"
+#include "Render/DescriptorHeapManager.h"
 
 class UploadContext;
 
 class Texture2D
 {
 public:
-    bool LoadFromFileWIC(ID3D12Device* device, UploadContext* uploader, DescriptorHeapManager* heap, const wchar_t* filename);
+    Texture2D() = default;
+    ~Texture2D() { Release(); }
+
+    bool LoadFromFileWIC(ID3D12Device* device, UploadContext* uploader, DescriptorHeapManager* srvHeap, const wchar_t* filename, bool srgb);
 
     void Release();
 
-    bool IsValid() const { return m_texture != nullptr; }
     const DescriptorHandle& GetSrv() const { return m_srv; }
+    ID3D12Resource* GetResource() const { return m_texture; }
     uint32_t Width() const { return m_width; }
     uint32_t Height() const { return m_height; }
 
@@ -26,8 +28,9 @@ private:
 
 private:
     ID3D12Resource* m_texture = nullptr;
-    ID3D12Resource* m_upload = nullptr;   // upload temporaire (optionnel: libéré après upload)
-    DescriptorHandle m_srv;
+    ID3D12Resource* m_upload = nullptr; // temp upload (freed after upload)
+
+    DescriptorHandle m_srv{};
 
     uint32_t m_width = 0;
     uint32_t m_height = 0;

@@ -1,10 +1,9 @@
 #include "GameScene.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h" 
+#include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
-
 
 void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 {
@@ -12,7 +11,10 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 	m_renderer = renderer;
 
 	Entity* player = m_ecs->CreateEntity<Entity>();
-	player->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	MeshRendererComponent* mrc = player->AddComponent<MeshRendererComponent>();
+	mrc->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
+	TextureHandle smiley = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
+	mrc->SetTexture(smiley);
 
 	player->SetPosition(0.0f, 0.0f, 5.0f);
 	m_entities.push_back(player);
@@ -37,5 +39,5 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
-	m_entities[0]->SetRotationX(sinf(dt));
+	m_entities[0]->SetRotationY(sinf(dt));
 }

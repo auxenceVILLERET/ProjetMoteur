@@ -8,6 +8,7 @@ class SceneManager;
 class Entity;
 class ECS;
 class Mesh;
+class ResourceManager;
 
 class App
 {
@@ -27,6 +28,7 @@ private:
 	Window* m_window;
 	Renderer* m_renderer;
 	SceneManager* m_sceneManager;
+	ResourceManager* m_resourceManager;
 	Entity* m_cam;
 	ECS* m_ecs;
 };
