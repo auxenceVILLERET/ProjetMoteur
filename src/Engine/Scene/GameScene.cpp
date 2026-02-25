@@ -13,7 +13,6 @@
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/Projectile.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
-
 #include <iostream>
 
 using namespace core;
@@ -55,6 +54,7 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
+	m_deltaTime = dt;
 	m_projectile->Update(dt);
 	//Test on entities
 	m_cube->RotateX(XMConvertToRadians(.01f));
@@ -206,8 +206,8 @@ void GameScene::MoveCamera()
 		directionRight += 1;
 	}
 
-	m_cam->MoveRight((directionRight * m_speedPlayer * deltaTime));
-	m_cam->MoveForward((directionForward * m_speedPlayer * deltaTime));
+	m_cam->MoveRight((directionRight * m_speedPlayer * m_deltaTime));
+	m_cam->MoveForward((directionForward * m_speedPlayer * m_deltaTime));
 }
 
 // -[DEBUG]- //

@@ -1,0 +1,46 @@
+#pragma once
+#include <DirectXMath.h>
+#include <vector>
+#include "Engine/ECS/Entity.h"
+
+using namespace DirectX;
+
+class ECS;
+class Renderer;
+
+class Tiles
+{
+public:
+	virtual void Initialize(ECS* ecs, Renderer* renderer) = 0;
+	void SetActive(bool active) {m_active = active;}
+	bool IsActive() const { return m_active; }
+
+	void SetIsTurnR(bool isTurnR) { m_isTurnR = isTurnR; }
+	bool IsTurnR() const { return m_isTurnR; }
+
+	void SetIsTurnL(bool isTurnL) { m_isTurnL = isTurnL; }
+	bool IsTurnL() const { return m_isTurnL; }
+
+	void SetPosition(const XMFLOAT3& position) { m_position = position; }
+	XMFLOAT3 GetPosition() const { return m_position; }
+
+	void SetIn(int in) { m_In = in; }
+	int GetIn() const { return m_In; }
+
+	void SetOut(int out) { m_Out = out; }
+	int GetOut() const { return m_Out; }
+
+	std::vector<Entity*>& GetEntities() { return m_entities; }
+
+private:
+	bool m_active;
+	bool m_isTurnR;
+	bool m_isTurnL;
+
+	XMFLOAT3 m_position;
+	int m_In;
+	int m_Out;
+
+	std::vector<Entity*> m_entities;
+};
+
