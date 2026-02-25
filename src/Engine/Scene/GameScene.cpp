@@ -167,23 +167,30 @@ void GameScene::MoveCamera()
 	m_cam->SetRotationLocalX(XMConvertToRadians(delta[1]));
 
 
+	// WASD / ZQSD movement
+	float directionForward = 0;
+	float directionRight = 0;
 
 	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
 	{
-		m_cam->MoveForward((1.0f * m_speedPlayer * deltaTime));
-	}
+		directionForward += 1;
+	}	
+	if (Input::GetKey(Keyboard::S))
+	{
+		directionForward -= 1;
+	};
+
 	if (Input::GetKey(Keyboard::A) || Input::GetKey(Keyboard::Q))
 	{
-		m_cam->MoveRight((-1.0f * m_speedPlayer * deltaTime));
+		directionRight -= 1;
 	}
 	if (Input::GetKey(Keyboard::D))
 	{
-		m_cam->MoveRight((1.0f * m_speedPlayer * deltaTime));
+		directionRight += 1;
 	}
-	if (Input::GetKey(Keyboard::S))
-	{
-		m_cam->MoveForward((-1.0f * m_speedPlayer * deltaTime));
-	}
+
+	m_cam->MoveRight((directionRight * m_speedPlayer * deltaTime));
+	m_cam->MoveForward((directionForward * m_speedPlayer * deltaTime));
 }
 
 // -[SHOOTING]- //
