@@ -31,7 +31,6 @@ protected:
 	Renderer* m_renderer;
 	Engine* m_engine;
 
-	float m_distanceTraveled = 0.0f;
 	float m_maxDistance = 50.0f;
 };
 

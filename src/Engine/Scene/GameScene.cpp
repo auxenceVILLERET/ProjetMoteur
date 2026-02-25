@@ -28,7 +28,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine)
 	m_moon = CreateMoon();
 
 	m_projectile = new Projectile();
-	m_projectile->Initialize(0.1f, Shape::SPHERE, 2.0f, 3.0f, m_engine, m_ecs, m_renderer);
+	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
 }
 
 void GameScene::OnEnter()

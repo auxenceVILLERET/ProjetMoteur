@@ -6,6 +6,7 @@
 #include "Engine/Engine.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/RigidBodyComponent.h"
+#include "Engine/ECS/Components/ProjectileComponent.h"
 
 void Projectile::Initialize(float size, Shape shape, int poolSize,float distanceMax,Engine* engine, ECS* ecs, Renderer* renderer)
 {
@@ -41,6 +42,8 @@ void Projectile::CreatePulling(int poolSize)
 		projectile->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetMeshByShape(m_shape), m_renderer);
 		projectile->SetScale(m_size);
 		projectile->AddComponent<RigidBodyComponent>()->SetUseGravity(false);
+		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);
+		projectile->GetComponent<ProjectileComponent>()->SetDistanceTraveled(0.0f);
 		m_projectiles.push_back(projectile);
 	}
 }
@@ -48,17 +51,22 @@ void Projectile::CreatePulling(int poolSize)
 void Projectile::UpdateDistance()
 {
 	float dt = m_engine->GetDeltaTime();
+
 	for (Entity* projectile : m_projectiles)
 	{
 		if (projectile->IsActive())
 		{
 			XMFLOAT3 velocity = projectile->GetComponent<RigidBodyComponent>()->GetVelocity();
-			
-			m_distanceTraveled += sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z) * dt;
-			if (m_distanceTraveled >= m_maxDistance)
+			ProjectileComponent* projectileComp = projectile->GetComponent<ProjectileComponent>();
+
+			float speed = sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+
+			projectileComp->SetDistanceTraveled(projectileComp->GetDistanceTraveled() + speed * dt);
+
+			if(projectileComp->GetDistanceTraveled() >= projectileComp->GetMaxDistance())
 			{
 				projectile->SetActive(false);
-				m_distanceTraveled = 0.0f;
+				projectileComp->SetDistanceTraveled(0.0f);
 			}
 		}
 	}
