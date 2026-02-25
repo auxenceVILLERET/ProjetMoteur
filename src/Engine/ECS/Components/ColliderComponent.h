@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/ECS/Component.h"
 #include <DirectXMath.h>
+#include <functional>
 
 using namespace DirectX;
 
@@ -22,6 +23,10 @@ public:
 	float GetRadius() const { return m_radius; }
 	XMFLOAT3 GetBoxSize() const { return m_boxSize; }
 	bool IsTrigger() const { return m_isTrigger; }
+
+	std::function<void(Entity* self, Entity* other)> OnCollisionEnter;
+	void TriggerCollisionEnter(Entity* self,Entity* other);
+
 private:
 	
 	Type m_type = Type::Sphere;

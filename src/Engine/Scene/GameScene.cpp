@@ -10,6 +10,9 @@
 #include "Engine/ECS/Components/StateMachineComponent.h"
 #include "ProjetMoteur/EnemyIdleState.h"
 #include "ProjetMoteur/EnemyChaseState.h"
+#include "Engine/ECS/Components/RigidBodyComponent.h"
+#include "Engine/Projectile.h"
+#include "Engine/ECS/Components/ColliderComponent.h"
 
 #include <iostream>
 
@@ -28,6 +31,9 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_sphere = CreateSphere();
 	m_moon = CreateMoon();
 	m_floor = CreateFloor();
+
+	m_projectile = new Projectile();
+	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
 }
 
 void GameScene::OnEnter()
@@ -49,15 +55,15 @@ void GameScene::OnExit()
 
 void GameScene::Update(float dt)
 {
-	deltaTime = dt;
+	m_projectile->Update(dt);
 	//Test on entities
 	m_cube->RotateX(XMConvertToRadians(.01f));
 	m_cube->RotateLocalY(XMConvertToRadians(.05f));
 	m_cube->RotateZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * deltaTime), 1);
-	m_moon->RotateLocalY(XMConvertToRadians(60.f * deltaTime));
-	m_cylinder->RotateY(XMConvertToRadians(45.f * deltaTime));
+	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * dt), 1);
+	m_moon->RotateLocalY(XMConvertToRadians(60.f * dt));
+	m_cylinder->RotateY(XMConvertToRadians(45.f * dt));
 
 	ProceduralRails();
 	MoveCamera();
@@ -66,7 +72,15 @@ void GameScene::Update(float dt)
 
 	if(Input::GetKeyDown(Keyboard::UP_ARROW))
 	{
-		m_sphere->MoveForward(.5f);
+		m_sphere->MoveForward(0.5f);
+	}
+	if(Input::GetMouseButtonDown(Mouse::LEFT))
+	{
+		Entity* temp = m_projectile->GetAvaibleProjectile();
+		if (temp == nullptr) return; // No projectile available in the pool
+
+		temp->SetPosition(0.0f,0.0f,0.0f);
+		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
 	}
 }
 
@@ -77,6 +91,7 @@ Entity* GameScene::CreateSphere()
 	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
 	sphere->SetPosition(0.0f, 0.0f, 0.0f);
 	sphere->AddComponent<PlayerComponent>();
+	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 
 	m_entities.push_back(sphere);
 	return sphere;
@@ -95,13 +110,13 @@ Entity* GameScene::CreateCylinder()
 Entity* GameScene::CreateCube() {
 	Entity* cube = m_ecs->CreateEntity<Entity>();
 	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
-	cube->SetPosition(0.0f, 0.0f, 10.0f);
+	cube->SetPosition(2.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
-	cube->AddComponent<StateMachineComponent>();
-	StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
+	//cube->AddComponent<StateMachineComponent>();
+	/*StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
 	smc->SetStateMachine(cube, m_ecs);
 	smc->GetStateMachine()->SetOwner(cube);
-	smc->GetStateMachine()->ChangeState(new EnemyIdleState());
+	smc->GetStateMachine()->ChangeState(new EnemyIdleState());*/
 
 	m_entities.push_back(cube);
 	return cube;
