@@ -25,6 +25,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_cube = CreateCube();
 	m_sphere = CreateSphere();
 	m_moon = CreateMoon();
+	m_floor = CreateFloor();
 }
 
 void GameScene::OnEnter()
@@ -58,6 +59,7 @@ void GameScene::Update(float dt)
 
 	ProceduralRails();
 	MoveCamera();
+	ShootBullet();
 
 	if(Input::GetKeyDown(Keyboard::UP_ARROW))
 	{
@@ -111,6 +113,18 @@ Entity* GameScene::CreateMoon() {
 	return moon;
 }
 
+Entity* GameScene::CreateFloor()
+{
+	Entity* floor = m_ecs->CreateEntity<Entity>();
+	floor->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	floor->SetPosition(0,-2.5f,0);
+	floor->SetScaleVector({ 50,0.1f,50 });
+	m_entities.push_back(floor);
+	return floor;
+}
+
+
+
 // -[RAIL GENERATION]- //
 void GameScene::CreateRail()
 {
@@ -153,9 +167,22 @@ void GameScene::MoveCamera()
 	m_cam->SetRotationLocalX(XMConvertToRadians(delta[1]));
 
 
+
 	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
 	{
 		m_cam->MoveForward((1.0f * m_speedPlayer * deltaTime));
+	}
+	if (Input::GetKey(Keyboard::A) || Input::GetKey(Keyboard::Q))
+	{
+		m_cam->MoveRight((-1.0f * m_speedPlayer * deltaTime));
+	}
+	if (Input::GetKey(Keyboard::D))
+	{
+		m_cam->MoveRight((1.0f * m_speedPlayer * deltaTime));
+	}
+	if (Input::GetKey(Keyboard::S))
+	{
+		m_cam->MoveForward((-1.0f * m_speedPlayer * deltaTime));
 	}
 }
 
@@ -163,7 +190,8 @@ void GameScene::MoveCamera()
 void GameScene::ShootBullet() {
 	// Shot bullets here
 	if (Input::GetMouseButton(Mouse::LEFT)) {
-		
+			m_cam->CoutRotation();
+			m_cam->CoutMatrix();
 	}
 }
 

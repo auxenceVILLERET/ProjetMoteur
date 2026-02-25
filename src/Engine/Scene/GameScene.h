@@ -25,6 +25,7 @@ private:
 	Entity* m_sphere;
 	Entity* m_cylinder;
 	Entity* m_moon;
+	Entity* m_floor;
 
 	Entity* m_rail;
 	std::vector<Entity*> m_rails;
@@ -42,6 +43,7 @@ private:
 	Entity* CreateCylinder();
 	Entity* CreateCube();
 	Entity* CreateMoon();
+	Entity* CreateFloor();
 
 	//RAILS
 	void CreateRail();
