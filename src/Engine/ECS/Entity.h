@@ -58,7 +58,7 @@ public:
 	void RotateZ(float angle); // Rotate in world
 	void RotateLocalZ(float angle); // Rotate locally
 
-	void SetRotation(XMFLOAT4 quaternion);
+	void SetRotation(const XMFLOAT4& quaternion);
 	void SetRotationX(float angle);
 	void SetRotationY(float angle);
 	void SetRotationZ(float angle);

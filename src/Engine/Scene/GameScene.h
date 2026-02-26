@@ -15,12 +15,13 @@ class GameScene : public Scene
 public:
 	~GameScene() = default;
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
-	void OnEnter() override; 
+	void OnEnter() override;
 	void OnExit() override;
 	void Update(float dt) override;
 
 private:
 	float m_deltaTime; // deltaTime
+	bool m_startupFlag = true;
 
 	std::vector<Entity*> m_entities;
 
@@ -40,12 +41,7 @@ private:
 
 	Projectile* m_projectile;
 
-	//TEST ENTITIES
-	Entity* CreateSphere();
-	Entity* CreateCylinder();
-	Entity* CreateCube();
-	Entity* CreateMoon();
-	Entity* CreateMoonMoon();
+	Entity* CreateBody();
 	Entity* CreateFloor();
 
 	//RAILS
@@ -59,5 +55,8 @@ private:
 	//LOOK WITH MOUSE
 	void MoveCamera();
 	void Debug();
+
+	//SHOOTING
+	void Shooting();
 };
 

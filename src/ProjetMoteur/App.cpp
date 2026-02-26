@@ -35,7 +35,7 @@ App::App(Engine& engine) : m_engine(engine)
 }
 
 void App::Initialize()
-{	
+{
 	// Initialize your application here
 	m_window = new Window(800, 600, L"LAB ENGINE GAMEPLAY");
 	m_ecs = &m_engine.GetECS();
@@ -91,20 +91,20 @@ void App::UpdateWindow()
 	m_window->ProcessMessages();
 	m_renderer->Update();
 
-	if(m_window->IsOpen() == false)
+	if (m_window->IsOpen() == false)
 		m_engine.Shutdown();
 }
 
 void App::HandleInput()
 {
-	if (Input::GetKey(Keyboard::LEFT_ARROW))  { m_sceneManager->ChangeScene("Menu");    }
-	if (Input::GetKey(Keyboard::RIGHT_ARROW)) { m_sceneManager->ChangeScene("Game");    }
-	if (Input::GetKey(Keyboard::UP_ARROW))    { m_sceneManager->ChangeScene("Sandbox"); }
+	if (Input::GetKey(Keyboard::NUMPAD1) || Input::GetKey(Keyboard::_1)) { m_sceneManager->ChangeScene("Menu"); }
+	if (Input::GetKey(Keyboard::NUMPAD2) || Input::GetKey(Keyboard::_2)) { m_sceneManager->ChangeScene("Game"); }
+	if (Input::GetKey(Keyboard::NUMPAD3) || Input::GetKey(Keyboard::_3)) { m_sceneManager->ChangeScene("Sandbox"); }
 
 	if (Input::GetKey(Keyboard::ESC)) {
 		App::Shutdown();
 	}
-	
+
 	Input::Update();
 }
 
