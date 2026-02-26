@@ -32,7 +32,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity3);
 	GetLocalOffset().push_back(offset3);
 
-	SetActive(true);
+	SetActive(false);
 	SetIsTurnL(false);
 	SetIsTurnR(false);
 	SetIn(0);

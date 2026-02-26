@@ -52,11 +52,6 @@ void TilesManager::AddTile(Tiles* tile)
 
 void TilesManager::Update(float deltaTime)
 {
-    for (Tiles* tiles : m_tiles)
-    {
-		tiles->Update(deltaTime);
-    }
-    
     for (int i = 0; i < m_activeTiles.size(); )
     {
         Tiles* tile = m_activeTiles[i];
@@ -82,7 +77,7 @@ void TilesManager::SpawnTile()
 
     for (Tiles* tile : m_tiles)
     {
-        if (tile->GetIn() == m_currentConnection)
+        if (tile->GetIn() == m_currentConnection && !tile->IsActive())
         {
             compatibles.push_back(tile);
         }
