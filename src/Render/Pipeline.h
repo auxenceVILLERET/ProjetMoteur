@@ -31,10 +31,6 @@ private:
 
     ID3D12RootSignature* m_uiRootSig;
     ID3D12PipelineState* m_uiPso;
-
-    // garde pour debug (optionnel)
-    ID3DBlob* m_vs;
-    ID3DBlob* m_ps;
 };
 
 #endif // !PIPELINE_H_INCLUDED

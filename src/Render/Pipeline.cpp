@@ -35,9 +35,11 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, DXGI_FORMAT rtvFormat, D
 	// --------------------
 	// DEFAULT SHADERS
 	// --------------------
+    ID3DBlob* defaultVS = nullptr;
+    ID3DBlob* defaultPS = nullptr;
 
-    if (CompileShader(L"../../res/Default_VS.hlsl", "VSMain", "vs_6_0", m_vs) == false) return false;
-    if (CompileShader(L"../../res/Default_PS.hlsl", "PSMain", "ps_6_0", m_ps) == false) return false;
+    if (CompileShader(L"../../res/Shaders/Default_VS.hlsl", "VSMain", "vs_5_0", defaultVS) == false) return false;
+    if (CompileShader(L"../../res/Shaders/Default_PS.hlsl", "PSMain", "ps_5_0", defaultPS) == false) return false;
 
     static D3D12_INPUT_ELEMENT_DESC inputLayout[] =
     {
@@ -48,8 +50,8 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, DXGI_FORMAT rtvFormat, D
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.pRootSignature = m_defaultRootSig;
 
-    psoDesc.VS = { m_vs->GetBufferPointer(), m_vs->GetBufferSize() };
-    psoDesc.PS = { m_ps->GetBufferPointer(), m_ps->GetBufferSize() };
+    psoDesc.VS = { defaultVS->GetBufferPointer(), defaultVS->GetBufferSize() };
+    psoDesc.PS = { defaultPS->GetBufferPointer(), defaultPS->GetBufferSize() };
 
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDesc.SampleMask = UINT_MAX;
@@ -81,8 +83,8 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, DXGI_FORMAT rtvFormat, D
     ID3DBlob* uiPS = nullptr;
 
     // Exemple: fichiers/entry différents pour l'UI
-    if (CompileShader(L"../../res/UI_VS.hlsl", "VSMain", "vs_6_0", uiVS) == false) return false;
-    if (CompileShader(L"../../res/UI_PS.hlsl", "PSMain", "ps_6_0", uiPS) == false) return false;
+    if (CompileShader(L"../../res/Shaders/UI_VS.hlsl", "VSMain", "vs_5_0", uiVS) == false) return false;
+    if (CompileShader(L"../../res/Shaders/UI_PS.hlsl", "PSMain", "ps_5_0", uiPS) == false) return false;
 
     static D3D12_INPUT_ELEMENT_DESC uiLayout[] =
     {
@@ -99,41 +101,31 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, DXGI_FORMAT rtvFormat, D
     uiDesc.PS = { uiPS->GetBufferPointer(), uiPS->GetBufferSize() };
 
     uiDesc.SampleMask = UINT_MAX;
-
-    // Rasterizer : pas de cull pour l'UI
     uiDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    uiDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-
-    // Depth OFF pour overlay
     uiDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    uiDesc.DepthStencilState.DepthEnable = false;
-    uiDesc.DepthStencilState.StencilEnable = false;
+    uiDesc.DepthStencilState.DepthEnable = FALSE;
+    uiDesc.DepthStencilState.StencilEnable = FALSE;
 
-    // Blend alpha ON
+    uiDesc.InputLayout = { uiLayout, _countof(uiLayout) };
+    uiDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    uiDesc.NumRenderTargets = 1;
+    uiDesc.RTVFormats[0] = rtvFormat;
+    uiDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+    uiDesc.SampleDesc.Count = 1;
+    uiDesc.SampleDesc.Quality = 0;
+
+    // alpha blend on
     uiDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    uiDesc.BlendState.RenderTarget[0].BlendEnable = true;
+    uiDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
     uiDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
     uiDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
     uiDesc.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
     uiDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
     uiDesc.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
     uiDesc.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-    uiDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-    // IA
-    uiDesc.InputLayout = { uiLayout, _countof(uiLayout) };
-    uiDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-    // RT
-    uiDesc.NumRenderTargets = 1;
-    uiDesc.RTVFormats[0] = rtvFormat;
-    uiDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
-
-    uiDesc.SampleDesc.Count = 1;
-    uiDesc.SampleDesc.Quality = 0;
-
-    HRESULT hr2 = device->CreateGraphicsPipelineState(&uiDesc, IID_PPV_ARGS(&m_uiPso));
-    if (FAILED(hr2))
+    hr = device->CreateGraphicsPipelineState(&uiDesc, IID_PPV_ARGS(&m_uiPso));
+    if (FAILED(hr))
         return false;
 
     return true;
@@ -145,8 +137,6 @@ void Pipeline::Shutdown()
     SafeRelease(m_defaultRootSig);
 	SafeRelease(m_uiPso);
 	SafeRelease(m_uiRootSig);
-    SafeRelease(m_vs);
-    SafeRelease(m_ps);
 }
 
 bool Pipeline::BuildRootSignature(ID3D12Device* device)
@@ -221,19 +211,48 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
 
 bool Pipeline::BuildUIRootSignature(ID3D12Device* device)
 {
-    // Root signature pour UI (param 0 = CBV b0, visible dans tous les shaders)
-    D3D12_ROOT_PARAMETER param = {};
-    param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-    param.Descriptor.ShaderRegister = 0; // b0
-    param.Descriptor.RegisterSpace = 0;
-    param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    // Param 0 : CBV b0 (VS)
+    D3D12_ROOT_PARAMETER params[2] = {};
+
+    params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    params[0].Descriptor.ShaderRegister = 0; // b0
+    params[0].Descriptor.RegisterSpace = 0;
+    params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+    // Param 1 : Descriptor table SRV t0 (PS)
+    D3D12_DESCRIPTOR_RANGE range = {};
+    range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range.NumDescriptors = 1;
+    range.BaseShaderRegister = 0; // t0
+    range.RegisterSpace = 0;
+    range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+    params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    params[1].DescriptorTable.NumDescriptorRanges = 1;
+    params[1].DescriptorTable.pDescriptorRanges = &range;
+    params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    // Static sampler s0
+    D3D12_STATIC_SAMPLER_DESC samp = {};
+    samp.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    samp.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    samp.ShaderRegister = 0; // s0
+    samp.RegisterSpace = 0;
+    samp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    samp.MinLOD = 0.0f;
+    samp.MaxLOD = D3D12_FLOAT32_MAX;
+    samp.MaxAnisotropy = 1;
+    samp.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 
     D3D12_ROOT_SIGNATURE_DESC desc = {};
-    desc.NumParameters = 1;
-    desc.pParameters = &param;
-    desc.NumStaticSamplers = 0;
-    desc.pStaticSamplers = nullptr;
+    desc.NumParameters = _countof(params);
+    desc.pParameters = params;
+    desc.NumStaticSamplers = 1;
+    desc.pStaticSamplers = &samp;
     desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
 
     ID3DBlob* serialized = nullptr;
     ID3DBlob* error = nullptr;
