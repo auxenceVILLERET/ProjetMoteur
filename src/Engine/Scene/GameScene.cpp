@@ -25,16 +25,20 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_engine = engine;
 	m_cam = camera;
 
-	// -[TEST OBJECTS]- //
-	m_cylinder = CreateCylinder();
-	m_cube = CreateCube();
-	m_sphere = CreateSphere();
-	m_moon = CreateMoon();
-	m_moonMoon = CreateMoonMoon();
+	m_body = m_ecs->CreateEntity<Entity>();
+
+	// For Clarity
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
 	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
+
+	// Ugly but needed until fix
+	for (Entity* entity : m_entities)
+	{
+		entity->SetActive(false);
+	}
+
 }
 
 void GameScene::OnEnter()
@@ -59,28 +63,14 @@ void GameScene::Update(float dt)
 	m_deltaTime = dt;
 
 	m_projectile->Update(m_deltaTime);
-	//Test on entities
-	m_cube->RotateX(XMConvertToRadians(.01f));
-	m_cube->RotateLocalY(XMConvertToRadians(.05f));
-	m_cube->RotateZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(10.f * m_deltaTime), 1);
-	m_moon->RotateLocalY(XMConvertToRadians(60.f * m_deltaTime));
-
-	m_moonMoon->OrbitAround(m_moon->GetPosition(), m_moon->m_up, XMConvertToRadians(100.f * m_deltaTime), .25);
-	m_moonMoon->RotateLocalY(XMConvertToRadians(90.f * m_deltaTime));
-
-	m_cylinder->RotateY(XMConvertToRadians(45.f * m_deltaTime));
 
 	ProceduralRails();
+	MovePlayer();
 	MoveCamera();
 	
 	Debug();
 
-	if(Input::GetKeyDown(Keyboard::UP_ARROW))
-	{
-		m_sphere->MoveForward(0.5f);
-	}
 	if(Input::GetMouseButtonDown(Mouse::LEFT))
 	{
 		Entity* temp = m_projectile->GetAvaibleProjectile();
@@ -89,57 +79,6 @@ void GameScene::Update(float dt)
 		temp->SetPosition(0.0f,0.0f,0.0f);
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
 	}
-}
-
-// -[TEST ENTITIES]- //
-Entity* GameScene::CreateSphere()
-{
-	Entity* sphere = m_ecs->CreateEntity<Entity>();
-	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	sphere->SetPosition(0.0f, 0.0f, 0.0f);
-	sphere->AddComponent<PlayerComponent>();
-	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
-
-	m_entities.push_back(sphere);
-	return sphere;
-}
-
-Entity* GameScene::CreateCylinder()
-{
-	Entity* cylinder = m_ecs->CreateEntity<Entity>();
-	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
-	cylinder->SetScale(.3f);
-	m_entities.push_back(cylinder);
-	return cylinder;
-}
-
-Entity* GameScene::CreateCube() {
-	Entity* cube = m_ecs->CreateEntity<Entity>();
-	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
-	cube->SetPosition(2.0f, 0.0f, 10.0f);
-	cube->SetScale(.5f);
-
-	m_entities.push_back(cube);
-	return cube;
-}
-
-Entity* GameScene::CreateMoon() {
-	Entity* moon = m_ecs->CreateEntity<Entity>();
-	moon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	moon->SetPosition(m_cylinder->GetPosition().x, m_cylinder->GetPosition().y, m_cylinder->GetPosition().z);
-	moon->SetScale(.1f);
-	m_entities.push_back(moon);
-	return moon;
-}
-
-Entity* GameScene::CreateMoonMoon() {
-	Entity* moonMoon = m_ecs->CreateEntity<Entity>();
-	moonMoon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	moonMoon->SetPosition(m_moon->GetPosition().x, m_moon->GetPosition().y, m_moon->GetPosition().z);
-	moonMoon->SetScale(.05f);
-	m_entities.push_back(moonMoon);
-	return moonMoon;
 }
 
 Entity* GameScene::CreateFloor()
@@ -195,10 +134,15 @@ void GameScene::MoveCamera()
 	std::vector<float> delta = Input::GetMouseDelta();
 
 	// Kinda Cheating, can cause problem when player is being rotated;
+	m_cam->SetPosition(m_body->GetPosition());
+	
+	m_body->RotateLocalY(XMConvertToRadians(delta[0]));
+	m_cam->SetRotationY(m_body->GetRotation().y);
 
-	m_cam->RotateY(XMConvertToRadians(delta[0]));
 	m_cam->RotateLocalX(XMConvertToRadians(delta[1]));
+}
 
+void GameScene::MovePlayer() {
 	// WASD / ZQSD movement
 	float directionForward = 0;
 	float directionRight = 0;
@@ -206,7 +150,7 @@ void GameScene::MoveCamera()
 	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
 	{
 		directionForward += 1;
-	}	
+	}
 	if (Input::GetKey(Keyboard::S))
 	{
 		directionForward -= 1;
@@ -221,14 +165,17 @@ void GameScene::MoveCamera()
 		directionRight += 1;
 	}
 
-	m_cam->MoveRight((directionRight * m_speedPlayer * m_deltaTime));
-	m_cam->MoveForward((directionForward * m_speedPlayer * m_deltaTime));
+	m_body->MoveRight((directionRight * m_speedPlayer * m_deltaTime));
+	m_body->MoveForward((directionForward * m_speedPlayer * m_deltaTime));
 }
 
 // -[DEBUG]- //
 void GameScene::Debug() {
-	if (Input::GetMouseButton(Mouse::LEFT)) {
+	if (Input::GetMouseButtonDown(Mouse::RIGHT)) {
 
+		m_body->CoutRotation();
+		m_cam->CoutRotation();
+		std::cout << " ||||||||||||||||||||||||||||||||||||||| " << std::endl;
 	}
 }
 

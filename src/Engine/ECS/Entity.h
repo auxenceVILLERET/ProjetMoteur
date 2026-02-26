@@ -63,6 +63,14 @@ public:
 	void SetRotationY(float angle);
 	void SetRotationZ(float angle);
 
+	void SetForward(XMFLOAT3 vector);
+	void SetRight(XMFLOAT3 vector);
+	void SetUp(XMFLOAT3 vector);
+
+	XMFLOAT3 GetForward();
+	XMFLOAT3 GetRight();
+	XMFLOAT3 GetUp();
+
 
 	void LookAt(float x, float y, float z); // look at a specific coords
 	void OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius);

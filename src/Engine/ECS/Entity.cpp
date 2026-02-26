@@ -212,6 +212,45 @@ void Entity::SetRotationZ(float angle)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetForward(XMFLOAT3 vector)
+{
+	m_forward.x = vector.x;
+	m_forward.y = vector.y;
+	m_forward.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetRight(XMFLOAT3 vector)
+{
+	m_right.x = vector.x;
+	m_right.y = vector.y;
+	m_right.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetUp(XMFLOAT3 vector)
+{
+	m_up.x = vector.x;
+	m_up.y = vector.y;
+	m_up.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+XMFLOAT3 Entity::GetForward()
+{
+	return m_forward;
+}
+
+XMFLOAT3 Entity::GetRight()
+{
+	return m_right;
+}
+
+XMFLOAT3 Entity::GetUp()
+{
+	return m_up;
+}
+
 
 
 void Entity::LookAt(float x, float y, float z)

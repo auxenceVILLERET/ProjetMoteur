@@ -10,12 +10,12 @@ class Projectile;
 class Renderer;
 
 
-class GameScene : public Scene
+class SandboxScene : public Scene
 {
 public:
-	~GameScene() = default;
+	~SandboxScene() = default;
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
-	void OnEnter() override; 
+	void OnEnter() override;
 	void OnExit() override;
 	void Update(float dt) override;
 
@@ -24,6 +24,11 @@ private:
 
 	std::vector<Entity*> m_entities;
 
+	Entity* m_cube;
+	Entity* m_sphere;
+	Entity* m_cylinder;
+	Entity* m_moon;
+	Entity* m_moonMoon;
 	Entity* m_floor;
 
 	Entity* m_rail;
@@ -53,11 +58,11 @@ private:
 	void ProceduralRails();
 	void DeleteRails();
 
-	//MOVING PLAYER
-	void MovePlayer();
-
-	//LOOK WITH MOUSE
+	//LOOK WITH MOUSE + WASD/ZQSD
 	void MoveCamera();
 	void Debug();
+
+	//SHOOTING
+	void Shooting();
 };
 

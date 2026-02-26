@@ -14,6 +14,7 @@
 #include "Engine/ECS/Systems/RenderSystem.h"
 #include "Engine/Scene/GameScene.h"
 #include "Engine/Scene/MenuScene.h"
+#include "SandboxScene.h"
 #include "Engine/ECS/Systems/StateMachineSystem.h"
 #include "Engine/ECS/Systems/PhysicSystem.h"
 #include "Engine/ECS/Systems/ColliderSystem.h"
@@ -58,10 +59,11 @@ void App::Initialize()
 	RessourceManager::Instance().FinalizeUpload();
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
-	
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+
 	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
-	
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+
 	m_sceneManager->ChangeScene("Menu");
 
 	m_ecs->AddSystem<StateMachineSystem>();
@@ -95,16 +97,12 @@ void App::UpdateWindow()
 
 void App::HandleInput()
 {
-	if(Input::GetKey(Keyboard::A))
-	{
-		m_sceneManager->ChangeScene("Game");
-	}
-	if (Input::GetKey(Keyboard::E))
-	{
-		m_sceneManager->ChangeScene("Menu");
-	}
+	if (Input::GetKey(Keyboard::LEFT_ARROW))  { m_sceneManager->ChangeScene("Menu");    }
+	if (Input::GetKey(Keyboard::RIGHT_ARROW)) { m_sceneManager->ChangeScene("Game");    }
+	if (Input::GetKey(Keyboard::UP_ARROW))    { m_sceneManager->ChangeScene("Sandbox"); }
+
 	if (Input::GetKey(Keyboard::ESC)) {
-		//shutdown
+		App::Shutdown();
 	}
 	
 	Input::Update();
