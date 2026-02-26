@@ -9,9 +9,9 @@ SamplerState gSamp0 : register(s0);
 
 struct VertexIn
 {
-    float2 pos : POSITION; // NDC [-1..1]
+    float2 pos : POSITION; // [-1..1]
     float2 uv : TEXCOORD0;
-    uint col : COLOR0; // R8G8B8A8_UNORM packé (optionnel)
+    uint col : COLOR0; // R8G8B8A8_UNORM
 };
 
 struct VertexOut

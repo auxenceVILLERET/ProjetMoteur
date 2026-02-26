@@ -8,12 +8,13 @@
 
 #include "Helpers/d3dUtil.h"
 
-// Link necessary d3d12 libraries.
+//d3d12 libraries.
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")
 
 #include "DescriptorHeapManager.h"
+#include "UIRender.h"
 
 class Window;
 class DxContext;
@@ -28,15 +29,14 @@ using namespace DirectX;
 class Renderer
 {
 public:
-	Renderer();
-	~Renderer();
+	Renderer() = default;
+	~Renderer() { Shutdown(); }
 
 	bool Initialize(Window* window, Entity* camera);
 	void Shutdown();
 
 	void Update();
 	void Render(std::vector<MeshRendererComponent*> vMesh);
-	void DrawUI(ID3D12GraphicsCommandList* cmdList);
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
@@ -54,9 +54,8 @@ private:
 	Window* m_pWindow = nullptr;
 	Entity* m_pCamera = nullptr;
 
-	ID3D12Resource* m_texture = nullptr;
-	ID3D12Resource* m_textureUpload = nullptr;
-	DescriptorHandle m_textureSrv;
+	UIRender* m_ui = nullptr;
+	UIFrame m_uiFrame;
 
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;

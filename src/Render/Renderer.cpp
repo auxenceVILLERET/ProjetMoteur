@@ -21,15 +21,6 @@ inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT off
     return h;
 }
 
-Renderer::Renderer()
-{
-}
-
-Renderer::~Renderer()
-{
-    Shutdown();
-}
-
 bool Renderer::Initialize(Window* window, Entity* camera)
 {
     if (window == nullptr || camera == nullptr)
@@ -87,12 +78,18 @@ bool Renderer::Initialize(Window* window, Entity* camera)
 	//6) Render resource manager
     RenderResourceManager::Instance().Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager);
 
+	//7) UI renderer
+	m_ui = new UIRender();
+	if (m_ui->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
+		return false;
+
+	m_uiFrame.showSplash = true;
+
     return true;
 }
 
 void Renderer::Shutdown()
 {
-
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
@@ -131,9 +128,6 @@ void Renderer::Shutdown()
         m_pDxContext = nullptr;
     }
 
-	SafeRelease(m_texture);
-	SafeRelease(m_textureUpload);
-
     m_pWindow = nullptr;
 }
 
@@ -168,28 +162,14 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
 
-    cmd->SetGraphicsRootDescriptorTable(1, m_textureSrv.gpu);
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
 
-    DrawUI(cmd);
+	m_ui->Render(cmd, m_uiFrame);
 
     EndFrame();
-}
-
-void Renderer::DrawUI(ID3D12GraphicsCommandList* cmd)
-{
-    // PSO/Root UI
-    cmd->SetPipelineState(m_pPipeline->GetUIPSO());
-    cmd->SetGraphicsRootSignature(m_pPipeline->GetUIRootSignature());
-
-    // Heap SRV : idéalement le même heap global que tu utilises déjà
-    ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
-    cmd->SetDescriptorHeaps(1, &heaps);
-
-    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Renderer::DrawObj(MeshRendererComponent& obj)
@@ -260,7 +240,7 @@ void Renderer::BeginFrame()
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    float clearColor[4] = { 0.08f, 0.10f, 0.14f, 1.0f };
+    float clearColor[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
