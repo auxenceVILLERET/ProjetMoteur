@@ -32,6 +32,14 @@ public:
 
 	std::vector<Entity*>& GetEntities() { return m_entities; }
 
+	void SetSpeed(float speed) { m_speed = speed; }
+	float GetSpeed() const { return m_speed; }
+
+	virtual void Update(float deltaTime) = 0;
+
+	void MoveZ(float dist);
+
+	std::vector<XMFLOAT3>& GetLocalOffset() { return m_localOffset; }
 private:
 	bool m_active;
 	bool m_isTurnR;
@@ -41,6 +49,9 @@ private:
 	int m_In;
 	int m_Out;
 
+	float m_speed = 5.0f;
+
 	std::vector<Entity*> m_entities;
+	std::vector<XMFLOAT3> m_localOffset;
 };
 

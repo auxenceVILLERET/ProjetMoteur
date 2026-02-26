@@ -14,6 +14,7 @@
 #include "Engine/Projectile.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
 #include <iostream>
+#include "ProjetMoteur/Tiles/TilesManager.h"
 
 using namespace core;
 
@@ -33,6 +34,9 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_projectile = new Projectile();
 	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
+
+	m_tilesManager = new TilesManager();
+	m_tilesManager->Initialize(m_ecs, m_renderer);
 }
 
 void GameScene::OnEnter()
@@ -56,6 +60,7 @@ void GameScene::Update(float dt)
 {
 	m_deltaTime = dt;
 	m_projectile->Update(dt);
+	m_tilesManager->Update(dt);
 	//Test on entities
 	m_cube->RotateX(XMConvertToRadians(.01f));
 	m_cube->RotateLocalY(XMConvertToRadians(.05f));

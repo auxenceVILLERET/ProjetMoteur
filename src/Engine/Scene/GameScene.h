@@ -8,7 +8,7 @@ class Engine;
 class Camera;
 class Projectile;
 class Renderer;
-
+class TilesManager;
 
 class GameScene : public Scene
 {
@@ -43,6 +43,8 @@ private:
 	float m_speedPlayer = 1.f;
 
 	Projectile* m_projectile;
+
+	TilesManager* m_tilesManager;
 
 	//TEST ENTITIES
 	Entity* CreateSphere();
