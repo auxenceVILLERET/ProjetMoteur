@@ -167,7 +167,7 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
 
-	m_ui->Render(cmd, m_uiFrame);
+	//m_ui->Render(cmd, m_uiFrame);
 
     EndFrame();
 }

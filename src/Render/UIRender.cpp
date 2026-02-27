@@ -26,6 +26,10 @@ bool UIRender::Initialize(DxContext* dx, UploadContext* uploader, DescriptorHeap
     if (CreateFullscreenQuadVB(dx->GetDevice()) == false) return false;
 	if (CreateTintConstantBuffer(dx->GetDevice()) == false) return false;
 
+    m_fontAtlas = new Texture2D();
+    m_fontAtlas->LoadFromFileWIC(dx->GetDevice(), uploader, heap, L"../../res/Fonts/minecraft_32.png", true);
+    m_fontSrv = m_fontAtlas->GetSrv();
+
 	return true;
 }
 
@@ -52,17 +56,18 @@ void UIRender::Shutdown()
 
 bool UIRender::CreateFullscreenQuadVB(ID3D12Device* device)
 {
+	XMFLOAT4 color = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
     const UIVertex verts[6] =
     {
         // tri 1
-        { {-1.f, -1.f}, {+0.f, +1.f}, 0xFFFFFFFF},
-        { {-1.f, +1.f}, {+0.f, +0.f}, 0xFFFFFFFF},
-        { {+1.f, +1.f}, {+1.f, +0.f}, 0xFFFFFFFF},
+        { {-1.f, -1.f}, {+0.f, +1.f}, color},
+        { {-1.f, +1.f}, {+0.f, +0.f}, color},
+        { {+1.f, +1.f}, {+1.f, +0.f}, color},
 
         // tri 2
-        { {-1.f, -1.f}, {+0.f, +1.f}, 0xFFFFFFFF},
-        { {+1.f, +1.f}, {+1.f, +0.f}, 0xFFFFFFFF},
-        { {+1.f, -1.f}, {+1.f, +1.f}, 0xFFFFFFFF},
+        { {-1.f, -1.f}, {+0.f, +1.f}, color},
+        { {+1.f, +1.f}, {+1.f, +0.f}, color},
+        { {+1.f, -1.f}, {+1.f, +1.f}, color},
     };
 
     const UINT vbSize = (UINT)sizeof(verts);
@@ -127,6 +132,88 @@ bool UIRender::CreateTintConstantBuffer(ID3D12Device* device)
     return true;
 }
 
+bool UIRender::CreateTextVB(ID3D12Device* device, uint32_t maxChars)
+{
+    const UINT vbSize = maxChars * 6 * sizeof(UIVertex);
+
+    auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto bufDesc = CD3DX12_RESOURCE_DESC::Buffer(vbSize);
+
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProps, D3D12_HEAP_FLAG_NONE, &bufDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+        IID_PPV_ARGS(&m_textVB)
+    );
+
+    if (FAILED(hr)) return false;
+
+    void* mapped = nullptr;
+    CD3DX12_RANGE range(0, 0);
+    hr = m_textVB->Map(0, &range, &mapped);
+
+    if (FAILED(hr)) return false;
+
+    m_textVBMapped = (uint8_t*)mapped;
+
+    m_textVBV.BufferLocation = m_textVB->GetGPUVirtualAddress();
+    m_textVBV.StrideInBytes = sizeof(UIVertex);
+    m_textVBV.SizeInBytes = vbSize;
+
+    return true;
+}
+
+bool UIRender::CreateTextVertices(const char* text, float x, float y, float scale, float screenW, float screenH, XMFLOAT4 color)
+{
+    UIVertex* v = reinterpret_cast<UIVertex*>(m_textVBMapped);
+    UINT vertCount = 0;
+
+    float penX = x;
+    float penY = y;
+
+    for (const char* p = text; *p; ++p)
+    {
+        unsigned char c = (unsigned char)(*p);
+        const Glyph& g = m_fontData.glyphs[c];
+        if (g.w == 0 || g.h == 0) { penX += m_fontData.lineHeight * scale * 0.5f; continue; }
+
+        float x0 = penX + g.xOffset * scale;
+        float y0 = penY + g.yOffset * scale;
+        float x1 = x0 + g.w * scale;
+        float y1 = y0 + g.h * scale;
+
+        // pixel -> NDC
+        float ndcX0 = PxToNdcX(x0, screenW);
+        float ndcX1 = PxToNdcX(x1, screenW);
+        float ndcY0 = PxToNdcY(y0, screenH);
+        float ndcY1 = PxToNdcY(y1, screenH);
+
+        // UV (attention: BMFont y=top)
+        float u0 = (float)g.x / (float)m_fontData.atlasW;
+        float v0 = (float)g.y / (float)m_fontData.atlasH;
+        float u1 = (float)(g.x + g.w) / (float)m_fontData.atlasW;
+        float v1 = (float)(g.y + g.h) / (float)m_fontData.atlasH;
+
+        // 2 triangles
+        if (vertCount + 6 <= m_textVBMaxVerts)
+        {
+            v[vertCount + 0] = { {ndcX0, ndcY1}, {u0, v1}, color };
+            v[vertCount + 1] = { {ndcX0, ndcY0}, {u0, v0}, color };
+            v[vertCount + 2] = { {ndcX1, ndcY0}, {u1, v0}, color
+        };
+
+            v[vertCount + 3] = { {ndcX0, ndcY1}, {u0, v1}, color };
+            v[vertCount + 4] = { {ndcX1, ndcY0}, {u1, v0}, color };
+            v[vertCount + 5] = { {ndcX1, ndcY1}, {u1, v1}, color };
+
+            vertCount += 6;
+        }
+
+        penX += g.xAdvance * scale;
+    }
+
+    return vertCount;
+}
+
 void UIRender::DrawSplash(ID3D12GraphicsCommandList* cmd)
 {
     // Bind PSO/RS UI
@@ -136,7 +223,7 @@ void UIRender::DrawSplash(ID3D12GraphicsCommandList* cmd)
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
     cmd->SetDescriptorHeaps(1, heaps);
 
-    UpdateTint( 1.f, 1.f, 1.f, 1.f);
+    UpdateTint( 1.f, 1.f, 1.f, 0.5f);
 
     // Root param 0 = CBV(b0)
     cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
@@ -147,6 +234,88 @@ void UIRender::DrawSplash(ID3D12GraphicsCommandList* cmd)
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     cmd->IASetVertexBuffers(0, 1, &m_quadVBV);
     cmd->DrawInstanced(6, 1, 0, 0);
+}
+
+void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screenW, float screenH)
+{
+    cmd->SetPipelineState(m_pipeline->GetUIPSO());
+    cmd->SetGraphicsRootSignature(m_pipeline->GetUIRootSignature());
+
+    ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
+    cmd->SetDescriptorHeaps(1, heaps);
+
+    // SRV atlas
+    cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);
+
+    // Tint = blanc (ou alpha)
+    // cmd->SetGraphicsRootConstantBufferView(0, ...);
+
+    char buf[64];
+    sprintf_s(buf, "SCORE: %d", score);
+
+	XMFLOAT4 col = XMFLOAT4( 1.f, 1.f, 1.f, 1.f );
+    UINT verts = CreateTextVertices(buf, 20.f, 20.f, 1.0f, screenW, screenH, col);
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmd->IASetVertexBuffers(0, 1, &m_textVBV);
+    cmd->DrawInstanced(verts, 1, 0, 0);
+}
+
+bool UIRender::ParseIntField(const std::string& token, const char* key, int& out)
+{
+    size_t p = token.find(key);
+    if (p == std::string::npos) 
+        return false;
+
+    p += strlen(key);
+    out = std::stoi(token.substr(p));
+
+    return true;
+}
+
+bool UIRender::LoadBMFontText(const std::string& path, SpriteFont& font)
+{
+    std::ifstream f(path);
+    if (!f) return false;
+
+    std::string line;
+    while (std::getline(f, line))
+    {
+        if (line.rfind("common ", 0) == 0)
+        {
+            // common lineHeight=.. scaleW=.. scaleH=..
+            std::istringstream iss(line);
+            std::string tok;
+            while (iss >> tok)
+            {
+                ParseIntField(tok, "lineHeight=", font.lineHeight);
+                ParseIntField(tok, "scaleW=", font.atlasW);
+                ParseIntField(tok, "scaleH=", font.atlasH);
+            }
+        }
+        else if (line.rfind("char ", 0) == 0)
+        {
+            int id = -1, x = 0, y = 0, w = 0, h = 0, xo = 0, yo = 0, xa = 0;
+
+            std::istringstream iss(line);
+            std::string tok;
+            while (iss >> tok)
+            {
+                ParseIntField(tok, "id=", id);
+                ParseIntField(tok, "x=", x);
+                ParseIntField(tok, "y=", y);
+                ParseIntField(tok, "width=", w);
+                ParseIntField(tok, "height=", h);
+                ParseIntField(tok, "xoffset=", xo);
+                ParseIntField(tok, "yoffset=", yo);
+                ParseIntField(tok, "xadvance=", xa);
+            }
+
+            if (id >= 0 && id < 256)
+                font.glyphs[id] = { x,y,w,h,xo,yo,xa };
+        }
+    }
+    return true;
 }
 
 #endif // !UI_RENDERER_CPP_INCLUDED

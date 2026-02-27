@@ -16,7 +16,7 @@ struct UIVertex
 {
 	XMFLOAT2 Pos;
 	XMFLOAT2 UV;
-	UINT Color;
+	XMFLOAT4 color;
 };
 
 struct UIConstants
@@ -27,6 +27,21 @@ struct UIConstants
 struct UIFrame 
 { 
 	bool showSplash = false; 
+};
+
+struct Glyph
+{
+	int x, y, w, h;       // pixels dans l'atlas
+	int xOffset, yOffset; // offset sur la ligne
+	int xAdvance;         // avance après ce caractère
+};
+
+struct SpriteFont
+{
+	int atlasW = 0;
+	int atlasH = 0;
+	int lineHeight = 0;
+	Glyph glyphs[256] = {};   // ASCII
 };
 
 class UIRender
@@ -47,21 +62,44 @@ public:
 private:
 	bool CreateFullscreenQuadVB(ID3D12Device* device);
 	bool CreateTintConstantBuffer(ID3D12Device* device);
+
+	bool CreateTextVB(ID3D12Device* device, uint32_t maxChars);
+	bool CreateTextVertices(const char* text, float x, float y, float scale,
+		float screenW, float screenH, XMFLOAT4 color);
+
 	void DrawSplash(ID3D12GraphicsCommandList* cmd);
+	void DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screenW, float screenH);
+
+	float PxToNdcX(float x, float screenW) { return (x / screenW) * 2.0f - 1.0f; }
+	float PxToNdcY(float y, float screenH) { return 1.0f - (y / screenH) * 2.0f; }
+
+	bool ParseIntField(const std::string& token, const char* key, int& out);
+	bool LoadBMFontText(const std::string& path, SpriteFont& font);
 
 	DxContext* m_dx = nullptr;
 	UploadContext* m_uploader = nullptr;
 	Pipeline* m_pipeline = nullptr;
 	DescriptorHeapManager* m_srvHeap = nullptr;
 
-	Texture2D* m_splashTex = nullptr;
-	DescriptorHandle m_splashSrv;
-
 	ID3D12Resource* m_uiCB = nullptr;
 	uint8_t* m_uiCBMapped = nullptr;
 
+	// Splash
+	Texture2D* m_splashTex = nullptr;
+	DescriptorHandle m_splashSrv;
+
 	ID3D12Resource* m_quadVB;
 	D3D12_VERTEX_BUFFER_VIEW m_quadVBV{};
+
+	// Score
+	Texture2D* m_fontAtlas = nullptr;
+	DescriptorHandle m_fontSrv;
+	SpriteFont m_fontData;
+
+	ID3D12Resource* m_textVB;
+	D3D12_VERTEX_BUFFER_VIEW m_textVBV{};
+	uint8_t* m_textVBMapped = nullptr;
+	uint32_t m_textVBMaxVerts = 0;
 };
 
 #endif // !UI_RENDER_H_INCLUDED
