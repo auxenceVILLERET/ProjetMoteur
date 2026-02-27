@@ -39,6 +39,9 @@ private:
 
 	float m_speedPlayer = 1.f;
 
+	float m_yaw = 0.0f;
+	float m_pitch = 0.0f;
+
 	Projectile* m_projectile;
 
 	Entity* CreateBody();
@@ -51,6 +54,7 @@ private:
 
 	//MOVING PLAYER
 	void MovePlayer();
+	void UpdateCameraTransform();
 
 	//LOOK WITH MOUSE
 	void MoveCamera();

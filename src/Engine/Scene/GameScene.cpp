@@ -67,7 +67,6 @@ void GameScene::Update(float dt)
 	else m_startupFlag = false;
 	//
 
-	
 	ProceduralRails();
 	MovePlayer();
 	MoveCamera();
@@ -136,51 +135,69 @@ void GameScene::DeleteRails() {
 void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
+	float sensitivity = 0.0025f;
 
-	// Kinda Cheating, can cause problem when player is being rotated;
-	//m_cam->RotateLocalX(XMConvertToRadians(delta[1]));
-	m_body->RotateLocalY(XMConvertToRadians(delta[0]));
+	m_yaw += delta[0] * sensitivity;
+	m_pitch += delta[1] * sensitivity;
+
+	m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
+	UpdateCameraTransform();
 }
+
+void GameScene::UpdateCameraTransform()
+{
+	// Position = body
+	m_cam->SetPosition(m_body->GetPosition());
+
+	// Charger rotation body
+	XMVECTOR bodyQ = XMLoadFloat4(&m_body->m_quaternion);
+
+	// Up local du body
+	XMVECTOR bodyUp = XMVector3Rotate(
+		XMVectorSet(0, 1, 0, 0),
+		bodyQ
+	);
+
+	// YAW autour du up local
+	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
+
+	// Rotation après yaw
+	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
+
+	// Right local après yaw
+	XMVECTOR bodyRight = XMVector3Rotate(
+		XMVectorSet(1, 0, 0, 0),
+		yawedBody
+	);
+
+	// Pitch autour du right
+	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
+
+	// Rotation finale
+	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
+	finalQ = XMQuaternionNormalize(finalQ);
+
+	XMFLOAT4 qFloat;
+	XMStoreFloat4(&qFloat, finalQ);
+
+	m_cam->SetRotation(qFloat);
+}
+
 void GameScene::MovePlayer() {
-	// WASD / ZQSD movement
-	float directionForward = 0;
-	float directionRight = 0;
-
-	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
-	{
-		directionForward += 1;
-	}
-	if (Input::GetKey(Keyboard::S))
-	{
-		directionForward -= 1;
-	};
-
-	if (Input::GetKey(Keyboard::A) || Input::GetKey(Keyboard::Q))
-	{
-		directionRight -= 1;
-	}
-	if (Input::GetKey(Keyboard::D))
-	{
-		directionRight += 1;
-	}
-
-
+	
+	// ROTATION AUTOUR DU RAIL
 	if (Input::GetKey(Keyboard::LEFT))
 	{
 		m_body->OrbitAround({ 0,-1,5 },{0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), m_body->GetScale().y * 2);
-		m_body->RotateZ(XMConvertToRadians(90.0f * m_deltaTime));
+		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
+
 	}
 	if (Input::GetKey(Keyboard::RIGHT))
 	{
 		m_body->OrbitAround({ 0,-1,5 }, { 0,0,1 }, XMConvertToRadians(-90.0f * m_deltaTime), m_body->GetScale().y*2);
-		m_body->RotateZ(XMConvertToRadians(-90.0f * m_deltaTime));
+		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
 	}
-
-	m_cam->MoveRight((directionRight * m_speedPlayer * m_deltaTime));
-	m_cam->MoveForward((directionForward * m_speedPlayer * m_deltaTime));
-
 }
-
 
 // -[SHOOTING]-
 void GameScene::Shooting() {
@@ -200,15 +217,8 @@ void GameScene::Shooting() {
 	}
 }
 
-
 // -[DEBUG]- //
 void GameScene::Debug() {
-	if (Input::GetMouseButtonDown(Mouse::RIGHT)) {
-		
-	}
-
-	m_cam->SetPosition(m_body->GetPosition());
-	m_cam->Translate(0, 0, -3);
 }
 
 
