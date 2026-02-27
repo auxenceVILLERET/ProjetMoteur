@@ -184,8 +184,7 @@ void Renderer::DrawObj(MeshRendererComponent& obj)
     if (mesh == nullptr) return;
 
     Texture2D* tex = nullptr;
-	if (obj.GetTextureHandle())
-        tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
+    tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
 
     // Root param 1 = SRV(t0) (si texture)
     if (tex)
