@@ -115,18 +115,18 @@ bool Mesh::CreateCube(UploadContext& uploader)
 
 bool Mesh::CreateCylinder(UploadContext& uploader)
 {
-	// Cylindre simple (16 slices)
 	const uint32_t slices = 16;
 	const float radius = 1.0f;
 	const float y0 = 0.0f;
 	const float y1 = 1.0f;
 
 	std::vector<Vertex> vertices;
-	vertices.reserve(slices * 2 + 2);
+	vertices.reserve((slices + 1) * 2 + 2);
 
-	for (uint32_t s = 0; s < slices; ++s)
+	// Anneaux (duplication du dernier slice pour la couture UV)
+	for (uint32_t s = 0; s <= slices; ++s)
 	{
-		float u = (float)s / (float)slices;
+		float u = (float)s / (float)slices; // 0..1
 		float ang = u * XM_2PI;
 		float x = cosf(ang) * radius;
 		float z = sinf(ang) * radius;
@@ -146,22 +146,20 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 
 	for (uint32_t s = 0; s < slices; ++s)
 	{
-		uint32_t sn = (s + 1) % slices;
-
 		uint32_t b0 = s * 2;
 		uint32_t t0 = s * 2 + 1;
-		uint32_t b1 = sn * 2;
-		uint32_t t1 = sn * 2 + 1;
+		uint32_t b1 = (s + 1) * 2;
+		uint32_t t1 = (s + 1) * 2 + 1;
 
-		// sides (CCW LH)
-		indices.push_back(b0); indices.push_back(t0); indices.push_back(t1);
+		// Flancs (WINDING CW)
 		indices.push_back(b0); indices.push_back(t1); indices.push_back(b1);
+		indices.push_back(b0); indices.push_back(t0); indices.push_back(t1);
 
-		// cap bottom
-		indices.push_back(centerBottom); indices.push_back(b1); indices.push_back(b0);
+		// Disque du bas (face visible depuis l'extérieur => vers -Y)
+		indices.push_back(centerBottom); indices.push_back(b0); indices.push_back(b1);
 
-		// cap top
-		indices.push_back(centerTop); indices.push_back(t0); indices.push_back(t1);
+		// Disque du haut (face visible depuis l'extérieur => vers +Y)
+		indices.push_back(centerTop); indices.push_back(t1); indices.push_back(t0);
 	}
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));

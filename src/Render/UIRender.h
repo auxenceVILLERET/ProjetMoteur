@@ -26,7 +26,8 @@ struct UIConstants
 
 struct UIFrame 
 { 
-	bool showSplash = false; 
+	bool showSplash = false;
+	int score = 0;
 };
 
 struct Glyph
@@ -41,6 +42,7 @@ struct SpriteFont
 	int atlasW = 0;
 	int atlasH = 0;
 	int lineHeight = 0;
+	int base = 0;
 	Glyph glyphs[256] = {};   // ASCII
 };
 
@@ -64,7 +66,7 @@ private:
 	bool CreateTintConstantBuffer(ID3D12Device* device);
 
 	bool CreateTextVB(ID3D12Device* device, uint32_t maxChars);
-	bool CreateTextVertices(const char* text, float x, float y, float scale,
+	UINT CreateTextVertices(const char* text, float x, float y, float scale,
 		float screenW, float screenH, XMFLOAT4 color);
 
 	void DrawSplash(ID3D12GraphicsCommandList* cmd);
@@ -88,7 +90,7 @@ private:
 	Texture2D* m_splashTex = nullptr;
 	DescriptorHandle m_splashSrv;
 
-	ID3D12Resource* m_quadVB;
+	ID3D12Resource* m_quadVB = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_quadVBV{};
 
 	// Score
@@ -96,10 +98,11 @@ private:
 	DescriptorHandle m_fontSrv;
 	SpriteFont m_fontData;
 
-	ID3D12Resource* m_textVB;
+	ID3D12Resource* m_textVB = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_textVBV{};
 	uint8_t* m_textVBMapped = nullptr;
-	uint32_t m_textVBMaxVerts = 0;
+	UINT m_textVBMaxVerts = 0;
+	UINT m_textMaxChars = 0;
 };
 
 #endif // !UI_RENDER_H_INCLUDED
