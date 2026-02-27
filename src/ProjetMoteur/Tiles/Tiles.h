@@ -40,6 +40,9 @@ public:
 	void MoveZ(float dist);
 
 	std::vector<XMFLOAT3>& GetLocalOffset() { return m_localOffset; }
+
+	void CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radius, float startAngle, float endAngle, int segments);
+
 private:
 	bool m_active;
 	bool m_isTurnR;
@@ -50,6 +53,7 @@ private:
 	int m_Out;
 
 	float m_speed = 5.0f;
+
 
 	std::vector<Entity*> m_entities;
 	std::vector<XMFLOAT3> m_localOffset;

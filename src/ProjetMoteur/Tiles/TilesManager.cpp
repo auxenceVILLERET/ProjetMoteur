@@ -20,7 +20,6 @@ TilesManager& TilesManager::Instance()
 
 void TilesManager::Initialize(ECS* ecs, Renderer* renderer)
 {
-	m_spawnZ = 0.0f;
 	m_currentConnection = 0;
 
 	Tile1* tile1 = new Tile1();
@@ -35,9 +34,9 @@ void TilesManager::Initialize(ECS* ecs, Renderer* renderer)
 	tile3->Initialize(ecs, renderer);
 	AddTile(tile3);
 
-	Tile4* tile4 = new Tile4();
-	tile4->Initialize(ecs, renderer);
-	AddTile(tile4);
+    Tile4* tile4 = new Tile4();
+    tile4->Initialize(ecs, renderer);
+    AddTile(tile4);
 
     for (int i = 0; i < 2; i++)
     {
@@ -56,11 +55,11 @@ void TilesManager::Update(float deltaTime)
     {
         Tiles* tile = m_activeTiles[i];
 
-        if (tile->GetPosition().z < -18.0f )
+        if (tile->GetPosition().z + 18.0f < 0.0f)
         {
             tile->SetActive(false);
+			tile->Update(deltaTime);
             m_activeTiles.erase(m_activeTiles.begin() + i);
-			m_spawnZ -= 18.0f;
             SpawnTile();
         }
         else
@@ -86,16 +85,25 @@ void TilesManager::SpawnTile()
     if (compatibles.empty())
         return;
 
-	int index = Random::RandomInt(0, compatibles.size() - 1);
-	std::cout << index << std::endl;
+    int index = Random::RandomInt(0, compatibles.size() - 1);
     Tiles* chosen = compatibles[index];
 
     chosen->SetActive(true);
 
-    XMFLOAT3 pos = { 0, 0, m_spawnZ };
-    chosen->SetPosition(pos);
+    float newZ;
 
-    m_spawnZ += 18.0f;
+    if (m_activeTiles.size() >= 1)
+    {
+        newZ = m_activeTiles.back()->GetPosition().z;
+        newZ += 18.0f;
+    }
+    else
+    {
+		newZ = 0.0f;
+    }
+
+    chosen->SetPosition({ 0,0,newZ });
+
     m_currentConnection = chosen->GetOut();
 
     m_activeTiles.push_back(chosen);

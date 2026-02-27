@@ -16,11 +16,21 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity);
 	GetLocalOffset().push_back(offset);
 
+	Entity* tileEntity1 = ecs->CreateEntity<Entity>();
+	tileEntity1->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+	XMFLOAT3 offset1 = { 1.0f, 0.0f, 4.0f };
+	tileEntity1->SetPosition(GetPosition().x + offset1.x, GetPosition().y + offset1.y, GetPosition().z + offset1.z);
+	tileEntity1->SetScaleVector({ 0.1f, 1.5f, 0.1f });
+	tileEntity1->RotateX(XM_PIDIV2);
+	tileEntity1->RotateY(XMConvertToRadians(315));
+	GetEntities().push_back(tileEntity1);
+	GetLocalOffset().push_back(offset1);
+
 	Entity* tileEntity2 = ecs->CreateEntity<Entity>();
 	tileEntity2->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
-	XMFLOAT3 offset2 = { 0.0f, 0.0f, 6.0f };
+	XMFLOAT3 offset2 = { 0.0f, 0.0f, 7.0f };
 	tileEntity2->SetPosition(GetPosition().x + offset2.x, GetPosition().y + offset2.y, GetPosition().z + offset2.z);
-	tileEntity2->SetScaleVector({ 0.1f, 3.0f, 0.1f });
+	tileEntity2->SetScaleVector({ 0.1f, 2.0f, 0.1f });
 	tileEntity2->RotateX(XM_PIDIV2);
 	GetEntities().push_back(tileEntity2);
 	GetLocalOffset().push_back(offset2);
