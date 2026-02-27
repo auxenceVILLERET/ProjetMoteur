@@ -13,8 +13,6 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* player = m_ecs->CreateEntity<Entity>();
 	MeshRendererComponent* mrc = player->AddComponent<MeshRendererComponent>();
 	mrc->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
-	TextureHandle smiley = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
-	mrc->SetTexture(smiley);
 
 	player->SetPosition(0.0f, 0.0f, 5.0f);
 	m_entities.push_back(player);
