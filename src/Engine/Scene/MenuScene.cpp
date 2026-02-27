@@ -25,6 +25,7 @@ void MenuScene::OnEnter()
 	{
 		entity->SetActive(true);
 	}
+
 }
 
 void MenuScene::OnExit()
@@ -38,4 +39,5 @@ void MenuScene::OnExit()
 
 void MenuScene::Update(float dt)
 {
+
 }

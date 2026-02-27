@@ -25,11 +25,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_engine = engine;
 	m_cam = camera;
 
-	// -[TEST OBJECTS]- //
-	m_cylinder = CreateCylinder();
-	m_cube = CreateCube();
-	m_sphere = CreateSphere();
-	m_moon = CreateMoon();
+	m_body = CreateBody();
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
@@ -37,11 +33,17 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);
+	// Ugly but needed until fix
+	for (Entity* entity : m_entities)
+	{
+		entity->SetActive(false);
+	}
+
 }
 
 void GameScene::OnEnter()
 {
-	for(Entity* entity : m_entities) 
+	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(true);
 	}
@@ -50,7 +52,7 @@ void GameScene::OnEnter()
 void GameScene::OnExit()
 {
 	// Clean up entities 
-	for (Entity* entity : m_entities) 
+	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(false);
 	}
@@ -59,20 +61,19 @@ void GameScene::OnExit()
 void GameScene::Update(float dt)
 {
 	m_deltaTime = dt;
-	m_projectile->Update(dt);
-	m_tilesManager->Update(dt);
-	//Test on entities
-	m_cube->RotateX(XMConvertToRadians(.01f));
-	m_cube->RotateLocalY(XMConvertToRadians(.05f));
-	m_cube->RotateZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(45.f * dt), 1);
-	m_moon->RotateLocalY(XMConvertToRadians(60.f * dt));
-	m_cylinder->RotateY(XMConvertToRadians(45.f * dt));
+	m_projectile->Update(m_deltaTime);
+	m_tilesManager->Update(dt);
+	
+	// Make a few rails by default
+	if (m_rails.size() < 3) ProceduralRails();	
+	else m_startupFlag = false;
+	//
 
 	ProceduralRails();
+	MovePlayer();
 	MoveCamera();
-	
+
 	Debug();
 
 	if(Input::GetKeyDown(Keyboard::UP_ARROW))
@@ -87,83 +88,49 @@ void GameScene::Update(float dt)
 		temp->SetPosition(0.0f,0.0f,0.0f);
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
 	}
+	Shooting();
 }
 
-// -[TEST ENTITIES]- //
-Entity* GameScene::CreateSphere()
+Entity* GameScene::CreateBody()
 {
-	Entity* sphere = m_ecs->CreateEntity<Entity>();
-	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	sphere->SetPosition(0.0f, 0.0f, 0.0f);
-	sphere->AddComponent<PlayerComponent>();
-	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
-
-	m_entities.push_back(sphere);
-	return sphere;
-}
-
-Entity* GameScene::CreateCylinder()
-{
-	Entity* cylinder = m_ecs->CreateEntity<Entity>();
-	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
-	cylinder->SetScale(.3f);
-	m_entities.push_back(cylinder);
-	return cylinder;
-}
-
-Entity* GameScene::CreateCube() {
-	Entity* cube = m_ecs->CreateEntity<Entity>();
-	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
-	cube->SetPosition(2.0f, 0.0f, 10.0f);
-	cube->SetScale(.5f);
-	//cube->AddComponent<StateMachineComponent>();
-	/*StateMachineComponent* smc = cube->GetComponent<StateMachineComponent>();
-	smc->SetStateMachine(cube, m_ecs);
-	smc->GetStateMachine()->SetOwner(cube);
-	smc->GetStateMachine()->ChangeState(new EnemyIdleState());*/
-
-	m_entities.push_back(cube);
-	return cube;
-}
-
-Entity* GameScene::CreateMoon() {
-	Entity* moon = m_ecs->CreateEntity<Entity>();
-	moon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
-	moon->SetPosition(m_cylinder->GetPosition().x, m_cylinder->GetPosition().y, m_cylinder->GetPosition().z);
-	moon->SetScale(.1f);
-	m_entities.push_back(moon);
-	return moon;
+	Entity* body = m_ecs->CreateEntity<Entity>();
+	body->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	body->SetPosition(0, 0, 5);
+	body->SetScale({ .25,.3,.25 });
+	m_entities.push_back(body);
+	return body;
 }
 
 Entity* GameScene::CreateFloor()
 {
 	Entity* floor = m_ecs->CreateEntity<Entity>();
 	floor->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	floor->SetPosition(0,-2.5f,0);
-	floor->SetScaleVector({ 50,0.1f,50 });
+	floor->SetPosition(0, -2.5f, 0);
+	floor->SetScale({ 50,0.1f,50 });
 	m_entities.push_back(floor);
 	return floor;
 }
-
-
 
 // -[RAIL GENERATION]- //
 void GameScene::CreateRail()
 {
 	m_rail = m_ecs->CreateEntity<Entity>();
 	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
-	m_rail->SetScaleVector({ .1f, 3.0f, .1f });
+	m_rail->SetScale({ .1f, 3.0f, .1f });
 	m_rail->RotateX(XM_PIDIV2);
 	m_entities.push_back(m_rail);
 }
 
-void GameScene::ProceduralRails()
+void GameScene::ProceduralRails() // TEMP
 {
-	if (Input::GetKeyDown(Keyboard::SPACE)) {
+	if (Input::GetKeyDown(Keyboard::SPACE) || m_startupFlag) {
 		CreateRail();
-		float nextPos = 0 ;
-		if (m_rails.size() > 0) nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
+		float nextPos = 0;
+
+		if (m_rails.size() > 0)
+		{
+			nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
+		}
 
 		m_rail->SetPosition(0.0f, -1.0f, nextPos);
 		m_rails.push_back(m_rail);
@@ -183,43 +150,90 @@ void GameScene::DeleteRails() {
 void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
+	float sensitivity = 0.0025f;
 
-	// Kinda Cheating, can cause problem when player is being rotated;
+	m_yaw += delta[0] * sensitivity;
+	m_pitch += delta[1] * sensitivity;
 
-	m_cam->RotateY(XMConvertToRadians(delta[0]));
-	m_cam->RotateLocalX(XMConvertToRadians(delta[1]));
+	m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
+	UpdateCameraTransform();
+}
 
-	// WASD / ZQSD movement
-	float directionForward = 0;
-	float directionRight = 0;
+void GameScene::UpdateCameraTransform()
+{
+	// Position = body
+	m_cam->SetPosition(m_body->GetPosition());
 
-	if (Input::GetKey(Keyboard::Z) || Input::GetKey(Keyboard::W))
+	// Charger rotation body
+	XMVECTOR bodyQ = XMLoadFloat4(&m_body->m_quaternion);
+
+	// Up local du body
+	XMVECTOR bodyUp = XMVector3Rotate(
+		XMVectorSet(0, 1, 0, 0),
+		bodyQ
+	);
+
+	// YAW autour du up local
+	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
+
+	// Rotation apr�s yaw
+	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
+
+	// Right local apr�s yaw
+	XMVECTOR bodyRight = XMVector3Rotate(
+		XMVectorSet(1, 0, 0, 0),
+		yawedBody
+	);
+
+	// Pitch autour du right
+	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
+
+	// Rotation finale
+	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
+	finalQ = XMQuaternionNormalize(finalQ);
+
+	XMFLOAT4 qFloat;
+	XMStoreFloat4(&qFloat, finalQ);
+
+	m_cam->SetRotation(qFloat);
+}
+
+void GameScene::MovePlayer() {
+	
+	// ROTATION AUTOUR DU RAIL
+	if (Input::GetKey(Keyboard::LEFT))
 	{
-		directionForward += 1;
-	}	
-	if (Input::GetKey(Keyboard::S))
-	{
-		directionForward -= 1;
-	};
+		m_body->OrbitAround({ 0,-1,5 },{0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), m_body->GetScale().y * 2);
+		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
 
-	if (Input::GetKey(Keyboard::A) || Input::GetKey(Keyboard::Q))
-	{
-		directionRight -= 1;
 	}
-	if (Input::GetKey(Keyboard::D))
+	if (Input::GetKey(Keyboard::RIGHT))
 	{
-		directionRight += 1;
+		m_body->OrbitAround({ 0,-1,5 }, { 0,0,1 }, XMConvertToRadians(-90.0f * m_deltaTime), m_body->GetScale().y*2);
+		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
 	}
+}
 
-	m_cam->MoveRight((directionRight * m_speedPlayer * m_deltaTime));
-	m_cam->MoveForward((directionForward * m_speedPlayer * m_deltaTime));
+// -[SHOOTING]-
+void GameScene::Shooting() {
+	if (Input::GetMouseButtonDown(Mouse::LEFT))
+	{
+		Entity* temp = m_projectile->GetAvaibleProjectile();
+		if (temp == nullptr) return; // No projectile available in the pool
+
+		XMFLOAT3 bulletSpeed = m_cam->GetForward();
+		float speedMult = 5;
+
+		bulletSpeed.x *= speedMult; bulletSpeed.y *= speedMult; bulletSpeed.z *= speedMult;
+
+		temp->SetPosition(m_cam->GetPosition());
+		temp->GetComponent<RigidBodyComponent>()->SetVelocity(bulletSpeed);
+			
+	}
 }
 
 // -[DEBUG]- //
 void GameScene::Debug() {
-	if (Input::GetMouseButton(Mouse::LEFT)) {
-
-	}
 }
 
 

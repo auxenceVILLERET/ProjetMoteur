@@ -25,6 +25,8 @@ public:
 
 	//POSITION
 	void SetPosition(float x, float y, float z); // set XYZ
+	void SetPosition(XMFLOAT3 vector); // set XYZ
+
 	void SetPositionX(float x); // set XYZ
 	void SetPositionY(float y); // set Y
 	void SetPositionZ(float z); // set Z
@@ -42,8 +44,8 @@ public:
 	//SCALING
 	void SetScale(float scale); // set the scale 
 	void Scale(float scale); // multiply current scale
-	void SetScaleVector(XMFLOAT3 vectorScale); // set the scale with XYZ Vector
-	void ScaleVector(XMFLOAT3 vectorScale); // multiply current scale with XYZ Vector
+	void SetScale(XMFLOAT3 vectorScale); // set the scale with XYZ Vector
+	void Scale(XMFLOAT3 vectorScale); // multiply current scale with XYZ Vector
 	XMFLOAT3 GetScale() const { return m_scale; } // get the scale of the obj
 
 	void CoutScale(); // DEBUG
@@ -56,10 +58,18 @@ public:
 	void RotateZ(float angle); // Rotate in world
 	void RotateLocalZ(float angle); // Rotate locally
 
-	void SetRotation(XMFLOAT4 quaternion);
+	void SetRotation(const XMFLOAT4& quaternion);
 	void SetRotationX(float angle);
 	void SetRotationY(float angle);
 	void SetRotationZ(float angle);
+
+	void SetForward(XMFLOAT3 vector);
+	void SetRight(XMFLOAT3 vector);
+	void SetUp(XMFLOAT3 vector);
+
+	XMFLOAT3 GetForward();
+	XMFLOAT3 GetRight();
+	XMFLOAT3 GetUp();
 
 
 	void LookAt(float x, float y, float z); // look at a specific coords
