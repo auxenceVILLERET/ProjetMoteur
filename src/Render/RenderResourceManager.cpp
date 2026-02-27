@@ -23,6 +23,8 @@ void RenderResourceManager::Initialize(DxContext* dx, UploadContext* uploader, D
 	m_dx = dx;
 	m_uploader = uploader;
 	m_srvHeap = srvHeap;
+
+    CreateWhiteTexture1x1();
 }
 
 Mesh* RenderResourceManager::ResolveMesh(MeshHandle h)
@@ -44,17 +46,20 @@ Mesh* RenderResourceManager::ResolveMesh(MeshHandle h)
 
 Texture2D* RenderResourceManager::ResolveTexture(TextureHandle h)
 {
-    if (!h || !m_dx || !m_uploader || !m_srvHeap) return nullptr;
+    if (!h || !m_dx || !m_uploader || !m_srvHeap)
+        return m_defaultTexture;
 
     auto it = m_textures.find(h.id);
     if (it != m_textures.end())
         return it->second.get();
 
     const TextureDesc* desc = ResourceManager::Instance().GetTextureDesc(h);
-    if (desc == nullptr) return nullptr;
+    if (!desc)
+        return m_defaultTexture;
 
     Texture2D* created = CreateTextureFromDesc(*desc);
-    if (created == nullptr) return nullptr;
+    if (!created)
+        return m_defaultTexture;
 
     m_textures.emplace(h.id, std::unique_ptr<Texture2D>(created));
     return created;
@@ -102,6 +107,16 @@ Texture2D* RenderResourceManager::CreateTextureFromDesc(const TextureDesc& desc)
         return nullptr;
 
     return t.release();
+}
+
+void RenderResourceManager::CreateWhiteTexture1x1()
+{
+    ID3D12Device* device = m_dx->GetDevice();
+    if (device == nullptr)
+        return;
+
+	m_defaultTexture = new Texture2D();
+    m_defaultTexture->LoadFromFileWIC(device, m_uploader, m_srvHeap, L"../../res/DefaultTexture.png", true);
 }
 
 void RenderResourceManager::FinalizeUpload()

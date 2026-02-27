@@ -27,6 +27,7 @@ private:
 
 	Mesh* CreateMeshPreset(MeshPreset mesh);
 	Texture2D* CreateTextureFromDesc(const TextureDesc& desc);
+	void CreateWhiteTexture1x1();
 
 	DxContext* m_dx = nullptr;
 	UploadContext* m_uploader = nullptr;
@@ -34,6 +35,8 @@ private:
 
 	std::unordered_map<uint32_t, std::unique_ptr<Mesh>> m_meshes;
 	std::unordered_map<uint32_t, std::unique_ptr<Texture2D>> m_textures;
+
+	Texture2D* m_defaultTexture = nullptr;
 };
 
 #endif // !RENDERRESSOURCEMANAGER_H
