@@ -1,6 +1,6 @@
 #include "ProjetMoteur/Tiles/Tiles.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h"
+#include "Engine/ResourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include <cmath>
 #include "Engine/ECS/ECS.h"
@@ -22,7 +22,7 @@ void Tiles::CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radiu
 		XMFLOAT3 offset = { x , 0.0f, z  };
 
 		Entity* tileEntity = ecs->CreateEntity<Entity>();
-		tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+		tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 		tileEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 		tileEntity->SetScale({ 0.1f, 0.3f, 0.1f });
 		tileEntity->RotateX(XM_PIDIV2);

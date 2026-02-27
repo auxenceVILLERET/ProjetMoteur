@@ -91,7 +91,7 @@ void GameScene::Update(float dt)
 Entity* GameScene::CreateBody()
 {
 	Entity* body = m_ecs->CreateEntity<Entity>();
-	body->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	body->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	body->SetPosition(0, 0, 5);
 	body->SetScale({ .25,.3,.25 });
 	m_entities.push_back(body);
@@ -101,7 +101,7 @@ Entity* GameScene::CreateBody()
 Entity* GameScene::CreateFloor()
 {
 	Entity* floor = m_ecs->CreateEntity<Entity>();
-	floor->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	floor->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	floor->SetPosition(0, -2.5f, 0);
 	floor->SetScale({ 50,0.1f,50 });
 	m_entities.push_back(floor);
@@ -112,7 +112,7 @@ Entity* GameScene::CreateFloor()
 void GameScene::CreateRail()
 {
 	m_rail = m_ecs->CreateEntity<Entity>();
-	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	m_rail->SetScale({ .1f, 3.0f, .1f });
 	m_rail->RotateX(XM_PIDIV2);
 	m_entities.push_back(m_rail);

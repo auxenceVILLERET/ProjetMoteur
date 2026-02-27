@@ -1,6 +1,6 @@
 #include "SandboxScene.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h" 
+#include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
@@ -89,7 +89,7 @@ void SandboxScene::Update(float dt)
 Entity* SandboxScene::CreateSphere()
 {
 	Entity* sphere = m_ecs->CreateEntity<Entity>();
-	sphere->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	sphere->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
 	sphere->SetPosition(-2.0f, 0.0f, 10.0f);
 	sphere->AddComponent<PlayerComponent>();
 	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
@@ -101,7 +101,7 @@ Entity* SandboxScene::CreateSphere()
 Entity* SandboxScene::CreateCylinder()
 {
 	Entity* cylinder = m_ecs->CreateEntity<Entity>();
-	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
 	cylinder->SetScale(.3f);
 	m_entities.push_back(cylinder);
@@ -110,7 +110,7 @@ Entity* SandboxScene::CreateCylinder()
 
 Entity* SandboxScene::CreateCube() {
 	Entity* cube = m_ecs->CreateEntity<Entity>();
-	cube->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
+	cube->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), m_renderer);
 	cube->SetPosition(2.0f, 0.0f, 10.0f);
 	cube->SetScale(.5f);
 
@@ -120,7 +120,7 @@ Entity* SandboxScene::CreateCube() {
 
 Entity* SandboxScene::CreateMoon() {
 	Entity* moon = m_ecs->CreateEntity<Entity>();
-	moon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	moon->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
 	moon->SetPosition(m_cylinder->GetPosition().x, m_cylinder->GetPosition().y, m_cylinder->GetPosition().z);
 	moon->SetScale(.1f);
 	m_entities.push_back(moon);
@@ -129,7 +129,7 @@ Entity* SandboxScene::CreateMoon() {
 
 Entity* SandboxScene::CreateMoonMoon() {
 	Entity* moonMoon = m_ecs->CreateEntity<Entity>();
-	moonMoon->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetSphere(), m_renderer);
+	moonMoon->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
 	moonMoon->SetPosition(m_moon->GetPosition().x, m_moon->GetPosition().y, m_moon->GetPosition().z);
 	moonMoon->SetScale(.05f);
 	m_entities.push_back(moonMoon);
@@ -139,7 +139,7 @@ Entity* SandboxScene::CreateMoonMoon() {
 Entity* SandboxScene::CreateFloor()
 {
 	Entity* floor = m_ecs->CreateEntity<Entity>();
-	floor->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	floor->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	floor->SetPosition(0, -2.5f, 0);
 	floor->SetScale({ 50,0.1f,50 });
 	m_entities.push_back(floor);
@@ -150,7 +150,7 @@ Entity* SandboxScene::CreateFloor()
 void SandboxScene::CreateRail()
 {
 	m_rail = m_ecs->CreateEntity<Entity>();
-	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), m_renderer);
+	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
 	m_rail->SetScale({ .1f, 3.0f, .1f });
 	m_rail->RotateX(XM_PIDIV2);
 	m_entities.push_back(m_rail);

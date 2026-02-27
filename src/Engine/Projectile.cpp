@@ -1,6 +1,6 @@
 #include "Projectile.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h"
+#include "Engine/ResourceManager.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
 #include "Engine/Engine.h"
@@ -41,7 +41,7 @@ void Projectile::CreatePulling(int poolSize)
 	{
 		Entity* projectile = m_ecs->CreateEntity<Entity>();
 		projectile->SetActive(false);
-		projectile->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetMeshByShape(m_shape), m_renderer);
+		projectile->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
 		projectile->SetScale(m_size);
 		projectile->AddComponent<RigidBodyComponent>()->SetUseGravity(false);
 		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);

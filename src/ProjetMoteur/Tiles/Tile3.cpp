@@ -2,13 +2,13 @@
 #include "Engine/ECS/ECS.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h"
+#include "Engine/ResourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 
 void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 {
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
-	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset = { 2.0f, 0.0f, 0.0f };
 	tileEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	tileEntity->SetScale({ 0.1f, 3.0f, 0.1f });
@@ -17,7 +17,7 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetLocalOffset().push_back(offset);
 
 	Entity* tileEntity1 = ecs->CreateEntity<Entity>();
-	tileEntity1->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+	tileEntity1->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset1 = { 1.0f, 0.0f, 4.0f };
 	tileEntity1->SetPosition(GetPosition().x + offset1.x, GetPosition().y + offset1.y, GetPosition().z + offset1.z);
 	tileEntity1->SetScale({ 0.1f, 1.5f, 0.1f });
@@ -27,7 +27,7 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetLocalOffset().push_back(offset1);
 
 	Entity* tileEntity2 = ecs->CreateEntity<Entity>();
-	tileEntity2->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+	tileEntity2->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset2 = { 0.0f, 0.0f, 7.0f };
 	tileEntity2->SetPosition(GetPosition().x + offset2.x, GetPosition().y + offset2.y, GetPosition().z + offset2.z);
 	tileEntity2->SetScale({ 0.1f, 2.0f, 0.1f });
@@ -36,7 +36,7 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetLocalOffset().push_back(offset2);
 
 	Entity* tileEntity3 = ecs->CreateEntity<Entity>();
-	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
+	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset3 = { 0.0f, 0.0f, 12.0f };
 	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
 	tileEntity3->SetScale({ 0.1f, 3.0f, 0.1f });
