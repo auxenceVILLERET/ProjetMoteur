@@ -37,11 +37,6 @@ void TilesManager::Initialize(ECS* ecs, Renderer* renderer)
     Tile4* tile4 = new Tile4();
     tile4->Initialize(ecs, renderer);
     AddTile(tile4);
-
-    for (int i = 0; i < 2; i++)
-    {
-        SpawnTile();
-    }
 }
 
 void TilesManager::AddTile(Tiles* tile)
@@ -51,6 +46,7 @@ void TilesManager::AddTile(Tiles* tile)
 
 void TilesManager::Update(float deltaTime)
 {
+
     for (int i = 0; i < m_activeTiles.size(); )
     {
         Tiles* tile = m_activeTiles[i];
@@ -58,7 +54,6 @@ void TilesManager::Update(float deltaTime)
         if (tile->GetPosition().z + 18.0f < 0.0f)
         {
             tile->SetActive(false);
-			tile->Update(deltaTime);
             m_activeTiles.erase(m_activeTiles.begin() + i);
             SpawnTile();
         }
@@ -107,4 +102,30 @@ void TilesManager::SpawnTile()
     m_currentConnection = chosen->GetOut();
 
     m_activeTiles.push_back(chosen);
+}
+
+
+void TilesManager::OnEnter()
+{
+    m_currentConnection = 0;
+    m_activeTiles.clear();
+
+    for (Tiles* tile : m_tiles)
+    {
+        tile->SetActive(false);
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        SpawnTile();
+    }
+}
+
+void TilesManager::OnExit()
+{
+    for (Tiles* tile : m_tiles)
+    {
+        tile->SetActive(false);
+    }
+    m_activeTiles.clear();
 }

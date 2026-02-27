@@ -43,6 +43,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 void GameScene::OnEnter()
 {
+	m_tilesManager->OnEnter();
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(true);
@@ -52,6 +53,7 @@ void GameScene::OnEnter()
 void GameScene::OnExit()
 {
 	// Clean up entities 
+	m_tilesManager->OnExit();
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(false);
@@ -68,7 +70,6 @@ void GameScene::Update(float dt)
 	// Make a few rails by default
 	if (m_rails.size() < 3) ProceduralRails();	
 	else m_startupFlag = false;
-	//
 
 	ProceduralRails();
 	MovePlayer();

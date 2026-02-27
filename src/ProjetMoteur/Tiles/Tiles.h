@@ -12,7 +12,7 @@ class Tiles
 {
 public:
 	virtual void Initialize(ECS* ecs, Renderer* renderer) = 0;
-	void SetActive(bool active) {m_active = active;}
+	void SetActive(bool active);
 	bool IsActive() const { return m_active; }
 
 	void SetIsTurnR(bool isTurnR) { m_isTurnR = isTurnR; }

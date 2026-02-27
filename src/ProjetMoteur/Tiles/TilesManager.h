@@ -17,6 +17,10 @@ public:
 	void Update(float deltaTime);
 
 	void SpawnTile();
+	
+	void OnEnter();
+	void OnExit();
+
 private:
 
 	std::vector<Tiles*> m_tiles;

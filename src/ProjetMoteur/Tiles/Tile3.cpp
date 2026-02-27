@@ -49,37 +49,18 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	SetIsTurnR(false);
 	SetIn(2);
 	SetOut(0);
-
-	if (this->IsActive() == false)
-	{
-		for (Entity* entity : GetEntities())
-		{
-			entity->SetActive(false);
-		}
-	}
 }
 
 void Tile3::Update(float deltaTime)
 {
-	if (this->IsActive() == false)
+	MoveZ(-(GetSpeed() * deltaTime));
+
+	for (int i = 0; i < GetEntities().size(); i++)
 	{
-		for (Entity* entity : GetEntities())
-		{
-			entity->SetActive(false);
-		}
+		Entity* entity = GetEntities()[i];
+		XMFLOAT3 offset = GetLocalOffset()[i];
+
+		entity->SetActive(true);
+		entity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	}
-	else
-	{
-		MoveZ(-(GetSpeed() * deltaTime));
-
-		for (int i = 0; i < GetEntities().size(); i++)
-		{
-			Entity* entity = GetEntities()[i];
-			XMFLOAT3 offset = GetLocalOffset()[i];
-
-			entity->SetActive(true);
-			entity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
-		}
-	}
-
 }

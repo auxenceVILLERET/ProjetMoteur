@@ -15,7 +15,6 @@ public:
 	float m_nearPlane; // minimal distance to show
 	float m_farPlane; // maximal distance to show
 
-	Transform transform; // Doesnt work until merge with [dev-transform] branch
 
 public:
 	Camera(); //init
@@ -28,6 +27,6 @@ public:
 	void SetPosition(float x, float y, float z);
 
 	// Set frustum -> the "Lens" of the camera, dictates how the view behaves
-	void SetLens(float fov, float aspectRatio, float near, float far);
+	void SetLens(float fov, float aspectRatio, float nearP, float farP);
 };
 

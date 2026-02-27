@@ -32,3 +32,12 @@ void Tiles::CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radiu
 	}
 }
 
+void Tiles::SetActive(bool active)
+{
+	m_active = active;
+
+	for (Entity* entity : m_entities)
+	{
+		entity->SetActive(active);
+	}
+}
