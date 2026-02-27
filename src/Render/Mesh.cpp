@@ -116,17 +116,20 @@ bool Mesh::CreateCube(UploadContext& uploader)
 bool Mesh::CreateCylinder(UploadContext& uploader)
 {
 	// Cylindre simple (16 slices)
+	// IMPORTANT : on duplique le dernier slice (slices+1) pour fermer la couture UV
+	// et on corrige l'ordre des indices des flancs pour respecter le même winding
+	// que CreateCube (faces CCW si votre rasterizer est réglé sur FrontCounterClockwise = TRUE).
 	const uint32_t slices = 16;
 	const float radius = 1.0f;
 	const float y0 = 0.0f;
 	const float y1 = 1.0f;
 
 	std::vector<Vertex> vertices;
-	vertices.reserve(slices * 2 + 2);
+	vertices.reserve((slices + 1) * 2 + 2);
 
-	for (uint32_t s = 0; s < slices; ++s)
+	for (uint32_t s = 0; s <= slices; ++s)
 	{
-		float u = (float)s / (float)slices;
+		float u = (float)s / (float)slices; // 0..1
 		float ang = u * XM_2PI;
 		float x = cosf(ang) * radius;
 		float z = sinf(ang) * radius;
@@ -146,21 +149,19 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 
 	for (uint32_t s = 0; s < slices; ++s)
 	{
-		uint32_t sn = (s + 1) % slices;
-
 		uint32_t b0 = s * 2;
 		uint32_t t0 = s * 2 + 1;
-		uint32_t b1 = sn * 2;
-		uint32_t t1 = sn * 2 + 1;
+		uint32_t b1 = (s + 1) * 2;
+		uint32_t t1 = (s + 1) * 2 + 1;
 
-		// sides (CCW LH)
-		indices.push_back(b0); indices.push_back(t0); indices.push_back(t1);
-		indices.push_back(b0); indices.push_back(t1); indices.push_back(b1);
+		// Flancs : ordre corrigé (quad = b0 -> b1 -> t1 -> t0)
+		indices.push_back(b0); indices.push_back(b1); indices.push_back(t1);
+		indices.push_back(b0); indices.push_back(t1); indices.push_back(t0);
 
-		// cap bottom
+		// Disque du bas (normal vers -Y) : ordre inversé
 		indices.push_back(centerBottom); indices.push_back(b1); indices.push_back(b0);
 
-		// cap top
+		// Disque du haut (normal vers +Y)
 		indices.push_back(centerTop); indices.push_back(t0); indices.push_back(t1);
 	}
 
