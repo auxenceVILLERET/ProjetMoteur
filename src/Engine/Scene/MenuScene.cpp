@@ -1,6 +1,6 @@
 #include "MenuScene.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h" 
+#include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
@@ -12,7 +12,10 @@ void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_renderer = renderer;
 
 	Entity* menuEntity = m_ecs->CreateEntity<Entity>();
-	menuEntity->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCube(), m_renderer);
+	MeshRendererComponent* mrc = menuEntity->AddComponent<MeshRendererComponent>();
+	mrc->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), m_renderer);
+	TextureHandle test = ResourceManager::Instance().LoadTexture(L"../../res/testTexture.png");
+	mrc->SetTexture(test);
 	
 	menuEntity->SetPosition(0.0f, 0.0f, 5.0f);
 	
@@ -39,5 +42,4 @@ void MenuScene::OnExit()
 
 void MenuScene::Update(float dt)
 {
-
 }

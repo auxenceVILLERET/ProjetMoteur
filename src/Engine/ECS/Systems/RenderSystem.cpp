@@ -4,7 +4,7 @@
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Renderer.h"
-#include "Engine/Mesh.h"
+#include "Mesh.h"
 
 void RenderSystem::Update(ECS& ecs, float deltaTime)
 {

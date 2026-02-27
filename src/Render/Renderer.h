@@ -8,16 +8,18 @@
 
 #include "Helpers/d3dUtil.h"
 
-// Link necessary d3d12 libraries.
+//d3d12 libraries.
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib, "D3D12.lib")
 #pragma comment(lib, "dxgi.lib")
+
+#include "DescriptorHeapManager.h"
+#include "UIRender.h"
 
 class Window;
 class DxContext;
 class SwapChainTargets;
 class Pipeline;
-class DescriptorHeapManager;
 class UploadContext;
 class Entity;
 class MeshRendererComponent;
@@ -27,8 +29,8 @@ using namespace DirectX;
 class Renderer
 {
 public:
-	Renderer();
-	~Renderer();
+	Renderer() = default;
+	~Renderer() { Shutdown(); }
 
 	bool Initialize(Window* window, Entity* camera);
 	void Shutdown();
@@ -37,8 +39,6 @@ public:
 	void Render(std::vector<MeshRendererComponent*> vMesh);
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
-
-	bool CreateTestPipeline();
 
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
@@ -54,13 +54,14 @@ private:
 	Window* m_pWindow = nullptr;
 	Entity* m_pCamera = nullptr;
 
+	UIRender* m_ui = nullptr;
+	UIFrame m_uiFrame;
+
 	DxContext* m_pDxContext = nullptr;
 	SwapChainTargets* m_pSwapChainTargets = nullptr;
 	Pipeline* m_pPipeline = nullptr;
 	DescriptorHeapManager* m_pDescriptorHeapManager = nullptr;
 	UploadContext* m_pUploadContext = nullptr;
-
-	float angle = 0.f;
 };
 
 #endif

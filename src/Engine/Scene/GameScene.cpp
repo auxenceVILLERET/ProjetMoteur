@@ -1,6 +1,6 @@
 #include "GameScene.h"
 #include "Engine/ECS/Entity.h"
-#include "Engine/RessourceManager.h" 
+#include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"

@@ -1,18 +1,19 @@
 #pragma once
 #include "DirectXMath.h"
 #include <d3d12.h>
+#include <vector>
 
 using namespace DirectX;
 
 struct Vertex
 {
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
+	XMFLOAT2 UV;
 };
 
 struct ObjectConstants
 {
-	DirectX::XMFLOAT4X4 WorldViewProj;
+	XMFLOAT4X4 WorldViewProj;
 };
 
 class UploadContext;
@@ -23,23 +24,28 @@ public:
 	Mesh() = default;
 	~Mesh() { Release(); }
 
-	bool Initialize(UploadContext& uploader, const Vertex* vertices, uint32_t vertexCount, const uint16_t* indices, uint32_t indexCount);
+	bool Initialize(UploadContext& uploader, std::vector<Vertex> vertices, std::vector<uint32_t> indices);
 
 	bool CreateTriangle(UploadContext& uploader);
 	bool CreateQuad(UploadContext& uploader);
 	bool CreateCube(UploadContext& uploader);
 	bool CreateCylinder(UploadContext& uploader);
-	bool CreateIco(UploadContext& uploader);
+	bool CreateSphere(UploadContext& uploader);
 
-	void FinalizeUpload(); // libère les upload buffers (après EndAndWait)
-
+	void FinalizeUpload();
 	void Draw(ID3D12GraphicsCommandList* cmdList) const;
 
 	uint32_t IndexCount() const { return m_indexCount; }
 
+	const std::vector<Vertex>& Vertices() const { return m_vertices; }
+	const std::vector<uint32_t>& Indices() const { return m_indices; }
+
 	void Release();
 
 private:
+	std::vector<Vertex> m_vertices;
+	std::vector<uint32_t> m_indices;
+
 	ID3D12Resource* m_pVb = nullptr;
 	ID3D12Resource* m_pVbUpload = nullptr;
 	D3D12_VERTEX_BUFFER_VIEW m_vbView{};

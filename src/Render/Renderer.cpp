@@ -7,9 +7,10 @@
 #include "DxContext.h"
 #include "SwapChainTargets.h"
 #include "Pipeline.h"
-#include "DescriptorHeapManager.h"
 #include "UploadContext.h"
-#include "Engine/Mesh.h"
+#include "Mesh.h"
+#include "Texture2D.h"
+#include "RenderResourceManager.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
@@ -18,15 +19,6 @@ inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT off
 {
     h.ptr += static_cast<SIZE_T>(offsetInDescriptors) * descriptorSize;
     return h;
-}
-
-Renderer::Renderer()
-{
-}
-
-Renderer::~Renderer()
-{
-    Shutdown();
 }
 
 bool Renderer::Initialize(Window* window, Entity* camera)
@@ -70,31 +62,34 @@ bool Renderer::Initialize(Window* window, Entity* camera)
 
     // 3) Descriptor heap manager (CBV/SRV/UAV shader-visible)
     m_pDescriptorHeapManager = new DescriptorHeapManager();
-    if (m_pDescriptorHeapManager->Initialize(
-        m_pDxContext->GetDevice(),
-        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-        1024,
-        true) == false)
-    {
+    if (m_pDescriptorHeapManager->Initialize(m_pDxContext->GetDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024, true) == false)
         return false;
-    }
 
     // 4) Upload context
     m_pUploadContext = new UploadContext();
     if (m_pUploadContext->Initialize(m_pDxContext->GetDevice(), m_pDxContext->GetCommandQueue()) == false)
         return false;
 
-    // 5) Pipeline (optionnel ici si tu n’as pas encore de shaders)
-    //    -> Laisse-le commenté tant que tu n’as pas de fichiers HLSL.
+    // 5) Pipeline
     m_pPipeline = new Pipeline();
-    if (CreateTestPipeline() == false) return false;
+    if (m_pPipeline->InitializePipeline(m_pDxContext->GetDevice()) == false)
+		return false;
+
+	//6) Render resource manager
+    RenderResourceManager::Instance().Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager);
+
+	//7) UI renderer
+	m_ui = new UIRender();
+	if (m_ui->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
+		return false;
+
+	m_uiFrame.showSplash = true;
 
     return true;
 }
 
 void Renderer::Shutdown()
 {
-
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
@@ -163,45 +158,44 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     cmd->SetPipelineState(m_pPipeline->GetPSO());
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
+
+    ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
+    cmd->SetDescriptorHeaps(1, &heaps);
+
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
-    {
         DrawObj(*m);
-    }
+
+	//m_ui->Render(cmd, m_uiFrame);
 
     EndFrame();
 }
 
 void Renderer::DrawObj(MeshRendererComponent& obj)
 {
-    // root param 0 = CBV(b0)
     ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+
+    // Root param 0 = CBV(b0)
     cmd->SetGraphicsRootConstantBufferView(0, obj.GetCbAddress());
-    obj.GetMesh()->Draw(cmd);
-}
 
-bool Renderer::CreateTestPipeline()
-{
-    std::vector<D3D12_INPUT_ELEMENT_DESC> layout =
+    // Resolve GPU resources
+    Mesh* mesh = RenderResourceManager::Instance().ResolveMesh(obj.GetMeshHandle());
+    if (mesh == nullptr) return;
+
+    Texture2D* tex = nullptr;
+	if (obj.GetTextureHandle())
+        tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
+
+    // Root param 1 = SRV(t0) (si texture)
+    if (tex)
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        ID3D12DescriptorHeap* heaps[] = { m_pDescriptorHeapManager->GetHeap() };
+        cmd->SetDescriptorHeaps(1, heaps);
+        cmd->SetGraphicsRootDescriptorTable(1, tex->GetSrv().gpu);
+    }
 
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
-          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-    };
-
-    // Formats identiques à SwapChainTargets (R8G8B8A8 + D24S8)
-    return m_pPipeline->InitializeGraphics(
-        m_pDxContext->GetDevice(),
-        L"../../src/Render/Simple.hlsl", "VSMain",
-        L"../../src/Render/Simple.hlsl", "PSMain",
-        layout,
-        DXGI_FORMAT_R8G8B8A8_UNORM,
-        DXGI_FORMAT_D24_UNORM_S8_UINT,
-        true
-    );
+    mesh->Draw(cmd);
 }
 
 void Renderer::BeginFrame()
@@ -246,7 +240,7 @@ void Renderer::BeginFrame()
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    float clearColor[4] = { 0.08f, 0.10f, 0.14f, 1.0f };
+    float clearColor[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
@@ -296,4 +290,5 @@ XMFLOAT4X4 Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
     XMStoreFloat4x4(&wvpFloat4x4, wvp);
     return wvpFloat4x4;
 }
+
 #endif // !RENDERER_CPP_INCLUDED
