@@ -13,8 +13,6 @@ void MenuScene::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* menuEntity = m_ecs->CreateEntity<Entity>();
 	MeshRendererComponent* mrc = menuEntity->AddComponent<MeshRendererComponent>();
 	mrc->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), m_renderer);
-	TextureHandle test = ResourceManager::Instance().LoadTexture(L"../../res/testTexture.png");
-	mrc->SetTexture(test);
 	
 	menuEntity->SetPosition(0.0f, 0.0f, 5.0f);
 	
@@ -27,6 +25,10 @@ void MenuScene::OnEnter()
 	{
 		entity->SetActive(true);
 	}
+	UIFrame frame;
+	frame.showSplash = false;
+	frame.score = 10;
+	m_renderer->SetUiFrame(frame);
 }
 
 void MenuScene::OnExit()

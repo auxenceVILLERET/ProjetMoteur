@@ -40,6 +40,8 @@ public:
 	void DrawObj(MeshRendererComponent& obj);
 	XMFLOAT4X4 BuildWorldViewProjMatrix(XMMATRIX& world);
 
+	void SetUiFrame(const UIFrame& frame) { m_uiFrame = frame; }
+
 	Window* GetWindow() const { return m_pWindow; }
 	DxContext* GetDxContext() const { return m_pDxContext; }
 	SwapChainTargets* GetSwapChainTargets() const { return m_pSwapChainTargets; }
