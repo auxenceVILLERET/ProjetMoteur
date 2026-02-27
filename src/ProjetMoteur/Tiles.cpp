@@ -24,7 +24,7 @@ void Tiles::CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radiu
 		Entity* tileEntity = ecs->CreateEntity<Entity>();
 		tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(RessourceManager::Instance().GetCylinder(), renderer);
 		tileEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
-		tileEntity->SetScaleVector({ 0.1f, 0.3f, 0.1f });
+		tileEntity->SetScale({ 0.1f, 0.3f, 0.1f });
 		tileEntity->RotateX(XM_PIDIV2);
 
 		GetEntities().push_back(tileEntity);

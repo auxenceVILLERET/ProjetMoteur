@@ -76,10 +76,6 @@ void GameScene::Update(float dt)
 
 	Debug();
 
-	if(Input::GetKeyDown(Keyboard::UP_ARROW))
-	{
-		m_sphere->MoveForward(0.5f);
-	}
 	if(Input::GetMouseButtonDown(Mouse::LEFT))
 	{
 		Entity* temp = m_projectile->GetAvaibleProjectile();
