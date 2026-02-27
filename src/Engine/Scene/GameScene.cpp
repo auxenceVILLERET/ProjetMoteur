@@ -16,6 +16,8 @@
 #include <iostream>
 #include "ProjetMoteur/Tiles/TilesManager.h"
 
+#include "Window.h"
+
 using namespace core;
 
 void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
@@ -74,18 +76,12 @@ void GameScene::Update(float dt)
 	ProceduralRails();
 	MovePlayer();
 	MoveCamera();
+	Shooting();
 
 	Debug();
 
-	if(Input::GetMouseButtonDown(Mouse::LEFT))
-	{
-		Entity* temp = m_projectile->GetAvaibleProjectile();
-		if (temp == nullptr) return; // No projectile available in the pool
-
-		temp->SetPosition(0.0f,0.0f,0.0f);
-		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
-	}
 	Shooting();
+	
 }
 
 Entity* GameScene::CreateBody()
@@ -147,6 +143,7 @@ void GameScene::DeleteRails() {
 void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
+	std::cout << delta[0] << " " << delta[1] << std::endl;
 	float sensitivity = 0.0025f;
 
 	m_yaw += delta[0] * sensitivity;
@@ -160,32 +157,33 @@ void GameScene::UpdateCameraTransform()
 {
 	// Position = body
 	m_cam->SetPosition(m_body->GetPosition());
+	//m_cam->Translate(0, 0, -3);
 
-	// Charger rotation body
+	// Load body rotation 
 	XMVECTOR bodyQ = XMLoadFloat4(&m_body->m_quaternion);
 
-	// Up local du body
+	// Up local body
 	XMVECTOR bodyUp = XMVector3Rotate(
 		XMVectorSet(0, 1, 0, 0),
 		bodyQ
 	);
 
-	// YAW autour du up local
+	// YAW around up local
 	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
 
-	// Rotation apr�s yaw
+	// Rotation apres yaw
 	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
 
-	// Right local apr�s yaw
+	// Right local apres yaw
 	XMVECTOR bodyRight = XMVector3Rotate(
 		XMVectorSet(1, 0, 0, 0),
 		yawedBody
 	);
 
-	// Pitch autour du right
+	// Pitch around right
 	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
 
-	// Rotation finale
+	// Rotation
 	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
 	finalQ = XMQuaternionNormalize(finalQ);
 
@@ -196,17 +194,18 @@ void GameScene::UpdateCameraTransform()
 }
 
 void GameScene::MovePlayer() {
-	
+	float offset = 2;
+
 	// ROTATION AUTOUR DU RAIL
 	if (Input::GetKey(Keyboard::LEFT))
 	{
-		m_body->OrbitAround({ 0,-1,5 },{0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), m_body->GetScale().y * 2);
+		m_body->OrbitAround({ 0,-1,5 },{0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
 
 	}
 	if (Input::GetKey(Keyboard::RIGHT))
 	{
-		m_body->OrbitAround({ 0,-1,5 }, { 0,0,1 }, XMConvertToRadians(-90.0f * m_deltaTime), m_body->GetScale().y*2);
+		m_body->OrbitAround({ 0,-1,5 }, { 0,0,1 }, XMConvertToRadians(-90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
 	}
 }
@@ -218,11 +217,12 @@ void GameScene::Shooting() {
 		Entity* temp = m_projectile->GetAvaibleProjectile();
 		if (temp == nullptr) return; // No projectile available in the pool
 
+		// hadle speed and direction of bullet
 		XMFLOAT3 bulletSpeed = m_cam->GetForward();
 		float speedMult = 5;
-
 		bulletSpeed.x *= speedMult; bulletSpeed.y *= speedMult; bulletSpeed.z *= speedMult;
 
+		// shoot from player
 		temp->SetPosition(m_cam->GetPosition());
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity(bulletSpeed);
 			
@@ -231,6 +231,15 @@ void GameScene::Shooting() {
 
 // -[DEBUG]- //
 void GameScene::Debug() {
+	Window* window = Window::GetInstance();
+	
+	if (window->IsCursorLocked())
+	{
+		SetCursorPos(
+			window->GetCursorCenter().x,
+			window->GetCursorCenter().y
+		);
+	}
 }
 
 

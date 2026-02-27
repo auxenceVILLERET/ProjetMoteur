@@ -124,15 +124,67 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_MOUSEMOVE:
-        InputSystem::SetMousePosition(
-            LOWORD(lParam),
-            HIWORD(lParam)
-        );
+        if (!m_cursorLocked)
+        {
+            InputSystem::SetMousePosition(
+                LOWORD(lParam),
+                HIWORD(lParam)
+            );
+        }
+        break;
+    case WM_SETFOCUS:
+        LockCursor(true);
+        break;
+
+    case WM_KILLFOCUS:
+        LockCursor(false);
         break;
     }
 
 
     return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+void Window::UpdateCursorCenter()
+{
+    RECT rc;
+    GetClientRect(m_hWindow, &rc);
+
+    POINT center;
+    center.x = (rc.right - rc.left) / 2;
+    center.y = (rc.bottom - rc.top) / 2;
+
+    ClientToScreen(m_hWindow, &center);
+    m_cursorCenter = center;
+}
+
+void Window::LockCursor(bool enable)
+{
+    if (enable == m_cursorLocked)
+        return;
+
+    m_cursorLocked = enable;
+
+    if (enable)
+    {
+        UpdateCursorCenter();
+
+        RECT clip;
+        clip.left = m_cursorCenter.x;
+        clip.top = m_cursorCenter.y;
+        clip.right = m_cursorCenter.x + 1;
+        clip.bottom = m_cursorCenter.y + 1;
+
+        ClipCursor(&clip);
+
+        while (ShowCursor(FALSE) >= 0);
+        SetCursorPos(m_cursorCenter.x, m_cursorCenter.y);
+    }
+    else
+    {
+        ClipCursor(nullptr);
+        while (ShowCursor(TRUE) < 0);
+    }
 }
 
 
