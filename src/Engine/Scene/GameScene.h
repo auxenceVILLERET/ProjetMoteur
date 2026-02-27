@@ -59,7 +59,7 @@ private:
 
 	//LOOK WITH MOUSE
 	void MoveCamera();
-	void Debug();
+	void LockMouse();
 
 	//SHOOTING
 	void Shooting();

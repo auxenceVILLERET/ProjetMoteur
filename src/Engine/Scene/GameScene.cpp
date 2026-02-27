@@ -78,7 +78,7 @@ void GameScene::Update(float dt)
 	MoveCamera();
 	Shooting();
 
-	Debug();
+	//LockMouse();
 
 	Shooting();
 	
@@ -143,7 +143,6 @@ void GameScene::DeleteRails() {
 void GameScene::MoveCamera()
 {
 	std::vector<float> delta = Input::GetMouseDelta();
-	std::cout << delta[0] << " " << delta[1] << std::endl;
 	float sensitivity = 0.0025f;
 
 	m_yaw += delta[0] * sensitivity;
@@ -210,7 +209,7 @@ void GameScene::MovePlayer() {
 	}
 }
 
-// -[SHOOTING]-
+// -[SHOOTING]- //
 void GameScene::Shooting() {
 	if (Input::GetMouseButtonDown(Mouse::LEFT))
 	{
@@ -229,8 +228,8 @@ void GameScene::Shooting() {
 	}
 }
 
-// -[DEBUG]- //
-void GameScene::Debug() {
+// -[LOCK & HIDE CURSOR]- //
+void GameScene::LockMouse() {
 	Window* window = Window::GetInstance();
 	
 	if (window->IsCursorLocked())

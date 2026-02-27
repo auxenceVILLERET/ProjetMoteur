@@ -132,16 +132,10 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             );
         }
         break;
-    case WM_SETFOCUS:
-        LockCursor(true);
-        break;
-
     case WM_KILLFOCUS:
         LockCursor(false);
         break;
     }
-
-
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
@@ -162,7 +156,6 @@ void Window::LockCursor(bool enable)
 {
     if (enable == m_cursorLocked)
         return;
-
     m_cursorLocked = enable;
 
     if (enable)
