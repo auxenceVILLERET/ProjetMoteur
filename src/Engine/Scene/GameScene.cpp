@@ -48,6 +48,10 @@ void GameScene::OnEnter()
 	{
 		entity->SetActive(true);
 	}
+	UIFrame frame;
+	frame.showSplash = true;
+	frame.score = 0;
+	m_renderer->SetUiFrame(frame);
 }
 
 void GameScene::OnExit()
