@@ -39,12 +39,12 @@ void Camera::Update()
 	// UPDATE CAMERA
 }
 
-void Camera::SetLens(float fov, float aspectRatio, float near, float far)
+void Camera::SetLens(float fov, float aspectRatio, float nearP, float farP)
 {
 	m_fov = fov;
 	m_aspectRatio = aspectRatio;
-	m_nearPlane = near;
-	m_farPlane = far;
+	m_nearPlane = nearP;
+	m_farPlane = farP;
 }
 
 

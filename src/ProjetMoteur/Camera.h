@@ -15,8 +15,6 @@ public:
 	float m_nearPlane; // minimal distance to show
 	float m_farPlane; // maximal distance to show
 
-	Transform transform; // Doesnt work until merge with [dev-transform] branch
-
 public:
 	Camera(); //init
 	~Camera(); //destroy
