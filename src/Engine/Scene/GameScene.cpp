@@ -15,7 +15,7 @@
 #include "Engine/ECS/Components/ColliderComponent.h"
 #include <iostream>
 #include "ProjetMoteur/Tiles/TilesManager.h"
-
+#include "ProjetMoteur/Tiles/Tiles.h"
 #include "Window.h"
 
 using namespace core;
@@ -31,7 +31,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
-	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
+	m_projectile->Initialize(0.1f, Shape::SPHERE, 15, 3.0f, m_engine, m_ecs, m_renderer);
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);
@@ -40,9 +40,6 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	{
 		entity->SetActive(false);
 	}
-
-
-
 }
 
 void GameScene::OnEnter()
@@ -105,19 +102,27 @@ Entity* GameScene::CreateFloor()
 	return floor;
 }
 
+void GameScene::FollowRail()
+{
+	Tiles* activeTile = m_tilesManager->GetActiveTiles().front();
+	XMFLOAT3 pivot = activeTile->GetPosition();
+}
+
 void GameScene::MovePlayer() {
 	float offset = 1;
+
+	Tiles* activeTile = m_tilesManager->GetActiveTiles().front();
 
 	// ROTATION AUTOUR DU RAIL
 	if (Input::GetKey(Keyboard::LEFT))
 	{
-		m_body->OrbitAround({ 0.0f,0.0f,0.0f }, {0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
+		m_body->OrbitAround({0.0f,0.0f,0.0f}, {0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
 
 	}
 	if (Input::GetKey(Keyboard::RIGHT))
 	{
-		m_body->OrbitAround({0.0f,0.0f,0.0f}, {0,0,1}, XMConvertToRadians(-90.0f * m_deltaTime), offset);
+		m_body->OrbitAround({ 0.0f,0.0f,0.0f }, {0,0,1}, XMConvertToRadians(-90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
 	}
 }
@@ -131,7 +136,7 @@ void GameScene::Shooting() {
 
 		// hadle speed and direction of bullet
 		XMFLOAT3 bulletSpeed = m_cam->GetForward();
-		float speedMult = 5;
+		float speedMult = 15;
 		bulletSpeed.x *= speedMult; bulletSpeed.y *= speedMult; bulletSpeed.z *= speedMult;
 
 		// shoot from player

@@ -34,7 +34,7 @@ void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Enti
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
-	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
+	m_projectile->Initialize(0.1f, Shape::SPHERE, 15, 3.0f, m_engine, m_ecs, m_renderer);
 
 	// Ugly but needed until fix
 	for (Entity* entity : m_entities)

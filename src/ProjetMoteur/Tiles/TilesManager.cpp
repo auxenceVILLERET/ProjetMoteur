@@ -130,3 +130,7 @@ void TilesManager::OnExit()
     }
     m_activeTiles.clear();
 }
+
+std::vector<Tiles*> TilesManager::GetActiveTiles() {
+    return m_activeTiles;
+}

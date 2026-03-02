@@ -47,18 +47,18 @@ public:
 	void SpawnEnemy();
 
 private:
-	bool m_active;
-	bool m_isTurnR;
-	bool m_isTurnL;
+	bool m_active = false;
+	bool m_isTurnR = false;
+	bool m_isTurnL = false;
 	
-	XMFLOAT3 m_position;
-	int m_In;
-	int m_Out;
+	XMFLOAT3 m_position = {};
+	int m_In = 0;
+	int m_Out = 0;
 
 	float m_speed = 20.0f;
 
 
-	std::vector<Entity*> m_entities;
-	std::vector<XMFLOAT3> m_localOffset;
+	std::vector<Entity*> m_entities = {};
+	std::vector<XMFLOAT3> m_localOffset = {};
 };
 

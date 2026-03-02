@@ -20,30 +20,30 @@ public:
 	void Update(float dt) override;
 
 private:
-	float m_deltaTime; // deltaTime
+	float m_deltaTime = 0; // deltaTime
 
-	std::vector<Entity*> m_entities;
+	std::vector<Entity*> m_entities = {};
 
-	Entity* m_cube;
-	Entity* m_sphere;
-	Entity* m_cylinder;
-	Entity* m_moon;
-	Entity* m_moonMoon;
-	Entity* m_floor;
+	Entity* m_cube = nullptr;
+	Entity* m_sphere = nullptr;
+	Entity* m_cylinder = nullptr;
+	Entity* m_moon = nullptr;
+	Entity* m_moonMoon = nullptr;
+	Entity* m_floor = nullptr;
 
-	Entity* m_rail;
-	std::vector<Entity*> m_rails;
+	Entity* m_rail = nullptr;
+	std::vector<Entity*> m_rails = {};
 
-	Entity* m_body;
-	Entity* m_cam;
+	Entity* m_body = nullptr;
+	Entity* m_cam = nullptr;
 
 	float m_maxRails = 5;
 
-	Entity* m_bullet;
+	Entity* m_bullet = nullptr;
 
 	float m_speedPlayer = 1.f;
 
-	Projectile* m_projectile;
+	Projectile* m_projectile = nullptr;
 
 	//TEST ENTITIES
 	Entity* CreateSphere();

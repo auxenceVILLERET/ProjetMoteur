@@ -43,6 +43,8 @@ private:
 	float m_pitch = 0.0f;
 	bool m_locked = true;
 
+
+
 	Projectile* m_projectile;
 	TilesManager* m_tilesManager;
 	
@@ -53,6 +55,8 @@ private:
 	void CreateRail();
 	void ProceduralRails();
 	void DeleteRails();
+
+	void FollowRail();
 
 	//MOVING PLAYER
 	void MovePlayer();

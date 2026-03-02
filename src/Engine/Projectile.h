@@ -24,13 +24,13 @@ public:
 	void Update(float dt);
 
 protected:
-	std::vector<Entity*> m_projectiles;
+	std::vector<Entity*> m_projectiles = {};
 
-	float m_size;
+	float m_size = 0;
 	Shape m_shape;
-	ECS* m_ecs;
-	Renderer* m_renderer;
-	Engine* m_engine;
+	ECS* m_ecs = nullptr;
+	Renderer* m_renderer = nullptr;
+	Engine* m_engine = nullptr;
 
 	float m_maxDistance = 50.0f;
 };
