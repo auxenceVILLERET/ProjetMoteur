@@ -43,16 +43,19 @@ public:
 
 	void CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radius, float startAngle, float endAngle, int segments);
 
+
+	void SpawnEnemy();
+
 private:
 	bool m_active;
 	bool m_isTurnR;
 	bool m_isTurnL;
-
+	
 	XMFLOAT3 m_position;
 	int m_In;
 	int m_Out;
 
-	float m_speed = 5.0f;
+	float m_speed = 20.0f;
 
 
 	std::vector<Entity*> m_entities;

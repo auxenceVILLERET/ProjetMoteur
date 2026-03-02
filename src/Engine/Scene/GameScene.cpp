@@ -35,7 +35,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);
-	// Ugly but needed until fix
+
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(false);

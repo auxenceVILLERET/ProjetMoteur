@@ -57,7 +57,6 @@ namespace core
 		{
 			std::vector<float> delta = { 0.0f,0.0f };
 			std::vector<float> current = GetMousePosition();
-			std::cout << current[0] << " " << current[1] << std::endl;
 
 			if (m_mousePosLastFrame == current || m_mousePosLastFrame.size() < 1) { m_mousePosLastFrame = current; return delta; }
 			delta = { current[0] - m_mousePosLastFrame[0] , current[1] - m_mousePosLastFrame[1] };
