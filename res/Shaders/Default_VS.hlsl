@@ -1,6 +1,5 @@
 cbuffer ObjectCB : register(b0)
 {
-    float4x4 gWorld;
     float4x4 gWorldViewProj;
 };
 
@@ -22,15 +21,11 @@ struct VertexOut
 VertexOut VSMain(VertexIn v)
 {
     VertexOut o;
-
-    float4 wp = mul(float4(v.pos, 1.0f), gWorld);
-    o.worldPos = wp.xyz;
-
-    // Si tu as du non-uniform scale, passe gWorldInvTranspose dans le CB à la place.
-    o.worldNrm = normalize(mul(float4(v.normal, 0.0f), gWorld).xyz);
-
     o.pos = mul(float4(v.pos, 1.0f), gWorldViewProj);
-    o.uv = v.uv;
 
+    // Pour l’instant : on passe position objet + normal objet
+    o.worldPos = v.pos;
+    o.worldNrm = v.normal;
+    o.uv = v.uv;
     return o;
 }

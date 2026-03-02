@@ -44,7 +44,7 @@ void App::Initialize()
 	m_renderer = new Renderer();
 	m_sceneManager = new SceneManager();
 
-	m_renderer->Initialize(m_window, m_cam);
+	m_renderer->Initialize(m_window, m_cam->GetComponent<CameraComponent>());
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 

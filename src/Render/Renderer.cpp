@@ -168,18 +168,19 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
-    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // frame constants (camera + lightCount)
     FrameCB frame{};
     frame.viewProj = GetViewProjMatrix();
     frame.cameraPos = m_pCamera->GetEntity()->GetPosition();
-    frame.lightCount = m_pLightRender->GetLightCount();
+    frame.lightCount = 0;
 
     m_pLightRender->UpdateFrame(bb, frame);
 
     // Bind b1 + t1 via LightRender
     m_pLightRender->Bind(cmd, bb, /*ROOT_FRAME=*/1, /*ROOT_LIGHTS=*/3);
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
@@ -280,9 +281,19 @@ void Renderer::EndFrame()
 
     // Present.
     hr = m_pSwapChainTargets->GetSwapChain()->Present(1, 0);
-	if (FAILED(hr))
-		throw std::runtime_error("Swap chain present failed.");
+    if (FAILED(hr))
+    {
+        char buf[256];
+        sprintf_s(buf, "Present failed: hr=0x%08X\n", (uint32_t)hr);
+        OutputDebugStringA(buf);
 
+        // Si device removed :
+        HRESULT reason = m_pDxContext->GetDevice()->GetDeviceRemovedReason();
+        sprintf_s(buf, "DeviceRemovedReason=0x%08X\n", (uint32_t)reason);
+        OutputDebugStringA(buf);
+
+        throw std::runtime_error("Swap chain present failed.");
+    }
     // Simple but safe: CPU waits GPU each frame.
     m_pDxContext->WaitForGpu();
 

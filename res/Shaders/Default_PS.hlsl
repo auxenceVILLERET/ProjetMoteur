@@ -1,5 +1,6 @@
 cbuffer FrameCB : register(b1)
 {
+    float4x4 gViewProj;
     float3 gCameraPos;
     uint gLightCount;
 };
@@ -34,15 +35,17 @@ float4 PSMain(VertexOut i) : SV_TARGET
 {
     float3 albedo = gTex0.Sample(gSamp0, i.uv).rgb;
 
-    float3 N = normalize(i.worldNrm);
+    float3 N = float3(0, 1, 0);
 
     // Un petit ambient pour voir quelque chose même hors lumière
     float3 ambient = 0.05f * albedo;
 
     float3 lighting = 0.0f;
 
+    uint count = min(gLightCount, 128u); // mets ici ton MaxLights
+    
     [loop]
-    for (uint li = 0; li < gLightCount; ++li)
+    for (uint li = 0; li < count; ++li)
     {
         Light Lgt = gLights[li];
 
