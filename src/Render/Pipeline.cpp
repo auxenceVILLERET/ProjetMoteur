@@ -44,6 +44,7 @@ bool Pipeline::InitializeGraphics(ID3D12Device* device, DXGI_FORMAT rtvFormat, D
     static D3D12_INPUT_ELEMENT_DESC inputLayout[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 
@@ -141,15 +142,27 @@ void Pipeline::Shutdown()
 
 bool Pipeline::BuildRootSignature(ID3D12Device* device)
 {
+    // 4 params :
+    // 0 = CBV b0 (Object)
+    // 1 = CBV b1 (Frame)
+    // 2 = Table SRV t0 (Texture)
+    // 3 = Table SRV t1 (Lights buffer)
+
+    D3D12_ROOT_PARAMETER params[4] = {};
     // Param 0 : CBV b0 (VS)
-    D3D12_ROOT_PARAMETER params[2] = {};
 
     params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
     params[0].Descriptor.ShaderRegister = 0; // b0
     params[0].Descriptor.RegisterSpace = 0;
     params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
-    // Param 1 : Descriptor table SRV t0 (PS)
+    // Param 1 : CBV b1 (frame, caméra + nb lights)
+    params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+    params[1].Descriptor.ShaderRegister = 1; // b1
+    params[1].Descriptor.RegisterSpace = 0;
+    params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+    // Param 2 : Descriptor table SRV t0 (PS)
     D3D12_DESCRIPTOR_RANGE range = {};
     range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     range.NumDescriptors = 1;
@@ -157,10 +170,23 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
     range.RegisterSpace = 0;
     range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-    params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-    params[1].DescriptorTable.NumDescriptorRanges = 1;
-    params[1].DescriptorTable.pDescriptorRanges = &range;
-    params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    params[2].DescriptorTable.NumDescriptorRanges = 1;
+    params[2].DescriptorTable.pDescriptorRanges = &range;
+    params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    // Param 3 : SRV table t1 (lights)
+    D3D12_DESCRIPTOR_RANGE lightRange = {};
+    lightRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    lightRange.NumDescriptors = 1;
+    lightRange.BaseShaderRegister = 1; // t1
+    lightRange.RegisterSpace = 0;
+    lightRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+    params[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    params[3].DescriptorTable.NumDescriptorRanges = 1;
+    params[3].DescriptorTable.pDescriptorRanges = &lightRange;
+    params[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
     // Static sampler s0
     D3D12_STATIC_SAMPLER_DESC samp = {};

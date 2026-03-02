@@ -40,9 +40,9 @@ bool Mesh::Initialize(UploadContext& uploader, std::vector<Vertex> vertices, std
 bool Mesh::CreateTriangle(UploadContext& uploader)
 {
 	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex{ { 0.0f,  0.5f, 0.0f }, { 0.5f, 0.5f } });
-	vertices.push_back(Vertex{ { 0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f } });
-	vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f } });
+	vertices.push_back(Vertex{ { 0.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.5f, 0.5f } });
+	vertices.push_back(Vertex{ { 0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } });
+	vertices.push_back(Vertex{ { -0.5f,-0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } });
 
 	std::vector<uint32_t> indices = { 0,1,2 };
 
@@ -52,16 +52,18 @@ bool Mesh::CreateTriangle(UploadContext& uploader)
 bool Mesh::CreateQuad(UploadContext& uploader)
 {
 	std::vector<Vertex> vertices;
-	vertices.push_back(Vertex{ { -0.5f,  0.5f, 0.0f }, { 0.0f, 0.0f } });
-	vertices.push_back(Vertex{ {  0.5f,  0.5f, 0.0f }, { 1.0f, 0.0f } });
-	vertices.push_back(Vertex{ {  0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f } });
-	vertices.push_back(Vertex{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f } });
+	vertices.push_back(Vertex{ { -0.5f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f } });
+	vertices.push_back(Vertex{ {  0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f } });
+	vertices.push_back(Vertex{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } });
 
 	std::vector<uint32_t> indices =
 	{
 		0, 1, 2,
 		0, 2, 3
 	};
+
+	CalculateNormals();
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
@@ -82,10 +84,10 @@ bool Mesh::CreateCube(UploadContext& uploader)
 			uint32_t base = (uint32_t)vertices.size();
 
 			// UV cohérents (V inversé souvent pratique selon chargement)
-			vertices.push_back(Vertex{ a, {0.0f, 1.0f} }); // bas-gauche
-			vertices.push_back(Vertex{ b, {0.0f, 0.0f} }); // haut-gauche
-			vertices.push_back(Vertex{ c, {1.0f, 0.0f} }); // haut-droit
-			vertices.push_back(Vertex{ d, {1.0f, 1.0f} }); // bas-droit
+			vertices.push_back(Vertex{ a, { 0.0f, 0.0f, 0.0f }, {0.0f, 1.0f} }); // bas-gauche
+			vertices.push_back(Vertex{ b, { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f} }); // haut-gauche
+			vertices.push_back(Vertex{ c, { 0.0f, 0.0f, 0.0f }, {1.0f, 0.0f} }); // haut-droit
+			vertices.push_back(Vertex{ d, { 0.0f, 0.0f, 0.0f }, {1.0f, 1.0f} }); // bas-droit
 
 			// 2 triangles
 			indices.push_back(base + 0); indices.push_back(base + 1); indices.push_back(base + 2);
@@ -110,6 +112,8 @@ bool Mesh::CreateCube(UploadContext& uploader)
 	// BOTTOM(-Y)
 	addFace({ -s, -s, +s }, { -s, -s, -s }, { +s, -s, -s }, { +s, -s, +s });
 
+	CalculateNormals();
+
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
@@ -131,15 +135,15 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 		float x = cosf(ang) * radius;
 		float z = sinf(ang) * radius;
 
-		vertices.push_back(Vertex{ { x, y0, z }, { u, 1.0f } }); // bas
-		vertices.push_back(Vertex{ { x, y1, z }, { u, 0.0f } }); // haut
+		vertices.push_back(Vertex{ { x, y0, z }, { 0.0f, 0.0f, 0.0f }, { u, 1.0f } }); // bas
+		vertices.push_back(Vertex{ { x, y1, z }, { 0.0f, 0.0f, 0.0f }, { u, 0.0f } }); // haut
 	}
 
 	uint32_t centerBottom = (uint32_t)vertices.size();
-	vertices.push_back(Vertex{ { 0.0f, y0, 0.0f }, { 0.5f, 0.5f } });
+	vertices.push_back(Vertex{ { 0.0f, y0, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.5f, 0.5f } });
 
 	uint32_t centerTop = (uint32_t)vertices.size();
-	vertices.push_back(Vertex{ { 0.0f, y1, 0.0f }, { 0.5f, 0.5f } });
+	vertices.push_back(Vertex{ { 0.0f, y1, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.5f, 0.5f } });
 
 	std::vector<uint32_t> indices;
 	indices.reserve(slices * 12);
@@ -161,6 +165,8 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 		// Disque du haut (face visible depuis l'extérieur => vers +Y)
 		indices.push_back(centerTop); indices.push_back(t1); indices.push_back(t0);
 	}
+
+	CalculateNormals();
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
@@ -196,7 +202,7 @@ bool Mesh::CreateSphere(UploadContext& uploader)
 
 			XMFLOAT3 pos = { x , y , z };
 
-			vertices.push_back(Vertex{ pos, { u, 1.0f - v } });
+			vertices.push_back(Vertex{ pos, { 0.0f, 0.0f, 0.0f }, { u, 1.0f - v } });
 		}
 	}
 
@@ -216,6 +222,8 @@ bool Mesh::CreateSphere(UploadContext& uploader)
 		}
 	}
 
+	CalculateNormals();
+
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
@@ -229,6 +237,41 @@ void Mesh::Release()
 	m_indexCount = 0;
 	m_vertices.clear();
 	m_indices.clear();
+}
+
+void Mesh::CalculateNormals()
+{
+	for (size_t i = 0; i < m_indices.size(); i += 3)
+	{
+		uint32_t i0 = m_indices[i];
+		uint32_t i1 = m_indices[i + 1];
+		uint32_t i2 = m_indices[i + 2];
+
+		XMVECTOR p0 = XMLoadFloat3(&m_vertices[i0].Pos);
+		XMVECTOR p1 = XMLoadFloat3(&m_vertices[i1].Pos);
+		XMVECTOR p2 = XMLoadFloat3(&m_vertices[i2].Pos);
+
+		XMVECTOR e1 = XMVectorSubtract(p1, p0);
+		XMVECTOR e2 = XMVectorSubtract(p2, p0);
+
+		// Normale du triangle
+		XMVECTOR n = XMVector3Cross(e1, e2);
+
+		// Accumule sur chaque vertex
+		XMStoreFloat3(&m_vertices[i0].Normal,
+			XMVectorAdd(XMLoadFloat3(&m_vertices[i0].Normal), n));
+		XMStoreFloat3(&m_vertices[i1].Normal,
+			XMVectorAdd(XMLoadFloat3(&m_vertices[i1].Normal), n));
+		XMStoreFloat3(&m_vertices[i2].Normal,
+			XMVectorAdd(XMLoadFloat3(&m_vertices[i2].Normal), n));
+	}
+
+	for (Vertex& v : m_vertices)
+	{
+		XMVECTOR n = XMLoadFloat3(&v.Normal);
+		n = XMVector3Normalize(n);
+		XMStoreFloat3(&v.Normal, n);
+	}
 }
 
 void Mesh::FinalizeUpload()

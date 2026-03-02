@@ -22,10 +22,7 @@ static D3D12_GPU_DESCRIPTOR_HANDLE GpuOffset(D3D12_GPU_DESCRIPTOR_HANDLE h, uint
     return h;
 }
 
-bool DescriptorHeapManager::Initialize(ID3D12Device* device,
-    D3D12_DESCRIPTOR_HEAP_TYPE heapType,
-    uint32_t numDescriptors,
-    bool shaderVisible)
+bool DescriptorHeapManager::Initialize(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, uint32_t numDescriptors, bool shaderVisible)
 {
     if (device == nullptr || numDescriptors == 0)
         return false;
