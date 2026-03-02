@@ -14,6 +14,10 @@
 #include "Engine/ECS/Systems/RenderSystem.h"
 #include "Engine/Scene/GameScene.h"
 #include "Engine/Scene/MenuScene.h"
+#include "SandboxScene.h"
+#include "Engine/ECS/Systems/StateMachineSystem.h"
+#include "Engine/ECS/Systems/PhysicSystem.h"
+#include "Engine/ECS/Systems/ColliderSystem.h"
 
 using namespace core;
 
@@ -34,7 +38,7 @@ App::App(Engine& engine) : m_engine(engine)
 void App::Initialize()
 {
 	// Initialize your application here
-	m_window = new Window(800, 600, L"test");
+	m_window = new Window(800, 600, L"LAB ENGINE GAMEPLAY");
 	m_ecs = &m_engine.GetECS();
 	CreateCamera();
 	m_renderer = new Renderer();
@@ -43,15 +47,22 @@ void App::Initialize()
 	m_renderer->Initialize(m_window, m_cam);
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
-	
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer);
-	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer);
+
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
 
 	m_sceneManager->ChangeScene("Menu");
+
+	m_ecs->AddSystem<StateMachineSystem>();
+	m_ecs->AddSystem<PhysicSystem>();
+	m_ecs->AddSystem<ColliderSystem>();
 }
 
 void App::Update()
 {
+	//update your application here
+
 	UpdateWindow();
 	m_sceneManager->Update(m_engine.GetDeltaTime());
 	HandleInput();
@@ -66,18 +77,21 @@ void App::UpdateWindow()
 {
 	m_window->ProcessMessages();
 	m_renderer->Update();
+
+	if (m_window->IsOpen() == false)
+		m_engine.Shutdown();
 }
 
 void App::HandleInput()
 {
-	if(Input::GetKey(Keyboard::A))
-	{
-		m_sceneManager->ChangeScene("Game");
+	if (Input::GetKey(Keyboard::NUMPAD1) || Input::GetKey(Keyboard::_1)) { m_sceneManager->ChangeScene("Menu"); }
+	if (Input::GetKey(Keyboard::NUMPAD2) || Input::GetKey(Keyboard::_2)) { m_sceneManager->ChangeScene("Game"); }
+	if (Input::GetKey(Keyboard::NUMPAD3) || Input::GetKey(Keyboard::_3)) { m_sceneManager->ChangeScene("Sandbox"); }
+
+	if (Input::GetKey(Keyboard::ESC)) {
+		App::Shutdown();
 	}
-	if (Input::GetKey(Keyboard::E))
-	{
-		m_sceneManager->ChangeScene("Menu");
-	}
+
 	Input::Update();
 }
 
@@ -102,3 +116,5 @@ void App::CreateCamera()
 	XMStoreFloat4x4(&identityMatrix, XMMatrixIdentity());
 	m_cam->GetComponent<CameraComponent>()->SetViewMatrix(identityMatrix);
 }
+
+

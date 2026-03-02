@@ -21,7 +21,11 @@ public:
 	void UpdateWindow();
 
 	void HandleInput();
+
 	void CreateCamera();
+
+	//TEST CAMERA MOVING
+	void Movement();
 
 private:
 	Engine& m_engine;
@@ -31,5 +35,7 @@ private:
 	ResourceManager* m_resourceManager;
 	Entity* m_cam;
 	ECS* m_ecs;
+
+	float m_speedPlayer = 2.0f;
 };
 

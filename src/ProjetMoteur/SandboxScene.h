@@ -8,12 +8,12 @@ class Engine;
 class Camera;
 class Projectile;
 class Renderer;
-class TilesManager;
 
-class GameScene : public Scene
+
+class SandboxScene : public Scene
 {
 public:
-	~GameScene() = default;
+	~SandboxScene() = default;
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
 	void OnEnter() override;
 	void OnExit() override;
@@ -21,10 +21,14 @@ public:
 
 private:
 	float m_deltaTime; // deltaTime
-	bool m_startupFlag = true;
 
 	std::vector<Entity*> m_entities;
 
+	Entity* m_cube;
+	Entity* m_sphere;
+	Entity* m_cylinder;
+	Entity* m_moon;
+	Entity* m_moonMoon;
 	Entity* m_floor;
 
 	Entity* m_rail;
@@ -39,14 +43,14 @@ private:
 
 	float m_speedPlayer = 1.f;
 
-	float m_yaw = 0.0f;
-	float m_pitch = 0.0f;
-	bool m_locked = true;
-
 	Projectile* m_projectile;
-	TilesManager* m_tilesManager;
-	
-	Entity* CreateBody();
+
+	//TEST ENTITIES
+	Entity* CreateSphere();
+	Entity* CreateCylinder();
+	Entity* CreateCube();
+	Entity* CreateMoon();
+	Entity* CreateMoonMoon();
 	Entity* CreateFloor();
 
 	//RAILS
@@ -54,12 +58,9 @@ private:
 	void ProceduralRails();
 	void DeleteRails();
 
-	//MOVING PLAYER
-	void MovePlayer();
-	void UpdateCameraTransform();
-
-	//LOOK WITH MOUSE
-	void HandleCursor();
+	//LOOK WITH MOUSE + WASD/ZQSD
+	void MoveCamera();
+	void Debug();
 
 	//SHOOTING
 	void Shooting();

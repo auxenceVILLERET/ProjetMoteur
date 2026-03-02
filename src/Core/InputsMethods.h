@@ -21,5 +21,9 @@ namespace core
         void SetMousePosition(float x, float y);
 
         void Update();
+
+        static bool m_preventDeltaUpdate = false;
+        static std::vector<float> m_mousePosLastFrame;
+        
     }
 }

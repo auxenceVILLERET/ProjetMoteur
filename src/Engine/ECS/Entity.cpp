@@ -30,6 +30,32 @@ void Entity::SetPosition(float x, float y, float z)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetPosition(XMFLOAT3 vector)
+{
+	m_position.x = vector.x;
+	m_position.y = vector.y;
+	m_position.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetPositionX(float x)
+{
+	m_position.x = x;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetPositionY(float y)
+{
+	m_position.y = y;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetPositionZ(float z)
+{
+	m_position.z = z;
+	UpdateWorldMatrix();
+}
+
 void Entity::MoveForward(float dist)
 {
 	m_position.x += m_forward.x * dist;
@@ -54,6 +80,14 @@ void Entity::MoveRight(float dist)
 	UpdateWorldMatrix();
 }
 
+void Entity::Translate(float x, float y, float z)
+{
+	m_position.x += x;
+	m_position.y += y;
+	m_position.z += z;
+	UpdateWorldMatrix();
+}
+
 void Entity::CoutPosition()
 {
 	std::cout << "Position : [" << m_position.x << "][" << m_position.y << "][" << m_position.z << "]\n" << std::endl;
@@ -75,13 +109,13 @@ void Entity::Scale(float scale)
 	UpdateWorldMatrix();
 }
 
-void Entity::SetScaleVector(XMFLOAT3 vectorScale)
+void Entity::SetScale(XMFLOAT3 vectorScale)
 {
 	m_scale = vectorScale;
 	UpdateWorldMatrix();
 }
 
-void Entity::ScaleVector(XMFLOAT3 vectorScale)
+void Entity::Scale(XMFLOAT3 vectorScale)
 {
 	m_scale.x *= vectorScale.x;
 	m_scale.y *= vectorScale.y;
@@ -96,7 +130,7 @@ void Entity::CoutScale()
 
 // ROTATION
 
-void Entity::SetRotationX(float angle)
+void Entity::RotateX(float angle)
 {
     XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
     XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(1,0,0,0), angle);
@@ -105,7 +139,16 @@ void Entity::SetRotationX(float angle)
     UpdateWorldMatrix();
 }
 
-void Entity::SetRotationY(float angle)
+void Entity::RotateLocalX(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::RotateY(float angle)
 {
 	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), angle);
@@ -114,7 +157,16 @@ void Entity::SetRotationY(float angle)
 	UpdateWorldMatrix();
 }
 
-void Entity::SetRotationZ(float angle)
+void Entity::RotateLocalY(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::RotateZ(float angle)
 {
 	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
 	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), angle);
@@ -123,10 +175,143 @@ void Entity::SetRotationZ(float angle)
 	UpdateWorldMatrix();
 }
 
+void Entity::RotateLocalZ(float angle)
+{
+	XMVECTOR q = XMVectorSet(m_quaternion.x, m_quaternion.y, m_quaternion.z, m_quaternion.w);
+	XMVECTOR dq = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), angle);
+	q = XMQuaternionNormalize(XMQuaternionMultiply(dq, q));
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::SetRotation(const XMFLOAT4& quaternion)
+{
+	XMVECTOR q = XMLoadFloat4(&quaternion);
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::SetRotationX(float angle)
+{
+	XMVECTOR q = XMQuaternionRotationAxis(
+		XMVectorSet(1, 0, 0, 0),
+		angle
+	);
+
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+void Entity::SetRotationY(float angle)
+{
+	XMVECTOR q = XMQuaternionRotationAxis(
+		XMVectorSet(0, 1, 0, 0),
+		angle
+	);
+
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+void Entity::SetRotationZ(float angle)
+{
+	XMVECTOR q = XMQuaternionRotationAxis(
+		XMVectorSet(0, 0, 1, 0),
+		angle
+	);
+
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&m_quaternion, q);
+	UpdateWorldMatrix();
+}
+
+void Entity::SetForward(XMFLOAT3 vector)
+{
+	m_forward.x = vector.x;
+	m_forward.y = vector.y;
+	m_forward.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetRight(XMFLOAT3 vector)
+{
+	m_right.x = vector.x;
+	m_right.y = vector.y;
+	m_right.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+void Entity::SetUp(XMFLOAT3 vector)
+{
+	m_up.x = vector.x;
+	m_up.y = vector.y;
+	m_up.z = vector.z;
+	UpdateWorldMatrix();
+}
+
+XMFLOAT3 Entity::GetForward()
+{
+	return m_forward;
+}
+
+XMFLOAT3 Entity::GetRight()
+{
+	return m_right;
+}
+
+XMFLOAT3 Entity::GetUp()
+{
+	return m_up;
+}
+
+
+
 void Entity::LookAt(float x, float y, float z)
 {
 
 }
+
+void Entity::OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius)
+{
+	// Charger position et pivot
+	XMVECTOR pos = XMLoadFloat3(&m_position);
+	XMVECTOR piv = XMLoadFloat3(&pivot);
+	XMVECTOR ax = XMVector3Normalize(XMLoadFloat3(&axis));
+
+	// Direction actuelle depuis le pivot
+	XMVECTOR dir = pos - piv;
+
+	// Si l'objet est exactement au pivot, on force une direction par défaut
+	if (XMVector3LengthSq(dir).m128_f32[0] < 0.00001f)
+	{
+		dir = XMVectorSet(1, 0, 0, 0); // direction X par défaut
+	}
+
+	// Normalisation puis application du rayon
+	dir = XMVector3Normalize(dir);
+	dir *= radius;
+
+	// Quaternion de rotation
+	XMVECTOR q = XMQuaternionRotationAxis(ax, angle);
+
+	// Rotation du vecteur
+	dir = XMVector3Rotate(dir, q);
+
+	// Nouvelle position
+	pos = piv + dir;
+
+	XMStoreFloat3(&m_position, pos);
+
+	UpdateWorldMatrix();
+}
+
+XMFLOAT4 Entity::GetRotation()
+{
+	return m_quaternion;
+}
+
+
 
 void Entity::CoutRotation()
 {

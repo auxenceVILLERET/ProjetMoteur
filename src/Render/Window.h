@@ -12,7 +12,7 @@ public:
 
     bool ProcessMessages();
 
-    Window* GetInstance();
+    static Window* GetInstance();
     HWND GetHandle() const;
 
     uint32_t GetWidth() const { return m_width; }
@@ -27,6 +27,14 @@ public:
 	void SetMaximized(bool maximized) { m_maximized = maximized; }
 	void SetResizing(bool resizing) { m_resizing = resizing; }
 	void SetFullscreen(bool fullscreen) { m_fullscreen = fullscreen; }
+
+    void LockCursor(bool enable);
+    void UpdateCursorCenter();
+
+    bool IsCursorLocked() const { return m_cursorLocked; }
+    const POINT& GetCursorCenter() const { return m_cursorCenter; }
+ 
+	bool IsOpen() const { return m_isOpen; }
 
 private:
     static LRESULT CALLBACK StaticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -43,6 +51,11 @@ private:
     bool m_maximized = false;   // is the application maximized?
     bool m_resizing = false;    // are the resize bars being dragged?
     bool m_fullscreen = false;  // fullscreen enabled
+	bool m_isOpen = true;      // is the application running?
+
+    // Cursor state
+    bool m_cursorLocked = false;
+    POINT m_cursorCenter{};
 };
 
 #endif // !ENGINE_WINDOW_H

@@ -33,10 +33,15 @@ void Engine::Run()
 
 void Engine::Shutdown()
 {
-
+	m_isRunning = false;
 }
 
 float Engine::GetDeltaTime()
 {
 	return m_timer->DeltaTime();
+}
+
+float Engine::GetTotalTime()
+{
+	return m_timer->TotalTime();
 }
