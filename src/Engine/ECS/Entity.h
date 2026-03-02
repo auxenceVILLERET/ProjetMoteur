@@ -25,7 +25,7 @@ public:
 
 	//POSITION
 	void SetPosition(float x, float y, float z); // set XYZ
-	void SetPosition(XMFLOAT3 vector); // set XYZ
+	void SetPosition(XMFLOAT3 vector); // set XYZ with Vector
 
 	void SetPositionX(float x); // set XYZ
 	void SetPositionY(float y); // set Y

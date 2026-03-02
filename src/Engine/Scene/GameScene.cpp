@@ -69,23 +69,16 @@ void GameScene::OnExit()
 void GameScene::Update(float dt)
 {
 	m_deltaTime = dt;
+	HandleCursor();
+	if (!m_locked) { return; }
 
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
-	
-	// Make a few rails by default
-	if (m_rails.size() < 3) ProceduralRails();	
-	else m_startupFlag = false;
 
-	ProceduralRails();
+	
+
 	MovePlayer();
-	MoveCamera();
 	Shooting();
-
-	//LockMouse();
-
-	Shooting();
-	
 }
 
 Entity* GameScene::CreateBody()
@@ -106,94 +99,6 @@ Entity* GameScene::CreateFloor()
 	floor->SetScale({ 50,0.1f,50 });
 	m_entities.push_back(floor);
 	return floor;
-}
-
-// -[RAIL GENERATION]- //
-void GameScene::CreateRail()
-{
-	m_rail = m_ecs->CreateEntity<Entity>();
-	m_rail->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
-	m_rail->SetScale({ .1f, 3.0f, .1f });
-	m_rail->RotateX(XM_PIDIV2);
-	m_entities.push_back(m_rail);
-}
-
-void GameScene::ProceduralRails() // TEMP
-{
-	if (Input::GetKeyDown(Keyboard::SPACE) || m_startupFlag) {
-		CreateRail();
-		float nextPos = 0;
-
-		if (m_rails.size() > 0)
-		{
-			nextPos = m_rail->GetScale().y + m_rails.back()->GetPosition().z;
-		}
-
-		m_rail->SetPosition(0.0f, -1.0f, nextPos);
-		m_rails.push_back(m_rail);
-
-		if (m_rails.size() > m_maxRails) {
-			DeleteRails();
-		}
-	}
-}
-
-void GameScene::DeleteRails() {
-	m_rails.front()->~Entity();
-	m_rails.erase(m_rails.begin(), m_rails.begin() + 1);
-}
-
-// -[CAMERA]- //
-void GameScene::MoveCamera()
-{
-	std::vector<float> delta = Input::GetMouseDelta();
-	float sensitivity = 0.0025f;
-
-	m_yaw += delta[0] * sensitivity;
-	m_pitch += delta[1] * sensitivity;
-
-	m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
-	UpdateCameraTransform();
-}
-
-void GameScene::UpdateCameraTransform()
-{
-	// Position = body
-	m_cam->SetPosition(m_body->GetPosition());
-	//m_cam->Translate(0, 0, -3);
-
-	// Load body rotation 
-	XMVECTOR bodyQ = XMLoadFloat4(&m_body->m_quaternion);
-
-	// Up local body
-	XMVECTOR bodyUp = XMVector3Rotate(
-		XMVectorSet(0, 1, 0, 0),
-		bodyQ
-	);
-
-	// YAW around up local
-	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
-
-	// Rotation apres yaw
-	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
-
-	// Right local apres yaw
-	XMVECTOR bodyRight = XMVector3Rotate(
-		XMVectorSet(1, 0, 0, 0),
-		yawedBody
-	);
-
-	// Pitch around right
-	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
-
-	// Rotation
-	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
-	finalQ = XMQuaternionNormalize(finalQ);
-
-	XMFLOAT4 qFloat;
-	XMStoreFloat4(&qFloat, finalQ);
-
-	m_cam->SetRotation(qFloat);
 }
 
 void GameScene::MovePlayer() {
@@ -232,17 +137,78 @@ void GameScene::Shooting() {
 	}
 }
 
-// -[LOCK & HIDE CURSOR]- //
-void GameScene::LockMouse() {
-	Window* window = Window::GetInstance();
-	
-	if (window->IsCursorLocked())
-	{
-		SetCursorPos(
-			window->GetCursorCenter().x,
-			window->GetCursorCenter().y
-		);
-	}
+// -[LOCK & HIDE CURSOR + Calculate DeltaMouse]- //
+void GameScene::HandleCursor()
+{
+  Window* window = Window::GetInstance();
+
+    if (Input::GetKeyDown(Keyboard::ESC))
+    {
+        m_locked = !m_locked;
+        window->LockCursor(m_locked);
+    }
+
+    if (!m_locked)
+        return;
+
+    window->UpdateCursorCenter();
+
+    POINT mouse;
+    GetCursorPos(&mouse);
+
+    float dx = float(mouse.x - window->GetCursorCenter().x);
+    float dy = float(mouse.y - window->GetCursorCenter().y);
+
+    float sensitivity = 0.0025f;
+
+    m_yaw   += dx * sensitivity;
+    m_pitch += dy * sensitivity;
+    m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
+
+    SetCursorPos(
+        window->GetCursorCenter().x,
+        window->GetCursorCenter().y
+    );
+
+    UpdateCameraTransform();
 }
 
+void GameScene::UpdateCameraTransform()
+{
+	// Position = body
+	m_cam->SetPosition(m_body->GetPosition());
+
+	// Load body rotation 
+	XMVECTOR bodyQ = XMLoadFloat4(&m_body->m_quaternion);
+
+	// Up local body
+	XMVECTOR bodyUp = XMVector3Rotate(
+		XMVectorSet(0, 1, 0, 0),
+		bodyQ
+	);
+
+	// YAW around up local
+	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
+
+	// Rotation apres yaw
+	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
+
+	// Right local apres yaw
+	XMVECTOR bodyRight = XMVector3Rotate(
+		XMVectorSet(1, 0, 0, 0),
+		yawedBody
+	);
+
+	// Pitch around right
+	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
+
+	// Rotation
+	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
+	finalQ = XMQuaternionNormalize(finalQ);
+
+	XMFLOAT4 qFloat;
+	XMStoreFloat4(&qFloat, finalQ);
+
+	m_cam->SetRotation(qFloat);
+}
 
