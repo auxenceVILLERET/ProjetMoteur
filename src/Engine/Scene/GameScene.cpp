@@ -41,15 +41,21 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 		entity->SetActive(false);
 	}
 
+
+
 }
 
 void GameScene::OnEnter()
-{
+{	
+	Window* window = Window::GetInstance();
+	window->LockCursor(true);
+	
 	m_tilesManager->OnEnter();
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(true);
 	}
+	
 	UIFrame frame;
 	frame.showSplash = false;
 	frame.score = 0;
@@ -74,8 +80,6 @@ void GameScene::Update(float dt)
 
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
-
-	
 
 	MovePlayer();
 	Shooting();
