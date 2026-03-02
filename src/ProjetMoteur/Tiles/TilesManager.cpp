@@ -127,6 +127,7 @@ void TilesManager::OnExit()
     for (Tiles* tile : m_tiles)
     {
         tile->SetActive(false);
+        tile->SetActiveEnemies(false);
     }
     m_activeTiles.clear();
 }

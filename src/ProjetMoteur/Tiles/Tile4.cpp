@@ -71,6 +71,7 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity->SetActive(false);
+	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
 	GetLocalOffset().push_back(offsetEnemy);
 
@@ -83,6 +84,7 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity2->SetActive(false);
+	EnemyEntity2->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity2);
 	GetLocalOffset().push_back(offsetEnemy2);
 
@@ -95,8 +97,10 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity3->SetActive(false);
+	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
 	GetLocalOffset().push_back(offsetEnemy3);
+
 
 	SetActive(false);
 	SetIsTurnL(false);

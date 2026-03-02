@@ -70,6 +70,16 @@ void Tiles::SetActive(bool active)
 	{
 		if (entity->GetComponent<EnemyComponent>()) continue;
 		entity->SetActive(active);
+	}
+}
 
+void Tiles::SetActiveEnemies(bool active)
+{
+	for (Entity* entity : m_entities)
+	{
+		if (entity->GetComponent<EnemyComponent>())
+		{
+			entity->SetActive(active);
+		}
 	}
 }

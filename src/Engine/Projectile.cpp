@@ -47,6 +47,7 @@ void Projectile::CreatePulling(int poolSize)
 		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);
 		projectile->GetComponent<ProjectileComponent>()->SetDistanceTraveled(0.0f);
 		projectile->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+		projectile->GetComponent<ColliderComponent>()->SetRadius(m_size);
 
 		m_projectiles.push_back(projectile);
 	}
