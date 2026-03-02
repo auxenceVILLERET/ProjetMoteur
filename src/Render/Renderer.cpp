@@ -240,7 +240,7 @@ void Renderer::BeginFrame()
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    float clearColor[4] = { 0.08f, 0.10f, 0.14f, 1.0f };
+    float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }

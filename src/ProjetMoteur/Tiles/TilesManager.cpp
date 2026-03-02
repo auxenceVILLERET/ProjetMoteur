@@ -56,6 +56,7 @@ void TilesManager::Update(float deltaTime)
             tile->SetActive(false);
             m_activeTiles.erase(m_activeTiles.begin() + i);
             SpawnTile();
+			tile->SpawnEnemy();
         }
         else
         {

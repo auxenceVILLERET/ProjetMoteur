@@ -4,6 +4,9 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include <cmath>
 #include "Engine/ECS/ECS.h"
+#include "Engine/ECS/Components/EnemyComponent.h"
+#include "Core/Random.h"
+#include <iostream>
 
 void Tiles::MoveZ(float dist)
 {
@@ -32,12 +35,41 @@ void Tiles::CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radiu
 	}
 }
 
+void Tiles::SpawnEnemy()
+{
+	Random random;
+	int choosenEnemy = random.RandomInt(1, 3);
+	float chance = random.Chance(50.0f);
+
+	if(chance < 0.5f)
+	{
+		choosenEnemy = 0; // no enemy
+	}
+
+	for(Entity* entity : m_entities)
+	{
+		if (entity->GetComponent<EnemyComponent>())
+		{
+			if (entity->GetComponent<EnemyComponent>()->GetID() == choosenEnemy)
+			{
+				entity->SetActive(true);
+			}
+			else
+			{
+				entity->SetActive(false);
+			}
+		}
+	}
+}
+
 void Tiles::SetActive(bool active)
 {
 	m_active = active;
 
 	for (Entity* entity : m_entities)
 	{
+		if (entity->GetComponent<EnemyComponent>()) continue;
 		entity->SetActive(active);
+
 	}
 }
