@@ -4,6 +4,7 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
+#include "Window.h"
 
 void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
 {
@@ -20,6 +21,8 @@ void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	menuEntity->SetPosition(0.0f, 0.0f, 5.0f);
 	
 	m_entities.push_back(menuEntity);
+
+
 }
 
 void MenuScene::OnEnter()
@@ -28,6 +31,10 @@ void MenuScene::OnEnter()
 	{
 		entity->SetActive(true);
 	}
+
+
+	Window* window = Window::GetInstance();
+	window->LockCursor(false);
 
 }
 

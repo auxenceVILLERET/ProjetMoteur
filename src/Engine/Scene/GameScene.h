@@ -59,7 +59,6 @@ private:
 	void UpdateCameraTransform();
 
 	//LOOK WITH MOUSE
-	void MoveCamera();
 	void HandleCursor();
 
 	//SHOOTING
