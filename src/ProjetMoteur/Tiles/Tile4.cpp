@@ -5,6 +5,7 @@
 #include "Engine/ResourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/EnemyComponent.h"
+#include "Engine/ECS/Components/ColliderComponent.h"
 
 void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 {
@@ -64,6 +65,7 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* EnemyEntity = ecs->CreateEntity<Entity>();
 	EnemyEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity->AddComponent<EnemyComponent>()->SetID(1);
+	EnemyEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy = { 2.0f, 1.0f, 6.0f };
 	EnemyEntity->SetPosition(GetPosition().x + offsetEnemy.x, GetPosition().y + offsetEnemy.y, GetPosition().z + offsetEnemy.z);
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
@@ -75,6 +77,7 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* EnemyEntity2 = ecs->CreateEntity<Entity>();
 	EnemyEntity2->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity2->AddComponent<EnemyComponent>()->SetID(2);
+	EnemyEntity2->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy2 = { -2.0f, 1.0f, 6.0f };
 	EnemyEntity2->SetPosition(GetPosition().x + offsetEnemy2.x, GetPosition().y + offsetEnemy2.y, GetPosition().z + offsetEnemy2.z);
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
@@ -86,6 +89,7 @@ void Tile4::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* EnemyEntity3 = ecs->CreateEntity<Entity>();
 	EnemyEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity3->AddComponent<EnemyComponent>()->SetID(3);
+	EnemyEntity3->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy3 = { 0.0f, 1.0f, 14.0f };
 	EnemyEntity3->SetPosition(GetPosition().x + offsetEnemy3.x, GetPosition().y + offsetEnemy3.y, GetPosition().z + offsetEnemy3.z);
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
