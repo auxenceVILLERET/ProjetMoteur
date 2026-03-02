@@ -156,20 +156,19 @@ void Window::LockCursor(bool enable)
 {
     if (enable == m_cursorLocked)
         return;
+
     m_cursorLocked = enable;
 
     if (enable)
     {
         UpdateCursorCenter();
 
-        RECT clip;
-        clip.left = m_cursorCenter.x;
-        clip.top = m_cursorCenter.y;
-        clip.right = m_cursorCenter.x + 1;
-        clip.bottom = m_cursorCenter.y + 1;
+        RECT rect;
+        GetClientRect(m_hWindow, &rect);
+        ClientToScreen(m_hWindow, (POINT*)&rect.left);
+        ClientToScreen(m_hWindow, (POINT*)&rect.right);
 
-        ClipCursor(&clip);
-
+        ClipCursor(&rect);
         while (ShowCursor(FALSE) >= 0);
         SetCursorPos(m_cursorCenter.x, m_cursorCenter.y);
     }

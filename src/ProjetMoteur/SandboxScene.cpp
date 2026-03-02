@@ -186,13 +186,6 @@ void SandboxScene::DeleteRails() {
 // -[CAMERA]- //
 void SandboxScene::MoveCamera()
 {
-	std::vector<float> delta = Input::GetMouseDelta();
-
-	// Kinda Cheating, can cause problem when player is being rotated;
-
-	m_cam->RotateY(XMConvertToRadians(delta[0]));
-	m_cam->RotateLocalX(XMConvertToRadians(delta[1]));
-
 	// WASD / ZQSD movement
 	float directionForward = 0;
 	float directionRight = 0;

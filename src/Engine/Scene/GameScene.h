@@ -41,6 +41,7 @@ private:
 
 	float m_yaw = 0.0f;
 	float m_pitch = 0.0f;
+	bool m_locked = true;
 
 	Projectile* m_projectile;
 	TilesManager* m_tilesManager;
@@ -59,7 +60,7 @@ private:
 
 	//LOOK WITH MOUSE
 	void MoveCamera();
-	void LockMouse();
+	void HandleCursor();
 
 	//SHOOTING
 	void Shooting();
