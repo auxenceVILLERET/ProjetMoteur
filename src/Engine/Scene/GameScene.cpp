@@ -85,8 +85,8 @@ Entity* GameScene::CreateBody()
 {
 	Entity* body = m_ecs->CreateEntity<Entity>();
 	body->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
-	body->SetPosition(0, 0, 5);
-	body->SetScale({ .25,.3,.25 });
+	body->SetPosition(0, 1, 0);
+	body->SetScale({ .01f });
 	m_entities.push_back(body);
 	return body;
 }
@@ -102,18 +102,18 @@ Entity* GameScene::CreateFloor()
 }
 
 void GameScene::MovePlayer() {
-	float offset = 2;
+	float offset = 1;
 
 	// ROTATION AUTOUR DU RAIL
 	if (Input::GetKey(Keyboard::LEFT))
 	{
-		m_body->OrbitAround({ 0,-1,5 },{0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
+		m_body->OrbitAround({ 0.0f,0.0f,0.0f }, {0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
 
 	}
 	if (Input::GetKey(Keyboard::RIGHT))
 	{
-		m_body->OrbitAround({ 0,-1,5 }, { 0,0,1 }, XMConvertToRadians(-90.0f * m_deltaTime), offset);
+		m_body->OrbitAround({0.0f,0.0f,0.0f}, {0,0,1}, XMConvertToRadians(-90.0f * m_deltaTime), offset);
 		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
 	}
 }
