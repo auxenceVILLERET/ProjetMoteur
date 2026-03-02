@@ -7,6 +7,8 @@
 #include "Engine/ECS/Components/EnemyComponent.h"
 #include "Core/Random.h"
 #include <iostream>
+#include "Engine/ECS/Components/ObstacleComponent.h"
+
 
 void Tiles::MoveZ(float dist)
 {
@@ -59,6 +61,17 @@ void Tiles::SpawnEnemy()
 				entity->SetActive(false);
 			}
 		}
+		if(entity->GetComponent<ObstacleComponent>())
+		{
+			if (choosenEnemy == 0)
+			{
+				entity->SetActive(false);
+			}
+			else
+			{
+				entity->SetActive(true);
+			}
+		}
 	}
 }
 
@@ -69,6 +82,7 @@ void Tiles::SetActive(bool active)
 	for (Entity* entity : m_entities)
 	{
 		if (entity->GetComponent<EnemyComponent>()) continue;
+		if (entity->GetComponent<ObstacleComponent>()) continue;
 		entity->SetActive(active);
 	}
 }
@@ -78,6 +92,10 @@ void Tiles::SetActiveEnemies(bool active)
 	for (Entity* entity : m_entities)
 	{
 		if (entity->GetComponent<EnemyComponent>())
+		{
+			entity->SetActive(active);
+		}
+		if(entity->GetComponent<ObstacleComponent>())
 		{
 			entity->SetActive(active);
 		}

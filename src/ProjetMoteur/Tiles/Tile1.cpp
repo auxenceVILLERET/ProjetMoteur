@@ -4,11 +4,13 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/EnemyComponent.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
+#include "Engine/ECS/Components/ObstacleComponent.h"
 
 
 void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 {
 	TextureHandle blueHandle = ResourceManager::Instance().LoadTexture(L"../../res/BlueTexture.png");
+	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
@@ -90,6 +92,19 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(EnemyEntity3);
 	GetLocalOffset().push_back(offsetEnemy3);
 
+	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
+	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
+	ObstacleEntity->AddComponent<ObstacleComponent>();
+	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+	XMFLOAT3 offsetObstacle = { -2.0f, 0.0f, 18.0f };
+	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
+	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
+	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
+	ObstacleEntity->SetActive(false);
+	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
+	GetEntities().push_back(ObstacleEntity);
+	GetLocalOffset().push_back(offsetObstacle);
+
 	SetActive(false);
 	SetIsTurnL(false);
 	SetIsTurnR(false);
@@ -110,4 +125,20 @@ void Tile1::Update(float deltaTime)
 		entity->SetPosition(GetPosition().x + offset.x,GetPosition().y + offset.y,GetPosition().z + offset.z);
 	}
 
+	for(Entity* entity : GetEntities())
+	{
+		if(entity->GetComponent<EnemyComponent>() != nullptr)
+		{
+			if (entity->IsActive() == false)
+			{
+				for(Entity* otherEntity : GetEntities())
+				{
+					if(otherEntity->GetComponent<ObstacleComponent>() != nullptr)
+					{
+						otherEntity->SetActive(false);
+					}
+				}
+			}
+		}
+	}
 }

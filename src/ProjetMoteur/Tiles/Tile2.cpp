@@ -6,10 +6,12 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/EnemyComponent.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
+#include "Engine/ECS/Components/ObstacleComponent.h"
 
 void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 {
 	TextureHandle texture = ResourceManager::Instance().LoadTexture(L"../../res/SplashScreen.png");
+	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
@@ -101,6 +103,19 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
 	GetLocalOffset().push_back(offsetEnemy3);
+
+	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
+	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
+	ObstacleEntity->AddComponent<ObstacleComponent>();
+	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+	XMFLOAT3 offsetObstacle = { 2.0f, 0.0f, 16.0f };
+	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
+	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
+	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
+	ObstacleEntity->SetActive(false);
+	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
+	GetEntities().push_back(ObstacleEntity);
+	GetLocalOffset().push_back(offsetObstacle);
 
 	SetActive(false);
 	SetIsTurnL(false);
