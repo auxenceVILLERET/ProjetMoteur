@@ -13,8 +13,10 @@ class LightSystem;
 struct FrameCB
 {
     XMFLOAT4X4 viewProj;
-    XMFLOAT3 cameraPos;
-    uint32_t lightCount;
+    XMFLOAT3 cameraPos; uint32_t pad0;
+
+    XMFLOAT3 lightPos; float lightRange;
+    XMFLOAT3 lightColor; float lightIntensity;
 };
 
 struct LightGPU
@@ -50,6 +52,8 @@ public:
     D3D12_GPU_DESCRIPTOR_HANDLE GetLightsSrv(uint32_t backBufferIndex) const;
 
 private:
+    static inline uint32_t Align256(uint32_t x) { return (x + 255u) & ~255u; }
+
     ID3D12Device* m_device = nullptr;
     DescriptorHeapManager* m_heap = nullptr;
 

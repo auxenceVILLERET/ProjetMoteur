@@ -25,13 +25,15 @@ void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Enti
 	m_engine = engine;
 	m_cam = camera;
 
+	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 	// -[TEST OBJECTS]- //
 	m_cylinder = CreateCylinder();
-	m_cube = CreateCube();
-	m_sphere = CreateSphere();
-	m_moon = CreateMoon();
-	m_moonMoon = CreateMoonMoon();
-	m_floor = CreateFloor();
+	m_cylinder->RotateX(XMConvertToRadians(90.f));
+	//m_cube = CreateCube();
+	//m_sphere = CreateSphere();
+	//m_moon = CreateMoon();
+	//m_moonMoon = CreateMoonMoon();
+	//m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
 	m_projectile->Initialize(0.1f, Shape::SPHERE, 15.0f, 3.0f, m_engine, m_ecs, m_renderer);
@@ -67,17 +69,17 @@ void SandboxScene::Update(float dt)
 	m_projectile->Update(m_deltaTime);
 
 	//Test on entities
-	m_cube->RotateX(XMConvertToRadians(.01f));
-	m_cube->RotateLocalY(XMConvertToRadians(.05f));
-	m_cube->RotateZ(XMConvertToRadians(.05f));
+	//m_cube->RotateX(XMConvertToRadians(.01f));
+	//m_cube->RotateLocalY(XMConvertToRadians(.5f));
+	//m_cube->RotateZ(XMConvertToRadians(5.f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(10.f * m_deltaTime), 1);
-	m_moon->RotateLocalY(XMConvertToRadians(60.f * m_deltaTime));
+	//m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(10.f * m_deltaTime), 1);
+	//m_moon->RotateLocalY(XMConvertToRadians(60.f * m_deltaTime));
 
-	m_moonMoon->OrbitAround(m_moon->GetPosition(), m_moon->m_up, XMConvertToRadians(100.f * m_deltaTime), .25);
-	m_moonMoon->RotateLocalY(XMConvertToRadians(90.f * m_deltaTime));
+	//m_moonMoon->OrbitAround(m_moon->GetPosition(), m_moon->m_up, XMConvertToRadians(100.f * m_deltaTime), .25);
+	//m_moonMoon->RotateLocalY(XMConvertToRadians(90.f * m_deltaTime));
 
-	m_cylinder->RotateY(XMConvertToRadians(45.f * m_deltaTime));
+	m_cylinder->RotateZ(XMConvertToRadians(45.f * m_deltaTime));
 
 
 	MoveCamera();
@@ -90,7 +92,7 @@ Entity* SandboxScene::CreateSphere()
 {
 	Entity* sphere = m_ecs->CreateEntity<Entity>();
 	sphere->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
-	sphere->SetPosition(-2.0f, 0.0f, 10.0f);
+	sphere->SetPosition(-1.0f, 0.0f, 10.0f);
 	sphere->AddComponent<PlayerComponent>();
 	sphere->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 
@@ -102,23 +104,25 @@ Entity* SandboxScene::CreateCylinder()
 {
 	Entity* cylinder = m_ecs->CreateEntity<Entity>();
 	cylinder->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
-	cylinder->SetPosition(2.0f, 0.0f, 5.0f);
-	cylinder->SetScale(.3f);
+	cylinder->SetPosition(0.0f, -2.0f, 2.0f);
+	cylinder->SetScale({1.0f, 5.0f, 1.0f});
 	m_entities.push_back(cylinder);
 	return cylinder;
 }
 
-Entity* SandboxScene::CreateCube() {
+Entity* SandboxScene::CreateCube() 
+{
 	Entity* cube = m_ecs->CreateEntity<Entity>();
 	cube->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), m_renderer);
-	cube->SetPosition(2.0f, 0.0f, 10.0f);
-	cube->SetScale(.5f);
+	cube->SetPosition(0.0f, 0.0f, 0.0f);
+	cube->SetScale(1.0f);
 
 	m_entities.push_back(cube);
 	return cube;
 }
 
-Entity* SandboxScene::CreateMoon() {
+Entity* SandboxScene::CreateMoon() 
+{
 	Entity* moon = m_ecs->CreateEntity<Entity>();
 	moon->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
 	moon->SetPosition(m_cylinder->GetPosition().x, m_cylinder->GetPosition().y, m_cylinder->GetPosition().z);

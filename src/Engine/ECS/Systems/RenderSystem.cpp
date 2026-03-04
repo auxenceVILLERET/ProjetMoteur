@@ -17,12 +17,15 @@ void RenderSystem::Update(ECS& ecs, float deltaTime)
 		MeshRendererComponent* meshRenderer = entity->GetComponent<MeshRendererComponent>();
 		if (meshRenderer != nullptr) 
 		{
-			XMFLOAT4X4 m = entity->GetMatrix();
-			XMMATRIX world = XMLoadFloat4x4(&m);
+			XMFLOAT4X4 world = entity->GetMatrix();
+			XMMATRIX worldMatrix = XMLoadFloat4x4(&world);
 
-			XMFLOAT4X4 worldViewProj = m_renderer->BuildWorldViewProjMatrix(world); 
+			XMFLOAT4X4 worldViewProjT = m_renderer->BuildWorldViewProjMatrix(worldMatrix); // Matrice Transposée
+			XMFLOAT4X4 worldT;
+			worldMatrix = XMMatrixTranspose(worldMatrix);
+			XMStoreFloat4x4(&worldT, worldMatrix); // Matrice Transposée
 
-			meshRenderer->UpdateConstants(worldViewProj);
+			meshRenderer->UpdateConstants(worldT, worldViewProjT);
 
 			m_vObj.push_back(meshRenderer);
 		} 

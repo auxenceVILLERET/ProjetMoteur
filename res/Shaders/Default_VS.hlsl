@@ -1,5 +1,7 @@
 cbuffer ObjectCB : register(b0)
 {
+    float4x4 gWorld;
+    float4x4 gWorldInvTranspose;
     float4x4 gWorldViewProj;
 };
 
@@ -21,11 +23,14 @@ struct VertexOut
 VertexOut VSMain(VertexIn v)
 {
     VertexOut o;
-    o.pos = mul(float4(v.pos, 1.0f), gWorldViewProj);
 
-    // Pour l’instant : on passe position objet + normal objet
-    o.worldPos = v.pos;
-    o.worldNrm = v.normal;
+    float4 wp = mul(float4(v.pos, 1.0f), gWorld);
+    o.worldPos = wp.xyz;
+
+    o.worldNrm = normalize(mul(float4(v.normal, 0.0f), gWorldInvTranspose).xyz);
+
+    o.pos = mul(float4(v.pos, 1.0f), gWorldViewProj);
     o.uv = v.uv;
+
     return o;
 }

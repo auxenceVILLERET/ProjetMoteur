@@ -169,11 +169,12 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
 
-    // frame constants (camera + lightCount)
+    //LIGHT SOLEIL
     FrameCB frame{};
-    frame.viewProj = GetViewProjMatrix();
-    frame.cameraPos = m_pCamera->GetEntity()->GetPosition();
-    frame.lightCount = 0;
+    frame.lightPos = { 0.0f, 10.0f, 0.0f };
+    frame.lightRange = 50.0f;
+    frame.lightColor = { 1,1,1 };
+    frame.lightIntensity = 1.0f;
 
     m_pLightRender->UpdateFrame(bb, frame);
 

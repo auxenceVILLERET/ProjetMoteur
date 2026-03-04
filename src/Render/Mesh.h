@@ -14,6 +14,8 @@ struct Vertex
 
 struct ObjectConstants
 {
+	XMFLOAT4X4 World;
+	XMFLOAT4X4 WorldInvTranspose;
 	XMFLOAT4X4 WorldViewProj;
 };
 

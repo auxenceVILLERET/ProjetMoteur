@@ -12,6 +12,8 @@ bool Mesh::Initialize(UploadContext& uploader, std::vector<Vertex> vertices, std
 	m_vertices = std::move(vertices);
 	m_indices = std::move(indices);
 
+	CalculateNormals();
+
 	m_indexCount = (uint32_t)m_indices.size();
 
 	const uint64_t vbBytes = uint64_t(m_vertices.size()) * sizeof(Vertex);
@@ -63,8 +65,6 @@ bool Mesh::CreateQuad(UploadContext& uploader)
 		0, 2, 3
 	};
 
-	CalculateNormals();
-
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
 
@@ -83,7 +83,6 @@ bool Mesh::CreateCube(UploadContext& uploader)
 			// 4 vertices par face
 			uint32_t base = (uint32_t)vertices.size();
 
-			// UV cohérents (V inversé souvent pratique selon chargement)
 			vertices.push_back(Vertex{ a, { 0.0f, 0.0f, 0.0f }, {0.0f, 1.0f} }); // bas-gauche
 			vertices.push_back(Vertex{ b, { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f} }); // haut-gauche
 			vertices.push_back(Vertex{ c, { 0.0f, 0.0f, 0.0f }, {1.0f, 0.0f} }); // haut-droit
@@ -111,8 +110,6 @@ bool Mesh::CreateCube(UploadContext& uploader)
 
 	// BOTTOM(-Y)
 	addFace({ -s, -s, +s }, { -s, -s, -s }, { +s, -s, -s }, { +s, -s, +s });
-
-	CalculateNormals();
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
@@ -165,8 +162,6 @@ bool Mesh::CreateCylinder(UploadContext& uploader)
 		// Disque du haut (face visible depuis l'extérieur => vers +Y)
 		indices.push_back(centerTop); indices.push_back(t1); indices.push_back(t0);
 	}
-
-	CalculateNormals();
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }
@@ -221,8 +216,6 @@ bool Mesh::CreateSphere(UploadContext& uploader)
 			indices.push_back(i0); indices.push_back(i2); indices.push_back(i3);
 		}
 	}
-
-	CalculateNormals();
 
 	return Initialize(uploader, std::move(vertices), std::move(indices));
 }

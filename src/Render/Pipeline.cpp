@@ -176,17 +176,17 @@ bool Pipeline::BuildRootSignature(ID3D12Device* device)
     params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
     // Param 3 : SRV table t1 (lights)
-    D3D12_DESCRIPTOR_RANGE lightRange = {};
-    lightRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-    lightRange.NumDescriptors = 1;
-    lightRange.BaseShaderRegister = 1; // t1
-    lightRange.RegisterSpace = 0;
-    lightRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+    //D3D12_DESCRIPTOR_RANGE lightRange = {};
+    //lightRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    //lightRange.NumDescriptors = 1;
+    //lightRange.BaseShaderRegister = 1; // t1
+    //lightRange.RegisterSpace = 0;
+    //lightRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-    params[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-    params[3].DescriptorTable.NumDescriptorRanges = 1;
-    params[3].DescriptorTable.pDescriptorRanges = &lightRange;
-    params[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    //params[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    //params[3].DescriptorTable.NumDescriptorRanges = 1;
+    //params[3].DescriptorTable.pDescriptorRanges = &lightRange;
+    //params[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
     // Static sampler s0
     D3D12_STATIC_SAMPLER_DESC samp = {};

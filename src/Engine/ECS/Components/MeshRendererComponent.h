@@ -20,10 +20,12 @@ public:
 
     // constant buffer
     bool CreateConstantBuffer(ID3D12Device* device);
-    void UpdateConstants(XMFLOAT4X4& worldViewProjT);
+    void UpdateConstants(XMFLOAT4X4& worldMatrixT, XMFLOAT4X4& worldViewProjMatrixT);
     D3D12_GPU_VIRTUAL_ADDRESS GetCbAddress() const { return m_pCb ? m_pCb->GetGPUVirtualAddress() : 0; }
 
 private:
+	XMFLOAT4X4 BuildWorldInvTranspose(XMFLOAT4X4& worldMatrixT);
+
     MeshHandle m_mesh{};
     TextureHandle m_texture{};
 

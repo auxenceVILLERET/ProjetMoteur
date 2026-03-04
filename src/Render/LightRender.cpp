@@ -5,6 +5,21 @@
 
 bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, uint32_t backBufferCount, uint32_t maxLights)
 {
+    if (m_lightsUpload)
+    { 
+        m_lightsUpload->Unmap(0, nullptr);
+        m_lightsUpload->Release();
+        m_lightsUpload = nullptr; 
+    }
+    if (m_frameUpload)
+    { 
+        m_frameUpload->Unmap(0, nullptr);  
+        m_frameUpload->Release();
+        m_frameUpload = nullptr;
+    }
+    m_lightsMapped = nullptr;
+    m_frameMapped = nullptr;
+
     m_device = device;
     m_heap = heap;
     m_backBufferCount = backBufferCount;
@@ -13,22 +28,22 @@ bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, 
     // --------------------------
     // Lights Upload Buffer
     // --------------------------
-    const uint64_t totalLightBytes = uint64_t(sizeof(LightGPU)) * maxLights * backBufferCount;
-
     D3D12_HEAP_PROPERTIES heapProps{};
     heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-    D3D12_RESOURCE_DESC buf{};
-    buf.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    buf.Width = totalLightBytes;
-    buf.Height = 1;
-    buf.DepthOrArraySize = 1;
-    buf.MipLevels = 1;
-    buf.SampleDesc.Count = 1;
-    buf.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    uint64_t totalLightBytes = uint64_t(sizeof(LightGPU)) * uint64_t(m_maxLights) * uint64_t(m_backBufferCount);
+
+    D3D12_RESOURCE_DESC lightDesc{};
+    lightDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    lightDesc.Width = totalLightBytes;
+    lightDesc.Height = 1;
+    lightDesc.DepthOrArraySize = 1;
+    lightDesc.MipLevels = 1;
+    lightDesc.SampleDesc.Count = 1;
+    lightDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
     HRESULT hr = device->CreateCommittedResource(
-        &heapProps, D3D12_HEAP_FLAG_NONE, &buf,
+        &heapProps, D3D12_HEAP_FLAG_NONE, &lightDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
         IID_PPV_ARGS(&m_lightsUpload));
 
@@ -48,7 +63,7 @@ bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, 
         srv.Format = DXGI_FORMAT_UNKNOWN;
         srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
         srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srv.Buffer.FirstElement = uint64_t(bb) * uint64_t(maxLights); // en ELEMENTS
+        srv.Buffer.FirstElement = uint64_t(bb) * uint64_t(maxLights);
         srv.Buffer.NumElements = maxLights;
         srv.Buffer.StructureByteStride = sizeof(LightGPU);
         srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
@@ -59,20 +74,20 @@ bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, 
     // --------------------------
     // FrameCB Upload Buffer (b1)
     // --------------------------
-    m_frameStride = sizeof(FrameCB);
-    const uint64_t totalFrameBytes = uint64_t(m_frameStride) * backBufferCount;
+    m_frameStride = Align256((uint32_t)sizeof(FrameCB));
+    uint64_t totalFrameBytes = uint64_t(m_frameStride) * uint64_t(m_backBufferCount);
 
-    D3D12_RESOURCE_DESC cb{};
-    cb.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    cb.Width = totalFrameBytes;
-    cb.Height = 1;
-    cb.DepthOrArraySize = 1;
-    cb.MipLevels = 1;
-    cb.SampleDesc.Count = 1;
-    cb.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    D3D12_RESOURCE_DESC frameDesc{};
+    frameDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    frameDesc.Width = totalFrameBytes;
+    frameDesc.Height = 1;
+    frameDesc.DepthOrArraySize = 1;
+    frameDesc.MipLevels = 1;
+    frameDesc.SampleDesc.Count = 1;
+    frameDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
     hr = device->CreateCommittedResource(
-        &heapProps, D3D12_HEAP_FLAG_NONE, &cb,
+        &heapProps, D3D12_HEAP_FLAG_NONE, &frameDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
         IID_PPV_ARGS(&m_frameUpload));
 
@@ -127,8 +142,10 @@ D3D12_GPU_VIRTUAL_ADDRESS LightRender::GetFrameCbAddress(uint32_t bb) const
 
 void LightRender::Bind(ID3D12GraphicsCommandList* cmd, uint32_t bb, UINT rootFrameParam, UINT rootLightsParam) const
 {
-    cmd->SetGraphicsRootConstantBufferView(rootFrameParam, GetFrameCbAddress(bb));
-    cmd->SetGraphicsRootDescriptorTable(rootLightsParam, m_lightsSrv[bb].gpu);
+    auto address = GetFrameCbAddress(bb);
+    assert((address & 255ull) == 0);
+    cmd->SetGraphicsRootConstantBufferView(rootFrameParam, address);
+   // cmd->SetGraphicsRootDescriptorTable(rootLightsParam, m_lightsSrv[bb].gpu);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE LightRender::GetLightsSrv(uint32_t bb) const

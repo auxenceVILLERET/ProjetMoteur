@@ -1,27 +1,17 @@
 cbuffer FrameCB : register(b1)
 {
-    float4x4 gViewProj;
+    float4x4 gViewProj; // optionnel
     float3 gCameraPos;
-    uint gLightCount;
+    uint pad0;
+
+    float3 gLightPos;
+    float gLightRange;
+    float3 gLightColor;
+    float gLightIntensity;
 };
 
 Texture2D gTex0 : register(t0);
 SamplerState gSamp0 : register(s0);
-
-struct Light
-{
-    float3 position;
-    float range;
-    float3 color;
-    float intensity;
-    float3 direction;
-    float spotCosAngle; // non utilisé ici (spot plus tard)
-    uint type;
-    uint3 pad;
-};
-
-// t1 = buffer structuré de lights
-StructuredBuffer<Light> gLights : register(t1);
 
 struct VertexOut
 {
@@ -35,46 +25,26 @@ float4 PSMain(VertexOut i) : SV_TARGET
 {
     float3 albedo = gTex0.Sample(gSamp0, i.uv).rgb;
 
-    float3 N = float3(0, 1, 0);
+    float3 N = normalize(i.worldNrm);
 
-    // Un petit ambient pour voir quelque chose même hors lumière
     float3 ambient = 0.05f * albedo;
 
+    float3 toL = gLightPos - i.worldPos;
+    float d = length(toL);
+
     float3 lighting = 0.0f;
-
-    uint count = min(gLightCount, 128u); // mets ici ton MaxLights
-    
-    [loop]
-    for (uint li = 0; li < count; ++li)
+    if (d < gLightRange)
     {
-        Light Lgt = gLights[li];
+        float3 L = toL / max(d, 1e-4f);
+        float NdotL = saturate(dot(N, L));
 
-        // type 0 = point light
-        if (Lgt.type == 0)
-        {
-            float3 toL = Lgt.position - i.worldPos;
-            float d = length(toL);
+        float x = saturate(1.0f - d / gLightRange);
+        float att = x * x;
 
-            if (d < Lgt.range)
-            {
-                float3 L = toL / max(d, 1e-4f);
-                float NdotL = saturate(dot(N, L));
-
-                // attenuation simple (smooth-ish)
-                float x = saturate(1.0f - (d / Lgt.range));
-                float att = x * x;
-
-                float3 radiance = Lgt.color * Lgt.intensity;
-
-                lighting += radiance * (NdotL * att);
-            }
-        }
+        float3 radiance = gLightColor * gLightIntensity;
+        lighting = radiance * (NdotL * att);
     }
 
-    // Emissive (pour l’instant 0 ; tu peux lier une texture emissive t2 plus tard)
-    float3 emissive = 0.0f;
-
-    float3 color = ambient + (albedo * lighting) + emissive;
-
+    float3 color = ambient + albedo * lighting;
     return float4(color, 1.0f);
 }
