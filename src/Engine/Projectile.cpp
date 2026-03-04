@@ -8,7 +8,7 @@
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/ECS/Components/ProjectileComponent.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
-#include "Engine/ECS/Components/PlayerComponent.h"
+#include "Engine/ECS/Components/EnemyComponent.h"
 
 void Projectile::Initialize(float size, Shape shape, int poolSize,float distanceMax,Engine* engine, ECS* ecs, Renderer* renderer)
 {
@@ -47,6 +47,7 @@ void Projectile::CreatePulling(int poolSize)
 		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);
 		projectile->GetComponent<ProjectileComponent>()->SetDistanceTraveled(0.0f);
 		projectile->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+		projectile->GetComponent<ColliderComponent>()->SetRadius(m_size);
 
 		m_projectiles.push_back(projectile);
 	}
@@ -85,9 +86,10 @@ void Projectile::Update(float dt)
 			ColliderComponent* collider = projectile->GetComponent<ColliderComponent>();
 			collider->OnCollisionEnter = [this](Entity* self, Entity* other)
 			{
-				if(other->GetComponent<PlayerComponent>())
+				if(other->GetComponent<EnemyComponent>())
 				{
 					other->SetActive(false);
+					other->GetComponent<EnemyComponent>()->SetScoreValue(100);
 					self->SetActive(false);
 				}
 			};

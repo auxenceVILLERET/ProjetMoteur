@@ -26,8 +26,8 @@ public:
 protected:
 	std::vector<Entity*> m_projectiles = {};
 
-	float m_size = 0;
-	Shape m_shape;
+	float m_size = 0.0f;
+	Shape m_shape = Shape::SPHERE;
 	ECS* m_ecs = nullptr;
 	Renderer* m_renderer = nullptr;
 	Engine* m_engine = nullptr;

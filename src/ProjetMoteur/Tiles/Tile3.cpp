@@ -5,10 +5,14 @@
 #include "Engine/ResourceManager.h"
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Engine/ECS/Components/EnemyComponent.h"
+#include "Engine/ECS/Components/ColliderComponent.h"
+#include "Engine/ECS/Components/ObstacleComponent.h"
 
 void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 {
 	TextureHandle texture = ResourceManager::Instance().LoadTexture(L"../../res/GreenTexture.png");
+	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
+
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset = { 2.0f, 0.0f, -2.0f };
@@ -60,35 +64,55 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* EnemyEntity = ecs->CreateEntity<Entity>();
 	EnemyEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity->AddComponent<EnemyComponent>()->SetID(1);
+	EnemyEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy = { 2.0f, 1.0f, 6.0f };
 	EnemyEntity->SetPosition(GetPosition().x + offsetEnemy.x, GetPosition().y + offsetEnemy.y, GetPosition().z + offsetEnemy.z);
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity->SetActive(false);
+	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
 	GetLocalOffset().push_back(offsetEnemy);
 
 	Entity* EnemyEntity2 = ecs->CreateEntity<Entity>();
 	EnemyEntity2->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity2->AddComponent<EnemyComponent>()->SetID(2);
+	EnemyEntity2->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy2 = { -2.0f, 1.0f, 6.0f };
 	EnemyEntity2->SetPosition(GetPosition().x + offsetEnemy2.x, GetPosition().y + offsetEnemy2.y, GetPosition().z + offsetEnemy2.z);
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity2->SetActive(false);
+	EnemyEntity2->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity2);
 	GetLocalOffset().push_back(offsetEnemy2);
 
 	Entity* EnemyEntity3 = ecs->CreateEntity<Entity>();
 	EnemyEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity3->AddComponent<EnemyComponent>()->SetID(3);
+	EnemyEntity3->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	XMFLOAT3 offsetEnemy3 = { 0.0f, 1.0f, 14.0f };
 	EnemyEntity3->SetPosition(GetPosition().x + offsetEnemy3.x, GetPosition().y + offsetEnemy3.y, GetPosition().z + offsetEnemy3.z);
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
 	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(texture);
 	EnemyEntity3->SetActive(false);
+	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
 	GetLocalOffset().push_back(offsetEnemy3);
+	
+	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
+	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
+	ObstacleEntity->AddComponent<ObstacleComponent>();
+	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+	XMFLOAT3 offsetObstacle = { 0.0f, 0.0f, 18.0f };
+	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
+	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
+	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
+	ObstacleEntity->SetActive(false);
+	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
+	m_obstacle = ObstacleEntity;
+	GetEntities().push_back(ObstacleEntity);
+	GetLocalOffset().push_back(offsetObstacle);
 
 	SetActive(false);
 	SetIsTurnL(false);
@@ -107,5 +131,16 @@ void Tile3::Update(float deltaTime)
 		XMFLOAT3 offset = GetLocalOffset()[i];
 
 		entity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
+
+		if (m_activeEnemy != nullptr)
+		{
+			if (m_activeEnemy->IsActive() == false)
+			{
+				int score = m_activeEnemy->GetComponent<EnemyComponent>()->GetScoreValue() + GetScoreValue();
+				SetScoreValue(score);
+				m_obstacle->SetActive(false);
+				m_activeEnemy = nullptr;
+			}
+		}
 	}
 }

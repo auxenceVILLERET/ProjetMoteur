@@ -60,7 +60,7 @@ namespace core
         }
     }
 
-    void InputSystem::SetMousePosition(int x, int y)
+    void InputSystem::SetMousePosition(float x, float y)
     {
         s_mouseX = x;
         s_mouseY = y;

@@ -31,12 +31,12 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
-	m_projectile->Initialize(0.1f, Shape::SPHERE, 15, 3.0f, m_engine, m_ecs, m_renderer);
+	m_projectile->Initialize(0.08f, Shape::SPHERE, 15, 10.0f, m_engine, m_ecs, m_renderer);
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);
 
-	m_angleOrbit = XMConvertToRadians(90.0f);
+	m_frame = new UIFrame();
 
 	for (Entity* entity : m_entities)
 	{
@@ -55,10 +55,9 @@ void GameScene::OnEnter()
 		entity->SetActive(true);
 	}
 
-	UIFrame frame;
-	frame.showSplash = false;
-	frame.score = 0;
-	m_renderer->SetUiFrame(frame);
+	m_frame->showSplash = true;
+	m_frame->score = 0;
+	
 }
 
 void GameScene::OnExit()
@@ -79,10 +78,12 @@ void GameScene::Update(float dt)
 
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
+	m_frame->score = m_tilesManager->GetScoreValue() ;
 
 	FollowRail();
 	MovePlayer();
 	Shooting();
+	m_renderer->SetUiFrame(*m_frame);
 }
 
 Entity* GameScene::CreateBody()
@@ -166,7 +167,7 @@ void GameScene::Shooting() {
 
 		// hadle speed and direction of bullet
 		XMFLOAT3 bulletSpeed = m_cam->GetForward();
-		float speedMult = 15;
+		float speedMult = 10;
 		bulletSpeed.x *= speedMult; bulletSpeed.y *= speedMult; bulletSpeed.z *= speedMult;
 
 		// shoot from player
@@ -200,8 +201,8 @@ void GameScene::HandleCursor()
 
 	float sensitivity = 0.0025f;
 
-	m_yaw += dx * sensitivity;
-	m_pitch += dy * sensitivity;
+    m_yaw   += dx * sensitivity;
+    m_pitch += dy * sensitivity;
 
 	m_yaw = std::clamp(m_yaw, -1.0f, 1.0f);
 	m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);

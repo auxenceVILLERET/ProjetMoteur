@@ -13,6 +13,7 @@ class Tiles
 public:
 	virtual void Initialize(ECS* ecs, Renderer* renderer) = 0;
 	void SetActive(bool active);
+	void SetActiveEnemies(bool active);
 	bool IsActive() const { return m_active; }
 
 	void SetIsTurnR(bool isTurnR) { m_isTurnR = isTurnR; }
@@ -47,6 +48,12 @@ public:
 
 	void SpawnEnemy();
 
+	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
+	int GetScoreValue() const { return m_scoreValue; }
+
+	Entity* m_activeEnemy;
+	Entity* m_obstacle;
+
 private:
 	bool m_active = false;
 	bool m_isTurnR = false;
@@ -55,9 +62,10 @@ private:
 	XMFLOAT3 m_position = {};
 	int m_In = 0;
 	int m_Out = 0;
+	
+	float m_speed = 0.0f;
 
-	float m_speed = 10.0f;
-
+	int m_scoreValue = 0;
 
 	std::vector<Entity*> m_entities = {};
 	std::vector<Entity*> m_rails = {};

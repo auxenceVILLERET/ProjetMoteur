@@ -7,7 +7,7 @@ void ColliderSystem::Update(ECS& ecs, float deltaTime)
 {
 	for (Entity* entity : ecs.GetEntities())
 	{
-		if(entity == nullptr || !entity->IsActive())
+		if(entity == nullptr || entity->IsActive() == false)
 			continue;
 
 		ColliderComponent* collider = entity->GetComponent<ColliderComponent>();
