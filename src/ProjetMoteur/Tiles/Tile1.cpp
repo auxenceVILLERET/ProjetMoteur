@@ -116,7 +116,6 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 
 void Tile1::Update(float deltaTime)
 {
-	
 	MoveZ(-(GetSpeed() * deltaTime));
 
 	for (int i = 0; i < GetEntities().size(); i++)
@@ -130,6 +129,8 @@ void Tile1::Update(float deltaTime)
 		{
 			if (m_activeEnemy->IsActive() == false)
 			{
+				int score = m_activeEnemy->GetComponent<EnemyComponent>()->GetScoreValue() + GetScoreValue();
+				SetScoreValue(score);
 				m_obstacle->SetActive(false);
 				m_activeEnemy = nullptr;
 			}

@@ -47,6 +47,8 @@ public:
 
 	void SpawnEnemy();
 
+	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
+	int GetScoreValue() const { return m_scoreValue; }
 
 	Entity* m_activeEnemy;
 	Entity* m_obstacle;
@@ -59,9 +61,10 @@ private:
 	XMFLOAT3 m_position;
 	int m_In;
 	int m_Out;
+	
+	float m_speed;
 
-	float m_speed = 10.0f;
-
+	int m_scoreValue = 0;
 
 	std::vector<Entity*> m_entities;
 	std::vector<XMFLOAT3> m_localOffset;

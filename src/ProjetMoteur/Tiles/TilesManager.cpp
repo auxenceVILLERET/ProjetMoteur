@@ -46,15 +46,19 @@ void TilesManager::AddTile(Tiles* tile)
 
 void TilesManager::Update(float deltaTime)
 {
-
+	m_speed = m_baseSpeed + (GetScoreValue() / 100) * m_speedPer100;
     for (int i = 0; i < m_activeTiles.size(); )
     {
         Tiles* tile = m_activeTiles[i];
+		tile->SetSpeed(m_speed);
 
         if (tile->GetPosition().z + 20.0f < 0.0f)
         {
             tile->SetActive(false);
             tile->SetActiveEnemies(false);
+			SetScoreValue(GetScoreValue() + tile->GetScoreValue());
+			tile->SetScoreValue(0);
+
             m_activeTiles.erase(m_activeTiles.begin() + i);
             SpawnTile();
 			tile->SpawnEnemy();

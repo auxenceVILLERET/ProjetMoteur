@@ -129,6 +129,8 @@ void Tile3::Update(float deltaTime)
 		{
 			if (m_activeEnemy->IsActive() == false)
 			{
+				int score = m_activeEnemy->GetComponent<EnemyComponent>()->GetScoreValue() + GetScoreValue();
+				SetScoreValue(score);
 				m_obstacle->SetActive(false);
 				m_activeEnemy = nullptr;
 			}
