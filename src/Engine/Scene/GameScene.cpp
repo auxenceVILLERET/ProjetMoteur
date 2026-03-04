@@ -31,7 +31,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
-	m_projectile->Initialize(0.08f, Shape::SPHERE, 15.0f, 10.0f, m_engine, m_ecs, m_renderer);
+	m_projectile->Initialize(0.08f, Shape::SPHERE, 15, 10.0f, m_engine, m_ecs, m_renderer);
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);

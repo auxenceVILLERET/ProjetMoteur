@@ -32,9 +32,8 @@ private:
 	std::vector<Tiles*> m_tiles;
 
 	std::vector<Tiles*> m_activeTiles;
-	float m_spawnZ;
-	int m_currentConnection;
+	int m_currentConnection = 0;
 
-	int m_scoreValue;
+	int m_scoreValue = 0;
 };
 

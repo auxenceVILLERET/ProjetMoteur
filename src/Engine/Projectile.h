@@ -26,11 +26,11 @@ public:
 protected:
 	std::vector<Entity*> m_projectiles;
 
-	float m_size;
-	Shape m_shape;
-	ECS* m_ecs;
-	Renderer* m_renderer;
-	Engine* m_engine;
+	float m_size = 0.0f;
+	Shape m_shape = Shape::SPHERE;
+	ECS* m_ecs = nullptr;
+	Renderer* m_renderer = nullptr;
+	Engine* m_engine = nullptr;
 
 	float m_maxDistance = 50.0f;
 };

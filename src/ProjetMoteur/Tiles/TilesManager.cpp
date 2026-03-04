@@ -86,7 +86,7 @@ void TilesManager::SpawnTile()
     if (compatibles.empty())
         return;
 
-    int index = Random::RandomInt(0, compatibles.size() - 1);
+    int index = Random::RandomInt(0, static_cast<int>(compatibles.size()) - 1);
     Tiles* chosen = compatibles[index];
 
     chosen->SetActive(true);

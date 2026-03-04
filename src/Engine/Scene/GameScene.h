@@ -9,7 +9,7 @@ class Camera;
 class Projectile;
 class Renderer;
 class TilesManager;
-class UIFrame;
+struct UIFrame;
 
 
 class GameScene : public Scene
