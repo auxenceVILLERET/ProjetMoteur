@@ -55,7 +55,7 @@ void GameScene::OnEnter()
 		entity->SetActive(true);
 	}
 
-	m_frame->showSplash = true;
+	m_frame->showSplash = false;
 	m_frame->score = 0;
 	
 }

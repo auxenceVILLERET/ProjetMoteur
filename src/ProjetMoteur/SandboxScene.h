@@ -8,7 +8,7 @@ class Engine;
 class Camera;
 class Projectile;
 class Renderer;
-
+struct UIFrame;
 
 class SandboxScene : public Scene
 {
@@ -21,6 +21,8 @@ public:
 
 private:
 	float m_deltaTime; // deltaTime
+
+	UIFrame* frame;
 
 	std::vector<Entity*> m_entities;
 

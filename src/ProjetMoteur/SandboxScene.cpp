@@ -24,6 +24,7 @@ void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Enti
 	m_renderer = renderer;
 	m_engine = engine;
 	m_cam = camera;
+	frame = new UIFrame();
 
 	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 	// -[TEST OBJECTS]- //
@@ -81,6 +82,14 @@ void SandboxScene::Update(float dt)
 
 	m_cylinder->RotateZ(XMConvertToRadians(45.f * m_deltaTime));
 
+
+	frame->score = 0;
+	if (Input::GetKeyDown(Keyboard::A))
+		frame->showSplash = true;
+	if (Input::GetKeyDown(Keyboard::E))
+		frame->showSplash = false;
+		
+	m_renderer->SetUiFrame(*frame);
 
 	MoveCamera();
 	Debug();

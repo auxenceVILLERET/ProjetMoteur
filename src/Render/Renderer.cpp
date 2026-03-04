@@ -252,7 +252,7 @@ void Renderer::BeginFrame()
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float clearColor[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
@@ -284,15 +284,6 @@ void Renderer::EndFrame()
     hr = m_pSwapChainTargets->GetSwapChain()->Present(1, 0);
     if (FAILED(hr))
     {
-        char buf[256];
-        sprintf_s(buf, "Present failed: hr=0x%08X\n", (uint32_t)hr);
-        OutputDebugStringA(buf);
-
-        // Si device removed :
-        HRESULT reason = m_pDxContext->GetDevice()->GetDeviceRemovedReason();
-        sprintf_s(buf, "DeviceRemovedReason=0x%08X\n", (uint32_t)reason);
-        OutputDebugStringA(buf);
-
         throw std::runtime_error("Swap chain present failed.");
     }
     // Simple but safe: CPU waits GPU each frame.

@@ -41,7 +41,8 @@ void UIRender::Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui)
 {
     if (cmd == nullptr) return;
 
-    if (ui.showSplash) DrawSplash(cmd);
+    if (ui.showSplash) 
+        DrawSplash(cmd);
 
     DrawScore(cmd, ui.score , 1920, 1080);
 }
@@ -257,6 +258,10 @@ void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screen
 
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
     cmd->SetDescriptorHeaps(1, heaps);
+
+    UpdateTint(1.f, 1.f, 1.f, 0.5f);
+
+    cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
 
     // SRV atlas (t0 sur root param 1)
     cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);
