@@ -56,7 +56,7 @@ private:
 	int m_In = 0;
 	int m_Out = 0;
 
-	float m_speed = 2.0f;
+	float m_speed = 10.0f;
 
 
 	std::vector<Entity*> m_entities = {};

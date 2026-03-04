@@ -60,6 +60,7 @@ private:
 	void DeleteRails();
 
 	void FollowRail();
+	void ChangeRail(float nextPivot, float dir, float speed);
 
 	//MOVING PLAYER
 	void MovePlayer();

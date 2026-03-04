@@ -110,22 +110,45 @@ void GameScene::FollowRail()
 	std::vector<Entity*> incoming;
 	std::vector<Entity*> activeTiles = m_tilesManager->GetActiveTiles().front()->GetRails();
 
+	float nextPivot;
+	float dir;
+
 	for (size_t i = 0; i < activeTiles.size(); i++)
 	{
 		incoming.push_back(activeTiles[i]);
-		m_pivot = incoming.front()->GetPosition().x;
+		nextPivot = incoming.front()->GetPosition().x;
 
-		if (incoming[0]->GetPosition().z < 0) {
+		if (m_pivot != nextPivot) {
+			if (m_pivot > nextPivot)
+			{
+				dir = -1; std::cout << dir << std::endl;
+				return;
+			}
+			if (m_pivot < nextPivot)
+			{
+				dir = 1;std::cout << dir << std::endl;
+				return;
+			}
+		}		
+		
+		if (incoming.front()->GetPosition().z < 0) {
 			incoming.erase(incoming.begin());
 		}
 
 	}
 }
 
+void GameScene::ChangeRail(float nexPivot, float dir, float speed)
+{
+	
+}
+
+
+
 void GameScene::MovePlayer() {
 
 	float offset = .5f;
-	int dir = ( Input::GetKey(Keyboard::LEFT) - Input::GetKey(Keyboard::RIGHT) );
+	int dir = (Input::GetKey(Keyboard::LEFT) - Input::GetKey(Keyboard::RIGHT));
 
 	m_angleOrbit += XMConvertToRadians(dir * 90.0f * m_deltaTime);
 
@@ -179,7 +202,9 @@ void GameScene::HandleCursor()
 
 	m_yaw += dx * sensitivity;
 	m_pitch += dy * sensitivity;
-	m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
+
+	m_yaw = std::clamp(m_yaw, -1.0f, 1.0f);
+	m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);
 
 	SetCursorPos(
 		window->GetCursorCenter().x,
