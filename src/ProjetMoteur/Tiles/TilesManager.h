@@ -29,7 +29,7 @@ private:
 
 	float m_baseSpeed = 5.0f;
 	float m_speedPer100 = 0.2f;
-	float m_speed;
+	float m_speed = 0.0f;
 
 	std::vector<Tiles*> m_tiles;
 	std::vector<Tiles*> m_activeTiles;

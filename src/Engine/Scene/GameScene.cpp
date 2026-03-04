@@ -38,6 +38,8 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_frame = new UIFrame();
 
+	m_angleOrbit = XMConvertToRadians(90.0f);
+
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(false);
@@ -57,7 +59,7 @@ void GameScene::OnEnter()
 
 	m_frame->showSplash = true;
 	m_frame->score = 0;
-	
+
 }
 
 void GameScene::OnExit()
@@ -78,7 +80,7 @@ void GameScene::Update(float dt)
 
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
-	m_frame->score = m_tilesManager->GetScoreValue() ;
+	m_frame->score = m_tilesManager->GetScoreValue();
 
 	FollowRail();
 	MovePlayer();
@@ -108,43 +110,36 @@ Entity* GameScene::CreateFloor()
 
 void GameScene::FollowRail()
 {
-	std::vector<Entity*> incoming;
-	std::vector<Entity*> activeTiles = m_tilesManager->GetActiveTiles().front()->GetRails();
+	Tiles* activeTiles = m_tilesManager->GetActiveTiles().front();
 
-	float nextPivot;
-	float dir;
+	auto& rails = activeTiles->GetRails();
+	if (rails.empty())
+		return;
 
-	for (size_t i = 0; i < activeTiles.size(); i++)
+	// Sécurité si on dépasse
+	if (m_currentRailIndex >= rails.size())
+		m_currentRailIndex = rails.size() - 1.0f;
+
+	Entity* incoming = rails[m_currentRailIndex];
+
+	// Si le rail est passé derrière le joueur
+	if (incoming->GetPosition().z < 0)
 	{
-		incoming.push_back(activeTiles[i]);
-		nextPivot = incoming.front()->GetPosition().x;
-
-		if (m_pivot != nextPivot) {
-			if (m_pivot > nextPivot)
-			{
-				dir = -1; std::cout << dir << std::endl;
-				return;
-			}
-			if (m_pivot < nextPivot)
-			{
-				dir = 1;std::cout << dir << std::endl;
-				return;
-			}
-		}		
+		m_currentRailIndex++;
 		
-		if (incoming.front()->GetPosition().z < 0) {
-			incoming.erase(incoming.begin());
-		}
+		if (m_currentRailIndex >= rails.size())
+			m_currentRailIndex = 0;
+			return;
 
+		incoming = rails[m_currentRailIndex];
 	}
-}
 
-void GameScene::ChangeRail(float nexPivot, float dir, float speed)
-{
+	float targetPivot = incoming->GetPosition().x;
 	
+	float smoothSpeed = 5.0f;
+
+	m_pivot += (targetPivot - m_pivot) * smoothSpeed * m_deltaTime;
 }
-
-
 
 void GameScene::MovePlayer() {
 
@@ -201,8 +196,8 @@ void GameScene::HandleCursor()
 
 	float sensitivity = 0.0025f;
 
-    m_yaw   += dx * sensitivity;
-    m_pitch += dy * sensitivity;
+	m_yaw += dx * sensitivity;
+	m_pitch += dy * sensitivity;
 
 	m_yaw = std::clamp(m_yaw, -1.0f, 1.0f);
 	m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);

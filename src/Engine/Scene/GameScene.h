@@ -36,6 +36,8 @@ private:
 	Entity* m_cam;
 
 	float m_pivot = 0.0f;
+	int m_currentRailIndex = 0;
+
 	float m_angleOrbit = 0.0f;
 
 	float m_maxRails = 5;
@@ -64,7 +66,6 @@ private:
 	void DeleteRails();
 
 	void FollowRail();
-	void ChangeRail(float nextPivot, float dir, float speed);
 
 	//MOVING PLAYER
 	void MovePlayer();
