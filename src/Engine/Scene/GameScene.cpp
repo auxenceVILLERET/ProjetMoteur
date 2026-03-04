@@ -167,7 +167,8 @@ void GameScene::HandleCursor()
 
     m_yaw   += dx * sensitivity;
     m_pitch += dy * sensitivity;
-    m_pitch = std::clamp(m_pitch, -1.4f, 1.4f);
+    m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);
+	m_yaw = std::clamp(m_yaw, -1.0f,1.0f);
 
     SetCursorPos(
         window->GetCursorCenter().x,
