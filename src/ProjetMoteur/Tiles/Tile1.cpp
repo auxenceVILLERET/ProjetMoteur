@@ -5,6 +5,7 @@
 #include "Engine/ECS/Components/EnemyComponent.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
 #include "Engine/ECS/Components/ObstacleComponent.h"
+#include <iostream>
 
 
 void Tile1::Initialize(ECS* ecs, Renderer* renderer)
@@ -102,6 +103,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
 	ObstacleEntity->SetActive(false);
 	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
+	m_obstacle = ObstacleEntity;
 	GetEntities().push_back(ObstacleEntity);
 	GetLocalOffset().push_back(offsetObstacle);
 
@@ -123,21 +125,13 @@ void Tile1::Update(float deltaTime)
 		XMFLOAT3 offset = GetLocalOffset()[i];
 
 		entity->SetPosition(GetPosition().x + offset.x,GetPosition().y + offset.y,GetPosition().z + offset.z);
-	}
 
-	for(Entity* entity : GetEntities())
-	{
-		if(entity->GetComponent<EnemyComponent>() != nullptr)
+		if (m_activeEnemy != nullptr)
 		{
-			if (entity->IsActive() == false)
+			if (m_activeEnemy->IsActive() == false)
 			{
-				for(Entity* otherEntity : GetEntities())
-				{
-					if(otherEntity->GetComponent<ObstacleComponent>() != nullptr)
-					{
-						otherEntity->SetActive(false);
-					}
-				}
+				m_obstacle->SetActive(false);
+				m_activeEnemy = nullptr;
 			}
 		}
 	}

@@ -47,6 +47,10 @@ public:
 
 	void SpawnEnemy();
 
+
+	Entity* m_activeEnemy;
+	Entity* m_obstacle;
+
 private:
 	bool m_active;
 	bool m_isTurnR;
@@ -56,7 +60,7 @@ private:
 	int m_In;
 	int m_Out;
 
-	float m_speed = 5.0f;
+	float m_speed = 10.0f;
 
 
 	std::vector<Entity*> m_entities;

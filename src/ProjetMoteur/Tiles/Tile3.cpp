@@ -103,6 +103,7 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
 	ObstacleEntity->SetActive(false);
 	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
+	m_obstacle = ObstacleEntity;
 	GetEntities().push_back(ObstacleEntity);
 	GetLocalOffset().push_back(offsetObstacle);
 
@@ -123,5 +124,14 @@ void Tile3::Update(float deltaTime)
 		XMFLOAT3 offset = GetLocalOffset()[i];
 
 		entity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
+
+		if (m_activeEnemy != nullptr)
+		{
+			if (m_activeEnemy->IsActive() == false)
+			{
+				m_obstacle->SetActive(false);
+				m_activeEnemy = nullptr;
+			}
+		}
 	}
 }

@@ -51,9 +51,10 @@ void TilesManager::Update(float deltaTime)
     {
         Tiles* tile = m_activeTiles[i];
 
-        if (tile->GetPosition().z + 18.0f < 0.0f)
+        if (tile->GetPosition().z + 20.0f < 0.0f)
         {
             tile->SetActive(false);
+            tile->SetActiveEnemies(false);
             m_activeTiles.erase(m_activeTiles.begin() + i);
             SpawnTile();
 			tile->SpawnEnemy();
@@ -105,7 +106,6 @@ void TilesManager::SpawnTile()
     m_activeTiles.push_back(chosen);
 }
 
-
 void TilesManager::OnEnter()
 {
     m_currentConnection = 0;
@@ -116,7 +116,7 @@ void TilesManager::OnEnter()
         tile->SetActive(false);
     }
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         SpawnTile();
     }

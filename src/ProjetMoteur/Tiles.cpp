@@ -48,6 +48,7 @@ void Tiles::SpawnEnemy()
 		choosenEnemy = 0; // no enemy
 	}
 
+
 	for(Entity* entity : m_entities)
 	{
 		if (entity->GetComponent<EnemyComponent>())
@@ -55,6 +56,7 @@ void Tiles::SpawnEnemy()
 			if (entity->GetComponent<EnemyComponent>()->GetID() == choosenEnemy)
 			{
 				entity->SetActive(true);
+				m_activeEnemy = entity;
 			}
 			else
 			{
