@@ -20,11 +20,7 @@ public:
     DescriptorHeapManager() = default;
     ~DescriptorHeapManager() { Shutdown(); }
 
-    // heapType typique: D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ou SAMPLER
-    bool Initialize(ID3D12Device* device,
-        D3D12_DESCRIPTOR_HEAP_TYPE heapType,
-        uint32_t numDescriptors,
-        bool shaderVisible);
+    bool Initialize(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, uint32_t numDescriptors, bool shaderVisible);
 
     void Shutdown();
 
@@ -32,18 +28,14 @@ public:
     DescriptorHandle Allocate();
     void Free(uint32_t index);
 
-    // Infos utiles
     ID3D12DescriptorHeap* GetHeap() const { return m_heap; }
     D3D12_DESCRIPTOR_HEAP_TYPE GetType() const { return m_type; }
     uint32_t Capacity() const { return m_capacity; }
     uint32_t DescriptorSize() const { return m_descriptorSize; }
     bool IsShaderVisible() const { return m_shaderVisible; }
 
-    // Calcule un handle à partir d’un index (pratique)
     DescriptorHandle GetHandle(uint32_t index) const;
 
-    // Optionnel: réinitialise toutes les allocs (mode “linear allocator”)
-    // Utile si tu n’as pas besoin de Free() (ex: heap temporaire).
     void ResetAll();
 
 private:
@@ -59,7 +51,6 @@ private:
     D3D12_CPU_DESCRIPTOR_HANDLE m_cpuStart{ 0 };
     D3D12_GPU_DESCRIPTOR_HANDLE m_gpuStart{ 0 };
 
-    // Free list + linear bump fallback
     std::vector<uint32_t> m_freeList;
     uint32_t m_nextLinear = 0;
 };

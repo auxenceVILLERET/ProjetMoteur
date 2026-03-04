@@ -5,20 +5,7 @@
 
 bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, uint32_t backBufferCount, uint32_t maxLights)
 {
-    if (m_lightsUpload)
-    { 
-        m_lightsUpload->Unmap(0, nullptr);
-        m_lightsUpload->Release();
-        m_lightsUpload = nullptr; 
-    }
-    if (m_frameUpload)
-    { 
-        m_frameUpload->Unmap(0, nullptr);  
-        m_frameUpload->Release();
-        m_frameUpload = nullptr;
-    }
-    m_lightsMapped = nullptr;
-    m_frameMapped = nullptr;
+	Shutdown();
 
     m_device = device;
     m_heap = heap;
@@ -100,8 +87,16 @@ bool LightRender::Initialize(ID3D12Device* device, DescriptorHeapManager* heap, 
 
 void LightRender::Shutdown()
 {
-    if (m_lightsUpload) { m_lightsUpload->Unmap(0, nullptr); m_lightsMapped = nullptr; }
-    if (m_frameUpload) { m_frameUpload->Unmap(0, nullptr);  m_frameMapped = nullptr; }
+    if (m_lightsUpload)
+    {
+        m_lightsUpload->Unmap(0, nullptr);
+        m_lightsMapped = nullptr;
+    }
+    if (m_frameUpload)
+    {
+        m_frameUpload->Unmap(0, nullptr);
+        m_frameMapped = nullptr;
+    }
 
     SafeRelease(m_lightsUpload);
     SafeRelease(m_frameUpload);
@@ -112,6 +107,7 @@ void LightRender::Shutdown()
     m_lightsSrv.clear();
     m_device = nullptr;
     m_heap = nullptr;
+
     m_lightCount = 0;
 }
 

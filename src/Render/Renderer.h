@@ -61,7 +61,7 @@ private:
 
 	LightRender* m_pLightRender = nullptr;
 
-	UIRender* m_ui = nullptr;
+	UIRender* m_pUiRender = nullptr;
 	UIFrame m_uiFrame;
 
 	DxContext* m_pDxContext = nullptr;

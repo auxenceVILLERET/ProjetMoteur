@@ -19,7 +19,7 @@ public:
 protected:
 	Renderer* m_renderer = nullptr; 
 	ECS* m_ecs = nullptr;
-	Engine* m_engine;
-	Entity* m_cam;
+	Engine* m_engine = nullptr;
+	Entity* m_cam = nullptr;
 };
 

@@ -136,7 +136,7 @@ void Pipeline::Shutdown()
 {
     SafeRelease(m_defaultPso);
     SafeRelease(m_defaultRootSig);
-	SafeRelease(m_uiPso);
+    SafeRelease(m_uiPso);
 	SafeRelease(m_uiRootSig);
 }
 

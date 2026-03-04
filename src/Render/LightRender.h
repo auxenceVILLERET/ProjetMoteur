@@ -13,10 +13,13 @@ class LightSystem;
 struct FrameCB
 {
     XMFLOAT4X4 viewProj;
-    XMFLOAT3 cameraPos; uint32_t pad0;
+    XMFLOAT3 cameraPos;
+    uint32_t pad0;
 
-    XMFLOAT3 lightPos; float lightRange;
-    XMFLOAT3 lightColor; float lightIntensity;
+    XMFLOAT3 lightPos; 
+    float lightRange;
+    XMFLOAT3 lightColor;
+    float lightIntensity;
 };
 
 struct LightGPU
@@ -42,11 +45,7 @@ public:
     void UpdateFrame(uint32_t backBufferIndex, const FrameCB& frame);
     D3D12_GPU_VIRTUAL_ADDRESS GetFrameCbAddress(uint32_t backBufferIndex) const;
 
-    // NEW: Renderer n’a plus besoin de connaître SRV/CBV des lights
-    void Bind(ID3D12GraphicsCommandList* cmd,
-        uint32_t backBufferIndex,
-        UINT rootFrameParam,   // CBV b1
-        UINT rootLightsParam) const; // SRV t1
+    void Bind(ID3D12GraphicsCommandList* cmd, uint32_t backBufferIndex, UINT rootFrameParam /*CBV b1*/, UINT rootLightsParam /*t1*/) const;
 
     uint32_t GetLightCount() const { return m_lightCount; }
     D3D12_GPU_DESCRIPTOR_HANDLE GetLightsSrv(uint32_t backBufferIndex) const;

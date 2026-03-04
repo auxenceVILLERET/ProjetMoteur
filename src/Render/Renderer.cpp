@@ -80,8 +80,8 @@ bool Renderer::Initialize(Window* window, CameraComponent* camera)
     RenderResourceManager::Instance().Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager);
 
 	//7) UI renderer
-	m_ui = new UIRender();
-	if (m_ui->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
+	m_pUiRender = new UIRender();
+	if (m_pUiRender->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
 		return false;
 
 	m_uiFrame.showSplash = false;
@@ -100,41 +100,28 @@ void Renderer::Shutdown()
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
+    if (m_pLightRender)
+		m_pLightRender->Shutdown();
+
+	if (m_pUiRender)
+		m_pUiRender->Shutdown();
+
     if (m_pPipeline)
-    {
-        m_pPipeline->Shutdown();
-        delete m_pPipeline;
-        m_pPipeline = nullptr;
-    }
+		m_pPipeline->Shutdown();
 
     if (m_pUploadContext)
-    {
-        m_pUploadContext->Shutdown();
-        delete m_pUploadContext;
-        m_pUploadContext = nullptr;
-    }
+		m_pUploadContext->Shutdown();
 
-    if (m_pDescriptorHeapManager)
-    {
-        m_pDescriptorHeapManager->Shutdown();
-        delete m_pDescriptorHeapManager;
-        m_pDescriptorHeapManager = nullptr;
-    }
+	if (m_pDescriptorHeapManager)
+		m_pDescriptorHeapManager->Shutdown();
 
-    if (m_pSwapChainTargets)
-    {
-        m_pSwapChainTargets->Shutdown();
-        delete m_pSwapChainTargets;
-        m_pSwapChainTargets = nullptr;
-    }
+	if (m_pSwapChainTargets)
+		m_pSwapChainTargets->Shutdown();
 
     if (m_pDxContext)
-    {
-        m_pDxContext->Shutdown();
-        delete m_pDxContext;
-        m_pDxContext = nullptr;
-    }
+		m_pDxContext->Shutdown();
 
+	m_pCamera = nullptr;
     m_pWindow = nullptr;
 }
 
@@ -186,7 +173,7 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
 
-	m_ui->Render(cmd, m_uiFrame);
+	m_pUiRender->Render(cmd, m_uiFrame);
 
     EndFrame();
 }

@@ -57,10 +57,26 @@ void UIRender::UpdateTint(float r, float g, float b, float a)
 
 void UIRender::Shutdown()
 {
-    SafeRelease(m_quadVB);
+    if (m_quadVB) 
+    { 
+        m_quadVB->Release();
+        m_quadVB = nullptr; 
+    }
+    if (m_uiCB)
+    { 
+        m_uiCB->Release();
+        m_uiCB = nullptr;
+    }
+    if (m_textVB) 
+    {
+        m_textVB->Release();
+        m_textVB = nullptr; 
+    }
+
     delete m_splashTex;
-	SafeRelease(m_uiCB);
+    m_splashTex = nullptr;
 	delete m_fontAtlas;
+    m_fontAtlas = nullptr;
 }
 
 bool UIRender::CreateFullscreenQuadVB(ID3D12Device* device)

@@ -15,6 +15,7 @@ public:
 	static RenderResourceManager& Instance();
 
 	void Initialize(DxContext* dx, UploadContext* uploader, DescriptorHeapManager* srvHeap);
+	void Shutdown();
 
 	Mesh* ResolveMesh(MeshHandle h);
 	Texture2D* ResolveTexture(TextureHandle h);
