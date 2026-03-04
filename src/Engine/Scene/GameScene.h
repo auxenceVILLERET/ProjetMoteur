@@ -33,6 +33,9 @@ private:
 	Entity* m_body;
 	Entity* m_cam;
 
+	float m_pivot = 0.0f;
+	float m_angleOrbit = 0.0f;
+
 	float m_maxRails = 5;
 
 	Entity* m_bullet;

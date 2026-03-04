@@ -39,6 +39,8 @@ private:
 
 	float m_maxRails = 5;
 
+	float m_angleOrbit = 0;
+
 	Entity* m_bullet = nullptr;
 
 	float m_speedPlayer = 1.f;

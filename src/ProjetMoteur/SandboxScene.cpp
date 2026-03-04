@@ -71,13 +71,10 @@ void SandboxScene::Update(float dt)
 	m_cube->RotateLocalY(XMConvertToRadians(.05f));
 	m_cube->RotateZ(XMConvertToRadians(.05f));
 
-	m_moon->OrbitAround(m_cylinder->GetPosition(), m_cylinder->m_up, XMConvertToRadians(10.f * m_deltaTime), 1);
-	m_moon->RotateLocalY(XMConvertToRadians(60.f * m_deltaTime));
+	m_angleOrbit += XMConvertToRadians(90.0F * m_deltaTime);
 
-	m_moonMoon->OrbitAround(m_moon->GetPosition(), m_moon->m_up, XMConvertToRadians(100.f * m_deltaTime), .25);
-	m_moonMoon->RotateLocalY(XMConvertToRadians(90.f * m_deltaTime));
-
-	m_cylinder->RotateY(XMConvertToRadians(45.f * m_deltaTime));
+	m_moon->OrbitAround(m_cylinder->GetPosition(), { 0.0f,1.0f,0.0f }, m_angleOrbit, 1.0f);
+	m_moonMoon->OrbitAround(m_moon->GetPosition(), {0.0f,1.0f,0.0f}, 0.0f, .25f);
 
 
 	MoveCamera();

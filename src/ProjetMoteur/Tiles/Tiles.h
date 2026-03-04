@@ -31,6 +31,7 @@ public:
 	int GetOut() const { return m_Out; }
 
 	std::vector<Entity*>& GetEntities() { return m_entities; }
+	std::vector<Entity*>& GetRails() { return m_rails; }
 
 	void SetSpeed(float speed) { m_speed = speed; }
 	float GetSpeed() const { return m_speed; }
@@ -55,10 +56,11 @@ private:
 	int m_In = 0;
 	int m_Out = 0;
 
-	float m_speed = 20.0f;
+	float m_speed = 2.0f;
 
 
 	std::vector<Entity*> m_entities = {};
+	std::vector<Entity*> m_rails = {};
 	std::vector<XMFLOAT3> m_localOffset = {};
 };
 

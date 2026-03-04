@@ -274,34 +274,23 @@ void Entity::LookAt(float x, float y, float z)
 
 void Entity::OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius)
 {
-	// Charger position et pivot
-	XMVECTOR pos = XMLoadFloat3(&m_position);
+	// Charger pivot et axe
 	XMVECTOR piv = XMLoadFloat3(&pivot);
 	XMVECTOR ax = XMVector3Normalize(XMLoadFloat3(&axis));
 
-	// Direction actuelle depuis le pivot
-	XMVECTOR dir = pos - piv;
+	// Direction de base fixe (rayon sur X)
+	XMVECTOR baseDir = XMVectorSet(radius, 0.0f, 0.0f, 0.0f);
 
-	// Si l'objet est exactement au pivot, on force une direction par défaut
-	if (XMVector3LengthSq(dir).m128_f32[0] < 0.00001f)
-	{
-		dir = XMVectorSet(1, 0, 0, 0); // direction X par défaut
-	}
-
-	// Normalisation puis application du rayon
-	dir = XMVector3Normalize(dir);
-	dir *= radius;
-
-	// Quaternion de rotation
+	// Quaternion basé directement sur l’angle donné
 	XMVECTOR q = XMQuaternionRotationAxis(ax, angle);
 
 	// Rotation du vecteur
-	dir = XMVector3Rotate(dir, q);
+	XMVECTOR rotatedDir = XMVector3Rotate(baseDir, q);
 
 	// Nouvelle position
-	pos = piv + dir;
+	XMVECTOR newPos = piv + rotatedDir;
 
-	XMStoreFloat3(&m_position, pos);
+	XMStoreFloat3(&m_position, newPos);
 
 	UpdateWorldMatrix();
 }
