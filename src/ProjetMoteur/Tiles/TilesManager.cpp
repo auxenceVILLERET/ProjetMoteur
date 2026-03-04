@@ -46,14 +46,19 @@ void TilesManager::AddTile(Tiles* tile)
 
 void TilesManager::Update(float deltaTime)
 {
-
+	m_speed = m_baseSpeed + (GetScoreValue() / 100) * m_speedPer100;
     for (int i = 0; i < m_activeTiles.size(); )
     {
         Tiles* tile = m_activeTiles[i];
+		tile->SetSpeed(m_speed);
 
-        if (tile->GetPosition().z + 18.0f < 0.0f)
+        if (tile->GetPosition().z + 20.0f < 0.0f)
         {
             tile->SetActive(false);
+            tile->SetActiveEnemies(false);
+			SetScoreValue(GetScoreValue() + tile->GetScoreValue());
+			tile->SetScoreValue(0);
+
             m_activeTiles.erase(m_activeTiles.begin() + i);
             SpawnTile();
 			tile->SpawnEnemy();
@@ -81,7 +86,7 @@ void TilesManager::SpawnTile()
     if (compatibles.empty())
         return;
 
-    int index = Random::RandomInt(0, compatibles.size() - 1);
+    int index = Random::RandomInt(0, static_cast<int>(compatibles.size()) - 1);
     Tiles* chosen = compatibles[index];
 
     chosen->SetActive(true);
@@ -105,7 +110,6 @@ void TilesManager::SpawnTile()
     m_activeTiles.push_back(chosen);
 }
 
-
 void TilesManager::OnEnter()
 {
     m_currentConnection = 0;
@@ -116,7 +120,7 @@ void TilesManager::OnEnter()
         tile->SetActive(false);
     }
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         SpawnTile();
     }

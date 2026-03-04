@@ -11,7 +11,7 @@ namespace core
 
         static void SetKey(Keyboard::Key key, bool pressed);
         static void SetMouseButton(Mouse::Button button, bool pressed);
-        static void SetMousePosition(int x, int y);
+        static void SetMousePosition(float x, float y);
 
         static std::array<InputState::State, Keyboard::AMOUNT> s_keys;
         static std::array<InputState::State, Mouse::AMOUNT>    s_mouseButtons;

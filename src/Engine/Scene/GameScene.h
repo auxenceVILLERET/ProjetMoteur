@@ -9,6 +9,8 @@ class Camera;
 class Projectile;
 class Renderer;
 class TilesManager;
+struct UIFrame;
+
 
 class GameScene : public Scene
 {
@@ -48,6 +50,8 @@ private:
 	
 	Entity* CreateBody();
 	Entity* CreateFloor();
+
+	UIFrame* m_frame;
 
 	//RAILS
 	void CreateRail();

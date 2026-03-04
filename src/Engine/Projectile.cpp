@@ -89,6 +89,7 @@ void Projectile::Update(float dt)
 				if(other->GetComponent<EnemyComponent>())
 				{
 					other->SetActive(false);
+					other->GetComponent<EnemyComponent>()->SetScoreValue(100);
 					self->SetActive(false);
 				}
 			};

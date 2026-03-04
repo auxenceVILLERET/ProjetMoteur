@@ -6,8 +6,11 @@ public:
 
 	void SetID(int id) { m_id = id; }
 	int GetID() const { return m_id; }
-
+	
+	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
+	int GetScoreValue() const { return m_scoreValue; }
 private:
 	int m_id;
+	int m_scoreValue = 0;
 };
 
