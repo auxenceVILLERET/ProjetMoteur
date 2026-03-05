@@ -42,6 +42,7 @@ void Projectile::CreatePulling(int poolSize)
 		Entity* projectile = m_ecs->CreateEntity<Entity>();
 		projectile->SetActive(false);
 		projectile->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Sphere), m_renderer);
+		projectile->GetComponent<MeshRendererComponent>()->SetTexture(ResourceManager::Instance().LoadTexture(L"../../res/BallTex.png"));
 		projectile->SetScale(m_size);
 		projectile->AddComponent<RigidBodyComponent>()->SetUseGravity(false);
 		projectile->AddComponent<ProjectileComponent>()->SetMaxDistance(m_maxDistance);
