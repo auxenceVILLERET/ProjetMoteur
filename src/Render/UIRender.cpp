@@ -31,24 +31,20 @@ bool UIRender::Initialize(DxContext* dx, UploadContext* uploader, DescriptorHeap
 		return false;
     m_fontSrv = m_fontAtlas->GetSrv();
 
-	if (CreateTextVB(dx->GetDevice(), 10) == false) return false;
+    if (CreateTextVB(dx->GetDevice(), 64) == false) return false;
     if (LoadBMFontText("../../res/Fonts/minecraft_32.fnt", m_fontData) == false) return false;
 
 	return true;
 }
 
-void UIRender::Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui)
+void UIRender::Render(ID3D12GraphicsCommandList* cmd, float screenW, float screenH, const UIFrame& ui)
 {
     if (cmd == nullptr) return;
 
     if (ui.showSplash) 
         DrawSplash(cmd);
 
-    if (ui.showScore)
-        DrawScore(cmd, ui.score , 1920, 1080);
-
-	if (ui.showCrosshair)
-        DrawCrosshair(cmd, 1920, 1080);
+	DrawScoreCrosshairBatch(cmd, screenW, screenH, ui);
 }
 
 void UIRender::UpdateTint(float r, float g, float b, float a)
@@ -194,10 +190,16 @@ bool UIRender::CreateTextVB(ID3D12Device* device, uint32_t maxChars)
     return true;
 }
 
-UINT UIRender::CreateTextVertices(const char* text, float x, float y, float scale, float screenW, float screenH, XMFLOAT4 color)
+UINT UIRender::CreateTextVertices(const char* text,
+    float x, float y,
+    float scale,
+    float screenW, float screenH,
+    const XMFLOAT4& color,
+    UINT startVertex)
 {
     UIVertex* v = reinterpret_cast<UIVertex*>(m_textVBMapped);
-    UINT vertCount = 0;
+
+    UINT vertCount = startVertex;
 
     float penX = x;
     float baselineY = y + m_fontData.base * scale;
@@ -206,47 +208,44 @@ UINT UIRender::CreateTextVertices(const char* text, float x, float y, float scal
     {
         unsigned char c = (unsigned char)(*p);
         const Glyph& g = m_fontData.glyphs[c];
+
         if (g.w == 0 || g.h == 0)
-        { 
+        {
             penX += g.xAdvance * scale;
             continue;
         }
+
+        if (vertCount + 6 > m_textVBMaxVerts)
+            break;
 
         float x0 = penX + g.xOffset * scale;
         float y0 = baselineY + g.yOffset * scale;
         float x1 = x0 + g.w * scale;
         float y1 = y0 + g.h * scale;
 
-        // pixel -> NDC
         float ndcX0 = PxToNdcX(x0, screenW);
         float ndcX1 = PxToNdcX(x1, screenW);
         float ndcY0 = PxToNdcY(y0, screenH);
         float ndcY1 = PxToNdcY(y1, screenH);
 
-        // UV (attention: BMFont y=top)
         float u0 = (float)g.x / (float)m_fontData.atlasW;
         float v0 = (float)g.y / (float)m_fontData.atlasH;
         float u1 = (float)(g.x + g.w) / (float)m_fontData.atlasW;
         float v1 = (float)(g.y + g.h) / (float)m_fontData.atlasH;
 
-        // 2 triangles
-        if (vertCount + 6 <= m_textVBMaxVerts)
-        {
-            v[vertCount + 0] = { {ndcX0, ndcY1}, {u0, v1}, color };
-            v[vertCount + 1] = { {ndcX0, ndcY0}, {u0, v0}, color };
-            v[vertCount + 2] = { {ndcX1, ndcY0}, {u1, v0}, color };
+        v[vertCount + 0] = { { ndcX0, ndcY1 }, { u0, v1 }, color };
+        v[vertCount + 1] = { { ndcX0, ndcY0 }, { u0, v0 }, color };
+        v[vertCount + 2] = { { ndcX1, ndcY0 }, { u1, v0 }, color };
 
-            v[vertCount + 3] = { {ndcX0, ndcY1}, {u0, v1}, color };
-            v[vertCount + 4] = { {ndcX1, ndcY0}, {u1, v0}, color };
-            v[vertCount + 5] = { {ndcX1, ndcY1}, {u1, v1}, color };
+        v[vertCount + 3] = { { ndcX0, ndcY1 }, { u0, v1 }, color };
+        v[vertCount + 4] = { { ndcX1, ndcY0 }, { u1, v0 }, color };
+        v[vertCount + 5] = { { ndcX1, ndcY1 }, { u1, v1 }, color };
 
-            vertCount += 6;
-        }
-
+        vertCount += 6;
         penX += g.xAdvance * scale;
     }
 
-    return vertCount;
+    return vertCount - startVertex;
 }
 
 void UIRender::DrawSplash(ID3D12GraphicsCommandList* cmd)
@@ -271,7 +270,7 @@ void UIRender::DrawSplash(ID3D12GraphicsCommandList* cmd)
     cmd->DrawInstanced(6, 1, 0, 0);
 }
 
-void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screenW, float screenH)
+void UIRender::DrawScoreCrosshairBatch(ID3D12GraphicsCommandList* cmd, float screenW, float screenH, const UIFrame& ui)
 {
     cmd->SetPipelineState(m_pipeline->GetUIPSO());
     cmd->SetGraphicsRootSignature(m_pipeline->GetUIRootSignature());
@@ -279,70 +278,42 @@ void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screen
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
     cmd->SetDescriptorHeaps(1, heaps);
 
-    UpdateTint(1.f, 1.f, 1.f, 0.5f);
-
-    cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
-
-    // SRV atlas (t0 sur root param 1)
-    cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);
-
-    char buf[64];
-    sprintf_s(buf, "%d", score);
-
-    XMFLOAT4 col(1.f, 1.f, 1.f, 1.f);
-
-    const UINT vertexCount = CreateTextVertices(buf, 20.f, 0.f, 2.0f, screenW, screenH, col);
-    if (vertexCount == 0) return;
-
-    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    cmd->IASetVertexBuffers(0, 1, &m_textVBV);
-    cmd->DrawInstanced(vertexCount, 1, 0, 0);
-}
-
-void UIRender::DrawCrosshair(ID3D12GraphicsCommandList* cmd, float screenW, float screenH)
-{
-    const char* plus = "+";
-    const float scale = 2.0f;
-    XMFLOAT4 col(1.f, 1.f, 1.f, 1.f);
-
-    // position approximative au centre
-    float x = screenW * 0.5f;
-    float y = screenH * 0.5f - 32.f;
-
-    unsigned char c = (unsigned char)'+';
-    const Glyph& g = m_fontData.glyphs[c];
-
-    float w = g.xAdvance * scale;          // approx largeur
-    float h = m_fontData.lineHeight * scale;
-
-    x -= w * 0.5f;
-    y -= h * 0.5f;
-
-    DrawT(cmd, plus, x, y, scale, screenW, screenH, col);
-}
-
-void UIRender::DrawT(ID3D12GraphicsCommandList* cmd, const char* text, float x, float y, float scale, float screenW, float screenH, const XMFLOAT4& color)
-{
-    // PSO/RS
-    cmd->SetPipelineState(m_pipeline->GetUIPSO());
-    cmd->SetGraphicsRootSignature(m_pipeline->GetUIRootSignature());
-
-    ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
-    cmd->SetDescriptorHeaps(1, heaps);
-
-    // CBV
     UpdateTint(1.f, 1.f, 1.f, 1.f);
     cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
 
-    // Atlas font
     cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);
-
-    const UINT vertexCount = CreateTextVertices(text, x, y, scale, screenW, screenH, color);
-    if (vertexCount == 0) return;
 
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     cmd->IASetVertexBuffers(0, 1, &m_textVBV);
-    cmd->DrawInstanced(vertexCount, 1, 0, 0);
+
+    UINT offset = 0;
+    XMFLOAT4 col(1.f, 1.f, 1.f, 1.f);
+
+    // SCORE
+    if (ui.showScore)
+    {
+        char buf[64];
+        sprintf_s(buf, "%d", ui.score);
+
+        UINT scoreVerts = CreateTextVertices(buf, 20.f, 20.f, 2.f, screenW, screenH, col, offset);
+
+        cmd->DrawInstanced(scoreVerts, 1, offset, 0);
+
+        offset += scoreVerts;
+    }
+
+    // CROSSHAIR
+    if (ui.showCrosshair)
+    {
+        const char* cross = "+";
+
+        float cx = screenW * 0.5f - 8.f;
+        float cy = screenH * 0.5f - 32.f;
+
+        UINT crossVerts = CreateTextVertices(cross, cx, cy, 1.f, screenW, screenH, col, offset);
+
+        cmd->DrawInstanced(crossVerts, 1, offset, 0);
+    }
 }
 
 bool UIRender::ParseIntField(const std::string& token, const char* key, int& out)
