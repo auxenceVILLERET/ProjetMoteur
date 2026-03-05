@@ -145,7 +145,7 @@ void GameScene::FollowRail()
 		return;
 
 	float targetPivot = closestRail->GetPosition().x;
-	m_pivot += (targetPivot - m_pivot) * smoothSpeed * m_deltaTime;
+	m_pivot = std::lerp(m_pivot, targetPivot, smoothSpeed * m_deltaTime);
 }
 
 void GameScene::MovePlayer() {
