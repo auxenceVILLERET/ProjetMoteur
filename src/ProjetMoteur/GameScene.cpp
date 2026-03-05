@@ -1,4 +1,4 @@
-#include "GameScene.h"
+#include "ProjetMoteur/GameScene.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
