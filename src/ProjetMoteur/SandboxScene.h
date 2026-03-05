@@ -44,6 +44,10 @@ private:
 
 	float m_speedPlayer = 1.f;
 
+	float m_yaw = 0.0f;
+	float m_pitch = 0.0f;
+	bool m_locked = true;
+
 	Projectile* m_projectile = nullptr;
 
 	//TEST ENTITIES
@@ -62,6 +66,8 @@ private:
 	//LOOK WITH MOUSE + WASD/ZQSD
 	void MoveCamera();
 	void Debug();
+	void HandleCursor();
+	void UpdateCameraTransform();
 
 	//SHOOTING
 	void Shooting();

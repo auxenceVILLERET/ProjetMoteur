@@ -28,13 +28,13 @@ private:
 
 	std::vector<Entity*> m_entities = {};
 
-	Entity* m_floor;
+	Entity* m_floor = nullptr;
 
-	Entity* m_rail;
+	Entity* m_rail = nullptr;
 	std::vector<Entity*> m_rails = {};
 
-	Entity* m_body;
-	Entity* m_cam;
+	Entity* m_body = nullptr;
+	Entity* m_cam = nullptr;
 
 	float m_pivot = 0.0f;
 	int m_currentRailIndex = 0;
@@ -43,7 +43,7 @@ private:
 
 	float m_maxRails = 5;
 
-	Entity* m_bullet;
+	Entity* m_bullet = nullptr;
 
 	float m_speedPlayer = 1.f;
 
@@ -51,14 +51,14 @@ private:
 	float m_pitch = 0.0f;
 	bool m_locked = true;
 
-	Projectile* m_projectile;
-	TilesManager* m_tilesManager;
-	Tiles* m_tiles;
+	Projectile* m_projectile = nullptr;
+	TilesManager* m_tilesManager = nullptr;
+	Tiles* m_tiles = nullptr;
 	
 	Entity* CreateBody();
 	Entity* CreateFloor();
 
-	UIFrame* m_frame;
+	UIFrame* m_frame = nullptr;
 
 	//RAILS
 	void CreateRail();
