@@ -59,6 +59,7 @@ void GameScene::OnEnter()
 
 	m_frame->showSplash = false;
 	m_frame->score = 0;
+	m_pivot = 0.0f;
 
 }
 

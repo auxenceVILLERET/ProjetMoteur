@@ -13,6 +13,7 @@
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/Projectile.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
+#include "Window.h"
 
 #include <iostream>
 
@@ -80,8 +81,48 @@ void SandboxScene::Update(float dt)
 
 
 	MoveCamera();
+	HandleCursor();
 	Debug();
 	Shooting();
+}
+
+// -[LOCK & HIDE CURSOR + Calculate DeltaMouse]- //
+void SandboxScene::HandleCursor()
+{
+	Window* window = Window::GetInstance();
+
+	if (Input::GetKeyDown(Keyboard::ESC))
+	{
+		m_locked = !m_locked;
+		window->LockCursor(m_locked);
+	}
+
+	if (!m_locked)
+	{
+		return;
+	}
+
+	window->UpdateCursorCenter();
+
+	POINT mouse;
+	GetCursorPos(&mouse);
+
+	float dx = float(mouse.x - window->GetCursorCenter().x);
+	float dy = float(mouse.y - window->GetCursorCenter().y);
+
+	float sensitivity = 0.0025f;
+
+	m_yaw += dx * sensitivity;
+	m_pitch += dy * sensitivity;
+
+	m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);
+
+	SetCursorPos(
+		window->GetCursorCenter().x,
+		window->GetCursorCenter().y
+	);
+
+	UpdateCameraTransform();
 }
 
 // -[TEST ENTITIES]- //
@@ -223,6 +264,36 @@ void SandboxScene::Shooting() {
 		temp->SetPosition(0.0f, 0.0f, 0.0f);
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity({ 0.0f, 0.0f, 5.0f });
 	}
+}
+
+void SandboxScene::UpdateCameraTransform()
+{
+	// Quaternion Yaw (axe Y monde)
+	XMVECTOR yawQ = XMQuaternionRotationAxis(
+		XMVectorSet(0, 1, 0, 0),
+		m_yaw
+	);
+
+	// Right vector après yaw
+	XMVECTOR right = XMVector3Rotate(
+		XMVectorSet(1, 0, 0, 0),
+		yawQ
+	);
+
+	// Quaternion pitch
+	XMVECTOR pitchQ = XMQuaternionRotationAxis(
+		right,
+		m_pitch
+	);
+
+	// Rotation finale
+	XMVECTOR finalQ = XMQuaternionMultiply(yawQ, pitchQ);
+	finalQ = XMQuaternionNormalize(finalQ);
+
+	XMFLOAT4 q;
+	XMStoreFloat4(&q, finalQ);
+
+	m_cam->SetRotation(q);
 }
 
 // -[DEBUG]- //
