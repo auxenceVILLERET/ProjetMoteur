@@ -69,10 +69,12 @@ void UploadContext::Begin()
         throw std::runtime_error("UploadContext::Begin: already recording");
 
 	HRESULT hr = m_alloc->Reset();
+
     if (FAILED(hr))
 		throw std::runtime_error("UploadContext: allocator reset failed");
 
     hr = m_cmdList->Reset(m_alloc, nullptr);
+
     if (FAILED(hr))
         throw std::runtime_error("UploadContext: cmd list reset failed");
 
@@ -85,6 +87,7 @@ void UploadContext::EndAndWait()
         throw std::runtime_error("UploadContext::EndAndWait: Begin() not called");
 
 	HRESULT hr = m_cmdList->Close();
+
 	if (FAILED(hr))
         throw std::runtime_error("UploadContext: Close failed");
 
@@ -94,14 +97,17 @@ void UploadContext::EndAndWait()
     // Signal and wait
     ++m_fenceValue;
 	hr = m_queue->Signal(m_fence, m_fenceValue);
+
     if (FAILED(hr))
 		throw std::runtime_error("UploadContext: Signal failed");
 
     if (m_fence->GetCompletedValue() < m_fenceValue)
     {
         hr = m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
+
         if (FAILED(hr))
 			throw std::runtime_error("UploadContext: SetEventOnCompletion failed");
+
         WaitForSingleObject(m_fenceEvent, INFINITE);
     }
 
@@ -138,8 +144,8 @@ bool UploadContext::UploadBuffer(
     if (srcData == nullptr || numBytes == 0)
         return false;
 
-    if (outDefaultBuffer) { outDefaultBuffer->Release(); outDefaultBuffer = nullptr; }
-    if (outUploadBuffer) { outUploadBuffer->Release();  outUploadBuffer = nullptr; }
+    if (outDefaultBuffer) { SafeRelease(outDefaultBuffer); }
+    if (outUploadBuffer) { SafeRelease(outUploadBuffer); }
 
     // Default heap (GPU)
     D3D12_HEAP_PROPERTIES defaultHeap = {};
@@ -164,6 +170,7 @@ bool UploadContext::UploadBuffer(
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
 		IID_PPV_ARGS(&outDefaultBuffer));
+
 	if (FAILED(hr))
 		throw std::runtime_error("UploadContext: CreateCommittedResource DEFAULT failed");
 
@@ -180,6 +187,7 @@ bool UploadContext::UploadBuffer(
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
         IID_PPV_ARGS(&outUploadBuffer));
+
     if (FAILED(hr))
         throw std::runtime_error("UploadContext: CreateCommittedResource UPLOAD failed");
 
@@ -187,8 +195,10 @@ bool UploadContext::UploadBuffer(
     void* mapped = nullptr;
     D3D12_RANGE range = { 0, 0 }; // no CPU reads
     hr = outUploadBuffer->Map(0, &range, &mapped);
+
     if (FAILED(hr))
         throw std::runtime_error("UploadContext: Map upload failed");
+
     std::memcpy(mapped, srcData, static_cast<size_t>(numBytes));
     outUploadBuffer->Unmap(0, nullptr);
 
@@ -200,6 +210,5 @@ bool UploadContext::UploadBuffer(
 
     return true;
 }
-
 
 #endif // !UPLOAD_CONTEXT_CPP_INCLUDED

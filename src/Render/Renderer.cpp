@@ -218,10 +218,12 @@ void Renderer::BeginFrame()
 
     // Reset allocator and list.
     HRESULT hr = pCommandAllocator->Reset();
+
     if (FAILED(hr))
 		throw std::runtime_error("Command allocator reset failed.");
 
     hr = pCommandList->Reset(pCommandAllocator, nullptr);
+
 	if (FAILED(hr))
 		throw std::runtime_error("Command list reset failed.");
 
