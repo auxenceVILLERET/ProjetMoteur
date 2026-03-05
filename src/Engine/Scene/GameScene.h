@@ -9,6 +9,7 @@ class Camera;
 class Projectile;
 class Renderer;
 class TilesManager;
+class Tiles;
 struct UIFrame;
 
 
@@ -25,12 +26,12 @@ private:
 	float m_deltaTime; // deltaTime
 	bool m_startupFlag = true;
 
-	std::vector<Entity*> m_entities;
+	std::vector<Entity*> m_entities = {};
 
 	Entity* m_floor;
 
 	Entity* m_rail;
-	std::vector<Entity*> m_rails;
+	std::vector<Entity*> m_rails = {};
 
 	Entity* m_body;
 	Entity* m_cam;
@@ -50,10 +51,9 @@ private:
 	float m_pitch = 0.0f;
 	bool m_locked = true;
 
-
-
 	Projectile* m_projectile;
 	TilesManager* m_tilesManager;
+	Tiles* m_tiles;
 	
 	Entity* CreateBody();
 	Entity* CreateFloor();

@@ -45,14 +45,13 @@ public:
 
 	void CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radius, float startAngle, float endAngle, int segments);
 
-
 	void SpawnEnemy();
 
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
 
-	Entity* m_activeEnemy;
-	Entity* m_obstacle;
+	Entity* m_activeEnemy = nullptr;
+	Entity* m_obstacle = nullptr;
 
 private:
 	bool m_active = false;

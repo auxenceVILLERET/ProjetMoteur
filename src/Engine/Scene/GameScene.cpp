@@ -111,14 +111,14 @@ Entity* GameScene::CreateFloor()
 void GameScene::FollowRail()
 {
 	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();
+	float smoothSpeed = m_tilesManager->GetSpeed();
+	float playerZ = m_body->GetPosition().z;
 
 	if (activeTiles.empty())
 		return;
 
-	float playerZ = m_body->GetPosition().z;
-
 	Entity* closestRail = nullptr;
-	float closestDistance = FLT_MAX;
+	float closestDistance = 100.0f; // big value just in case -> first rail to be checked
 
 	for (Tiles* tile : activeTiles)
 	{
@@ -145,9 +145,6 @@ void GameScene::FollowRail()
 		return;
 
 	float targetPivot = closestRail->GetPosition().x;
-
-	float smoothSpeed = 8.0f;
-
 	m_pivot += (targetPivot - m_pivot) * smoothSpeed * m_deltaTime;
 }
 

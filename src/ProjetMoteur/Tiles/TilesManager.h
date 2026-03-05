@@ -25,6 +25,7 @@ public:
 
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
+	float GetSpeed() const { return m_speed; };
 private:
 
 	float m_baseSpeed = 5.0f;
