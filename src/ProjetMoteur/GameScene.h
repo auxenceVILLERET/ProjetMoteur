@@ -17,7 +17,7 @@ class GameScene : public Scene
 {
 public:
 	~GameScene() = default;
-	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
+	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager) override;
 	void OnEnter() override;
 	void OnExit() override;
 	void Update(float dt) override;

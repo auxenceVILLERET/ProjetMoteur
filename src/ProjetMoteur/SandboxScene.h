@@ -8,13 +8,12 @@ class Engine;
 class Camera;
 class Projectile;
 class Renderer;
-struct UIFrame;
 
 class SandboxScene : public Scene
 {
 public:
 	~SandboxScene() = default;
-	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
+	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager) override;
 	void OnEnter() override;
 	void OnExit() override;
 	void Update(float dt) override;

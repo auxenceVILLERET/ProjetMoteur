@@ -18,12 +18,13 @@
 
 using namespace core;
 
-void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
+void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager)
 {
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_engine = engine;
 	m_cam = camera;
+	m_sceneManager = sceneManager;
 
 	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 	// -[TEST OBJECTS]- //
