@@ -123,6 +123,20 @@ void Entity::Scale(XMFLOAT3 vectorScale)
 	UpdateWorldMatrix();
 }
 
+void Entity::SetScale(float scaleX, float scaleY, float scaleZ)
+{
+	m_scale = { scaleX, scaleY, scaleZ };
+	UpdateWorldMatrix();
+}
+
+void Entity::Scale(float scaleX, float scaleY, float scaleZ)
+{
+	m_scale.x *= scaleX;
+	m_scale.y *= scaleY;
+	m_scale.z *= scaleZ;
+	UpdateWorldMatrix();
+}
+
 void Entity::CoutScale()
 {
 	std::cout << "Scaling : [" << m_scale.x << "][" << m_scale.y << "][" << m_scale.z << "]\n" << std::endl;

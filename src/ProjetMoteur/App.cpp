@@ -74,7 +74,7 @@ void App::Shutdown()
 {
 	//Clean everything and Exit App
 	std::cout << " /!\\ -[ SHUTDOWN ]- /!\\" << std::endl;
-	//m_engine.Shutdown();
+	m_engine.Shutdown();
 }
 
 void App::UpdateWindow()
@@ -99,7 +99,6 @@ void App::HandleInput()
 	if (Input::GetKeyDown(Keyboard::F)) 
 	{
 		std::cout << "FullScreen" << std::endl;
-		m_window->SetMaximized(true);
 	}
 
 	Input::Update();
