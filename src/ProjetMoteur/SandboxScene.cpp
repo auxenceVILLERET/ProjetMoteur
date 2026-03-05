@@ -13,6 +13,7 @@
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/Projectile.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
+#include "ProjetMoteur/Tiles/Tile6.h"
 #include "Window.h"
 #include <iostream>
 
@@ -28,7 +29,10 @@ void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Enti
 
 	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 
-
+	Tile6* tile = new Tile6();
+	tile->Initialize(m_ecs, m_renderer);
+	tile->SetPosition({ 0.0f, 0.0f, 0.0f });
+	tile->SetActive(false);
 
 	// Ugly but needed until fix
 	for (Entity* entity : m_entities)
