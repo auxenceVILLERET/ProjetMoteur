@@ -85,7 +85,7 @@ void Tiles::CreateTileEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMFL
 	tileEntity->SetScale(scale);
 	tileEntity->RotateX(XM_PIDIV2);
 	tileEntity->RotateY(XMConvertToRadians(Yrotation));
-	tileEntity->GetComponent<MeshRendererComponent>()->SetTexture(ResourceManager::Instance().LoadTexture(L"../../res/RailTex.png"));
+	tileEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity);
 	GetLocalOffset().push_back(offset);
 	GetRails().push_back(tileEntity);
@@ -99,7 +99,7 @@ void Tiles::CreateEnemyEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMF
 	EnemyEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
 	EnemyEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	EnemyEntity->SetScale(scale);
-	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(ResourceManager::Instance().LoadTexture(L"../../res/TargetTex.png"));
+	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_targetHandle);
 	EnemyEntity->SetActive(false);
 	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
@@ -115,7 +115,7 @@ void Tiles::CreateWallEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMFL
 	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Box);
 	ObstacleEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	ObstacleEntity->SetScale(scale);
-	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(ResourceManager::Instance().LoadTexture(L"../../res/smiley.png"));
+	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_wallTexture);
 	ObstacleEntity->SetActive(false);
 	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
 	m_obstacle = ObstacleEntity;
