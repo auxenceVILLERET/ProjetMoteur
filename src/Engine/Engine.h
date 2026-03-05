@@ -31,7 +31,6 @@ private:
 	Callback m_InitCallback;
 	Callback m_ShutdownCallback;
 
-
-	bool m_isRunning;
+	bool m_isRunning = true;
 };
 

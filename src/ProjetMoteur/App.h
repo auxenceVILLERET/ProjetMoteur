@@ -26,13 +26,11 @@ public:
 
 private:
 	Engine& m_engine;
-	Window* m_window;
-	Renderer* m_renderer;
-	SceneManager* m_sceneManager;
-	ResourceManager* m_resourceManager;
-	Entity* m_cam;
-	ECS* m_ecs;
-
-	float m_speedPlayer = 2.0f;
+	Window* m_window = nullptr;
+	Renderer* m_renderer = nullptr;
+	SceneManager* m_sceneManager = nullptr;
+	ResourceManager* m_resourceManager = nullptr;
+	Entity* m_cam = nullptr;
+	ECS* m_ecs = nullptr;
 };
 
