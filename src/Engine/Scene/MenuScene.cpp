@@ -25,6 +25,9 @@ void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 void MenuScene::OnEnter()
 {
+	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
+	m_cam->SetRotation({ 0.0f, 0.0f, 0.0f, 1.0f });
+
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(true);
@@ -46,6 +49,5 @@ void MenuScene::OnExit()
 
 void MenuScene::Update(float dt)
 {
-	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
-	m_cam->SetRotation({ 0.0f, 0.0f, 0.0f, 1.0f });
+
 }
