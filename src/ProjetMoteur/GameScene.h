@@ -23,7 +23,7 @@ public:
 	void Update(float dt) override;
 
 private:
-	float m_deltaTime; // deltaTime
+	float m_deltaTime = 0.0f; // deltaTime
 	bool m_startupFlag = true;
 
 	std::vector<Entity*> m_entities = {};

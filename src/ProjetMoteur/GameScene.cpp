@@ -114,6 +114,7 @@ Entity* GameScene::CreateBody()
 	m_entities.push_back(body);
 	return body;
 }
+
 // -[PLAYER MOVEMENT]- //
 void GameScene::MovePlayer() {
 
@@ -127,7 +128,6 @@ void GameScene::MovePlayer() {
 
 	FollowRail();
 }
-
 void GameScene::FollowRail()
 {
 	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();

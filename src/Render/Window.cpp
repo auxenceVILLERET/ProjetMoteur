@@ -139,6 +139,11 @@ LRESULT Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
+void Window::SetFullscreen(bool fullscreen)
+{ 
+    m_fullscreen = fullscreen; 
+}
+
 void Window::UpdateCursorCenter()
 {
     RECT rc;
@@ -178,6 +183,5 @@ void Window::LockCursor(bool enable)
         while (ShowCursor(TRUE) < 0);
     }
 }
-
 
 #endif // !WINDOW_CPP_INCLUDED

@@ -10,7 +10,7 @@ public:
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
 private:
-	int m_id;
+	int m_id = 0;;
 	int m_scoreValue = 0;
 };
 
