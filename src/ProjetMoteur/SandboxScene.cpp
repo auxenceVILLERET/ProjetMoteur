@@ -24,17 +24,16 @@ void SandboxScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Enti
 	m_renderer = renderer;
 	m_engine = engine;
 	m_cam = camera;
-	frame = new UIFrame();
 
 	m_cam->SetPosition(0.0f, 0.0f, 0.0f);
 	// -[TEST OBJECTS]- //
 	m_cylinder = CreateCylinder();
 	m_cylinder->RotateX(XMConvertToRadians(90.f));
-	//m_cube = CreateCube();
-	//m_sphere = CreateSphere();
-	//m_moon = CreateMoon();
-	//m_moonMoon = CreateMoonMoon();
-	//m_floor = CreateFloor();
+	m_cube = CreateCube();
+	m_sphere = CreateSphere();
+	m_moon = CreateMoon();
+	m_moonMoon = CreateMoonMoon();
+	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
 	m_projectile->Initialize(0.1f, Shape::SPHERE, 15, 3.0f, m_engine, m_ecs, m_renderer);
@@ -79,14 +78,6 @@ void SandboxScene::Update(float dt)
 	m_moon->OrbitAround(m_cylinder->GetPosition(), { 0.0f,1.0f,0.0f }, m_angleOrbit, 1.0f);
 	m_moonMoon->OrbitAround(m_moon->GetPosition(), {0.0f,1.0f,0.0f}, 0.0f, .25f);
 
-
-	frame->score = 0;
-	if (Input::GetKeyDown(Keyboard::A))
-		frame->showSplash = true;
-	if (Input::GetKeyDown(Keyboard::E))
-		frame->showSplash = false;
-		
-	m_renderer->SetUiFrame(*frame);
 
 	MoveCamera();
 	Debug();
