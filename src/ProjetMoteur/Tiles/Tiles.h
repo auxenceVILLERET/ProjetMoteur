@@ -51,7 +51,10 @@ public:
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
 
-protected:
+	void CreateTileEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMFLOAT3 scale, float Yrotation);
+	void CreateEnemyEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMFLOAT3 scale, int ID);
+	void CreateWallEntity(ECS* ecs, Renderer* renderer, XMFLOAT3 offset, XMFLOAT3 scale);
+
 	Entity* m_activeEnemy = nullptr;
 	Entity* m_obstacle = nullptr;
 

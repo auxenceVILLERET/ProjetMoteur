@@ -73,7 +73,9 @@ void App::Update()
 
 void App::Shutdown()
 {
-	// Clean up your application here
+	//Clean everything and Exit App
+	std::cout << " /!\\ -[ SHUTDOWN ]- /!\\" << std::endl;
+	//m_engine.Shutdown();
 }
 
 void App::UpdateWindow()
@@ -91,8 +93,14 @@ void App::HandleInput()
 	if (Input::GetKey(Keyboard::NUMPAD2) || Input::GetKey(Keyboard::_2)) { m_sceneManager->ChangeScene("Game"); }
 	if (Input::GetKey(Keyboard::NUMPAD3) || Input::GetKey(Keyboard::_3)) { m_sceneManager->ChangeScene("Sandbox"); }
 
-	if (Input::GetKey(Keyboard::ESC)) {
+	if (Input::GetKeyDown(Keyboard::BACKSPACE)) {
 		App::Shutdown();
+	}
+
+	if (Input::GetKeyDown(Keyboard::F)) 
+	{
+		std::cout << "FullScreen" << std::endl;
+		m_window->SetMaximized(true);
 	}
 
 	Input::Update();
