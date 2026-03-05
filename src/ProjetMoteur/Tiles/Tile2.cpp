@@ -10,9 +10,6 @@
 
 void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 {
-	TextureHandle texture = ResourceManager::Instance().LoadTexture(L"../../res/RailTex.png");
-	TextureHandle targetHandle = ResourceManager::Instance().LoadTexture(L"../../res/TargetTex.png");
-	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
@@ -20,7 +17,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	tileEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	tileEntity->SetScale({ 0.1f, 4.0f, 0.1f });
 	tileEntity->RotateX(XM_PIDIV2);
-	tileEntity->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	tileEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity);
 	GetLocalOffset().push_back(offset);
 
@@ -31,7 +28,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	tileEntity1->SetScale({ 0.1f, 2.8f, 0.1f });
 	tileEntity1->RotateX(XM_PIDIV2);
 	tileEntity1->RotateY(XMConvertToRadians(45));
-	tileEntity1->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	tileEntity1->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity1);
 	GetLocalOffset().push_back(offset1);
 
@@ -41,7 +38,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	tileEntity2->SetPosition(GetPosition().x + offset2.x, GetPosition().y + offset2.y, GetPosition().z + offset2.z);
 	tileEntity2->SetScale({ 0.1f, 2.0f, 0.1f });
 	tileEntity2->RotateX(XM_PIDIV2);
-	tileEntity2->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	tileEntity2->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity2);
 	GetLocalOffset().push_back(offset2);
 
@@ -52,7 +49,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	tileEntity4->SetScale({ 0.1f, 2.8f, 0.1f });
 	tileEntity4->RotateX(XM_PIDIV2);
 	tileEntity4->RotateY(XMConvertToRadians(45));
-	tileEntity4->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	tileEntity4->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity4);
 	GetLocalOffset().push_back(offset4);
 
@@ -62,7 +59,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
 	tileEntity3->SetScale({ 0.1f, 6.0f, 0.1f });
 	tileEntity3->RotateX(XM_PIDIV2);
-	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
 	GetEntities().push_back(tileEntity3);
 	GetLocalOffset().push_back(offset3);
 
@@ -81,7 +78,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy = { 2.0f, 1.0f, 6.0f };
 	EnemyEntity->SetPosition(GetPosition().x + offsetEnemy.x, GetPosition().y + offsetEnemy.y, GetPosition().z + offsetEnemy.z);
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
+	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_targetHandle);
 	EnemyEntity->SetActive(false);
 	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
@@ -94,7 +91,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy2 = { -2.0f, 1.0f, 6.0f };
 	EnemyEntity2->SetPosition(GetPosition().x + offsetEnemy2.x, GetPosition().y + offsetEnemy2.y, GetPosition().z + offsetEnemy2.z);
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
+	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(m_targetHandle);
 	EnemyEntity2->SetActive(false);
 	EnemyEntity2->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity2);
@@ -107,7 +104,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy3 = { 0.0f, 1.0f, 14.0f };
 	EnemyEntity3->SetPosition(GetPosition().x + offsetEnemy3.x, GetPosition().y + offsetEnemy3.y, GetPosition().z + offsetEnemy3.z);
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
+	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(m_targetHandle);
 	EnemyEntity3->SetActive(false);
 	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
@@ -120,7 +117,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetObstacle = { 2.0f, 0.0f, 16.0f };
 	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
 	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
-	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(wallTexture);
+	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_wallTexture);
 	ObstacleEntity->SetActive(false);
 	ObstacleEntity->GetComponent<ColliderComponent>()->SetRadius(1.0f);
 	m_obstacle = ObstacleEntity;

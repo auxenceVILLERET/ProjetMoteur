@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include "Engine/ECS/Entity.h"
+#include "Engine/ResourceManager.h"
 
 using namespace DirectX;
 
@@ -50,8 +51,13 @@ public:
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
 
+protected:
 	Entity* m_activeEnemy = nullptr;
 	Entity* m_obstacle = nullptr;
+
+	TextureHandle m_railTexture = ResourceManager::Instance().LoadTexture(L"../../res/RailTex.png");
+	TextureHandle m_targetHandle = ResourceManager::Instance().LoadTexture(L"../../res/TargetTex.png");
+	TextureHandle m_wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/briqueTex.png");
 
 private:
 	bool m_active = false;
@@ -65,6 +71,8 @@ private:
 	float m_speed = 0.0f;
 
 	int m_scoreValue = 0;
+	
+
 
 	std::vector<Entity*> m_entities = {};
 	std::vector<Entity*> m_rails = {};

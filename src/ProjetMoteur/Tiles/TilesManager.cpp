@@ -6,6 +6,7 @@
 #include "Tiles/Tile2.h"
 #include "Tiles/Tile3.h"
 #include "Tiles/Tile4.h"
+#include "Tiles/Tile5.h"
 #include "Core/Random.h"
 #include <iostream>
 
@@ -37,6 +38,11 @@ void TilesManager::Initialize(ECS* ecs, Renderer* renderer)
     Tile4* tile4 = new Tile4();
     tile4->Initialize(ecs, renderer);
     AddTile(tile4);
+
+	Tile5* tile5 = new Tile5();
+	tile5->Initialize(ecs, renderer);
+	AddTile(tile5);
+
 }
 
 void TilesManager::AddTile(Tiles* tile)

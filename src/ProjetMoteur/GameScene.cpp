@@ -59,10 +59,9 @@ void GameScene::OnEnter()
 	}
 
 	m_frame->showSplash = false;
-	m_frame->showScore = true;
 	m_frame->showCrosshair = true;
+	m_frame->showScore = true;
 	m_tilesManager->SetScoreValue(0);
-	m_frame->score = 0;
 	m_pivot = 0.0f;
 }
 
@@ -74,7 +73,6 @@ void GameScene::OnExit()
 	{
 		entity->SetActive(false);
 	}
-	m_frame->score = 0;
 	m_tilesManager->SetScoreValue(0);
 }
 

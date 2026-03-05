@@ -1,4 +1,4 @@
-#include "Tile3.h"
+#include "Tile5.h"
 #include "Engine/ECS/ECS.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/Entity.h"
@@ -8,11 +8,11 @@
 #include "Engine/ECS/Components/ColliderComponent.h"
 #include "Engine/ECS/Components/ObstacleComponent.h"
 
-void Tile3::Initialize(ECS* ecs, Renderer* renderer)
+void Tile5::Initialize(ECS* ecs, Renderer* renderer)
 {
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset = { 2.0f, 0.0f, -2.0f };
+	XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f };
 	tileEntity->SetPosition(GetPosition().x + offset.x, GetPosition().y + offset.y, GetPosition().z + offset.z);
 	tileEntity->SetScale({ 0.1f, 6.0f, 0.1f });
 	tileEntity->RotateX(XM_PIDIV2);
@@ -20,20 +20,20 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity);
 	GetLocalOffset().push_back(offset);
 
-	Entity* tileEntity1 = ecs->CreateEntity<Entity>();
-	tileEntity1->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset1 = { 2.0f, 0.0f, 4.0f };
-	tileEntity1->SetPosition(GetPosition().x + offset1.x, GetPosition().y + offset1.y, GetPosition().z + offset1.z);
-	tileEntity1->SetScale({ 0.1f, 2.8f, 0.1f });
-	tileEntity1->RotateX(XM_PIDIV2);
-	tileEntity1->RotateY(XMConvertToRadians(315));
-	tileEntity1->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
-	GetEntities().push_back(tileEntity1);
-	GetLocalOffset().push_back(offset1);
+	Entity* tileEntity3 = ecs->CreateEntity<Entity>();
+	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
+	XMFLOAT3 offset3 = { 0.0f, 0.0f, 6.0f };
+	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
+	tileEntity3->SetScale({ 0.1f, 2.8f, 0.1f });
+	tileEntity3->RotateX(XM_PIDIV2);
+	tileEntity3->RotateY(XMConvertToRadians(45));
+	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
+	GetEntities().push_back(tileEntity3);
+	GetLocalOffset().push_back(offset3);
 
 	Entity* tileEntity2 = ecs->CreateEntity<Entity>();
 	tileEntity2->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset2 = { 0.0f, 0.0f, 6.0f };
+	XMFLOAT3 offset2 = { 2.0f, 0.0f, 8.0f };
 	tileEntity2->SetPosition(GetPosition().x + offset2.x, GetPosition().y + offset2.y, GetPosition().z + offset2.z);
 	tileEntity2->SetScale({ 0.1f, 6.0f, 0.1f });
 	tileEntity2->RotateX(XM_PIDIV2);
@@ -41,22 +41,21 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity2);
 	GetLocalOffset().push_back(offset2);
 
-	Entity* tileEntity3 = ecs->CreateEntity<Entity>();
-	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset3 = { 0.0f, 0.0f, 12.0f };
-	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
-	tileEntity3->SetScale({ 0.1f, 6.0f, 0.1f });
-	tileEntity3->RotateX(XM_PIDIV2);
-	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
-	GetEntities().push_back(tileEntity3);
-	GetLocalOffset().push_back(offset3);
-
+	Entity* tileEntity4 = ecs->CreateEntity<Entity>();
+	tileEntity4->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
+	XMFLOAT3 offset4 = { 2.0f, 0.0f, 14.0f };
+	tileEntity4->SetPosition(GetPosition().x + offset4.x, GetPosition().y + offset4.y, GetPosition().z + offset4.z);
+	tileEntity4->SetScale({ 0.1f, 2.0f, 0.1f });
+	tileEntity4->RotateX(XM_PIDIV2);
+	tileEntity4->GetComponent<MeshRendererComponent>()->SetTexture(m_railTexture);
+	GetEntities().push_back(tileEntity4);
+	GetLocalOffset().push_back(offset4);
 
 	// Define m_rails vector //
 	GetRails().push_back(tileEntity);
-	GetRails().push_back(tileEntity1);
-	GetRails().push_back(tileEntity2);
 	GetRails().push_back(tileEntity3);
+	GetRails().push_back(tileEntity2);
+	GetRails().push_back(tileEntity4);
 
 	Entity* EnemyEntity = ecs->CreateEntity<Entity>();
 	EnemyEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
@@ -96,12 +95,12 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
 	GetLocalOffset().push_back(offsetEnemy3);
-	
+
 	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
 	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	ObstacleEntity->AddComponent<ObstacleComponent>();
 	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Box);
-	XMFLOAT3 offsetObstacle = { 0.0f, 0.0f, 18.0f };
+	XMFLOAT3 offsetObstacle = { 2.0f, 0.0f, 16.0f };
 	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
 	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
 	ObstacleEntity->GetComponent<MeshRendererComponent>()->SetTexture(m_wallTexture);
@@ -114,11 +113,12 @@ void Tile3::Initialize(ECS* ecs, Renderer* renderer)
 	SetActive(false);
 	SetIsTurnL(false);
 	SetIsTurnR(false);
-	SetIn(2);
-	SetOut(0);
+	SetIn(0);
+	SetOut(2);
+
 }
 
-void Tile3::Update(float deltaTime)
+void Tile5::Update(float deltaTime)
 {
 	MoveZ(-(GetSpeed() * deltaTime));
 
