@@ -9,6 +9,7 @@ class Camera;
 class Projectile;
 class Renderer;
 class TilesManager;
+class Tiles;
 struct UIFrame;
 
 
@@ -25,15 +26,20 @@ private:
 	float m_deltaTime; // deltaTime
 	bool m_startupFlag = true;
 
-	std::vector<Entity*> m_entities;
+	std::vector<Entity*> m_entities = {};
 
 	Entity* m_floor;
 
 	Entity* m_rail;
-	std::vector<Entity*> m_rails;
+	std::vector<Entity*> m_rails = {};
 
 	Entity* m_body;
 	Entity* m_cam;
+
+	float m_pivot = 0.0f;
+	int m_currentRailIndex = 0;
+
+	float m_angleOrbit = 0.0f;
 
 	float m_maxRails = 5;
 
@@ -47,6 +53,7 @@ private:
 
 	Projectile* m_projectile;
 	TilesManager* m_tilesManager;
+	Tiles* m_tiles;
 	
 	Entity* CreateBody();
 	Entity* CreateFloor();
@@ -57,6 +64,8 @@ private:
 	void CreateRail();
 	void ProceduralRails();
 	void DeleteRails();
+
+	void FollowRail();
 
 	//MOVING PLAYER
 	void MovePlayer();

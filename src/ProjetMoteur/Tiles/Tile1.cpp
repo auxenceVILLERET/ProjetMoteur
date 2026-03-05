@@ -13,6 +13,8 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	TextureHandle blueHandle = ResourceManager::Instance().LoadTexture(L"../../res/BlueTexture.png");
 	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
+	// Define Rails Positions //
+
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
 	tileEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
 	XMFLOAT3 offset = { 0.0f, 0.0f, 0.0f };
@@ -33,26 +35,34 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity2);
 	GetLocalOffset().push_back(offset2);
 
+	Entity* tileEntity3 = ecs->CreateEntity<Entity>();
+	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
+	XMFLOAT3 offset3 = { 0.0f, 0.0f, 12.0f };
+	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
+	tileEntity3->SetScale({ 0.1f, 2.8f, 0.1f });
+	tileEntity3->RotateX(XM_PIDIV2);
+	tileEntity3->RotateY(XMConvertToRadians(315));
+	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
+	GetEntities().push_back(tileEntity3);
+	GetLocalOffset().push_back(offset3);
+
 	Entity* tileEntity4 = ecs->CreateEntity<Entity>();
 	tileEntity4->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset4 = { 0.0f, 0.0f, 12.0f };
+	XMFLOAT3 offset4 = { -2.0f, 0.0f, 14.0f };
 	tileEntity4->SetPosition(GetPosition().x + offset4.x, GetPosition().y + offset4.y, GetPosition().z + offset4.z);
-	tileEntity4->SetScale({ 0.1f, 2.8f, 0.1f });
+	tileEntity4->SetScale({ 0.1f, 4.0f, 0.1f });
 	tileEntity4->RotateX(XM_PIDIV2);
-	tileEntity4->RotateY(XMConvertToRadians(315));
 	tileEntity4->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
 	GetEntities().push_back(tileEntity4);
 	GetLocalOffset().push_back(offset4);
 
-	Entity* tileEntity3 = ecs->CreateEntity<Entity>();
-	tileEntity3->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), renderer);
-	XMFLOAT3 offset3 = { -2.0f, 0.0f, 14.0f };
-	tileEntity3->SetPosition(GetPosition().x + offset3.x, GetPosition().y + offset3.y, GetPosition().z + offset3.z);
-	tileEntity3->SetScale({ 0.1f, 4.0f, 0.1f });
-	tileEntity3->RotateX(XM_PIDIV2);
-	tileEntity3->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
-	GetEntities().push_back(tileEntity3);
-	GetLocalOffset().push_back(offset3);
+	// Define m_rails vector //
+	GetRails().push_back(tileEntity);
+	GetRails().push_back(tileEntity2);
+	GetRails().push_back(tileEntity3);
+	GetRails().push_back(tileEntity4);
+
+	// Define Enemies Spawn Point //
 
 	Entity* EnemyEntity = ecs->CreateEntity<Entity>();
 	EnemyEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);

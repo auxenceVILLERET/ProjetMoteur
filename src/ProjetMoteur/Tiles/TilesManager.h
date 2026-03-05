@@ -21,19 +21,21 @@ public:
 	void OnEnter();
 	void OnExit();
 
+	std::vector<Tiles*> GetActiveTiles();
+
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
+	float GetSpeed() const { return m_speed; };
 private:
 
 	float m_baseSpeed = 5.0f;
 	float m_speedPer100 = 0.2f;
-	float m_speed;
+	float m_speed = 0.0f;
 
 	std::vector<Tiles*> m_tiles;
-
 	std::vector<Tiles*> m_activeTiles;
-	int m_currentConnection = 0;
 
+	int m_currentConnection = 0;
 	int m_scoreValue = 0;
 };
 

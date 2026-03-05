@@ -32,6 +32,7 @@ public:
 	int GetOut() const { return m_Out; }
 
 	std::vector<Entity*>& GetEntities() { return m_entities; }
+	std::vector<Entity*>& GetRails() { return m_rails; }
 
 	void SetSpeed(float speed) { m_speed = speed; }
 	float GetSpeed() const { return m_speed; }
@@ -44,21 +45,20 @@ public:
 
 	void CreateArc(ECS* ecs, Renderer* renderer, XMFLOAT3 center, float radius, float startAngle, float endAngle, int segments);
 
-
 	void SpawnEnemy();
 
 	void SetScoreValue(int scoreValue) { m_scoreValue = scoreValue; }
 	int GetScoreValue() const { return m_scoreValue; }
 
-	Entity* m_activeEnemy;
-	Entity* m_obstacle;
+	Entity* m_activeEnemy = nullptr;
+	Entity* m_obstacle = nullptr;
 
 private:
 	bool m_active = false;
 	bool m_isTurnR = false;
 	bool m_isTurnL = false;
 	
-	XMFLOAT3 m_position;
+	XMFLOAT3 m_position = {};
 	int m_In = 0;
 	int m_Out = 0;
 	
@@ -66,7 +66,8 @@ private:
 
 	int m_scoreValue = 0;
 
-	std::vector<Entity*> m_entities;
-	std::vector<XMFLOAT3> m_localOffset;
+	std::vector<Entity*> m_entities = {};
+	std::vector<Entity*> m_rails = {};
+	std::vector<XMFLOAT3> m_localOffset = {};
 };
 

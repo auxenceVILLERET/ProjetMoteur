@@ -24,7 +24,7 @@ public:
 	void Update(float dt);
 
 protected:
-	std::vector<Entity*> m_projectiles;
+	std::vector<Entity*> m_projectiles = {};
 
 	float m_size = 0.0f;
 	Shape m_shape = Shape::SPHERE;

@@ -24,9 +24,6 @@ public:
 
 	void CreateCamera();
 
-	//TEST CAMERA MOVING
-	void Movement();
-
 private:
 	Engine& m_engine;
 	Window* m_window;

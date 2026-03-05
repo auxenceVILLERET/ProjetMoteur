@@ -1,4 +1,4 @@
-#include "GameScene.h"
+#include "ProjetMoteur/GameScene.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ResourceManager.h" 
 #include "Engine/ECS/Components/MeshRendererComponent.h"
@@ -15,7 +15,7 @@
 #include "Engine/ECS/Components/ColliderComponent.h"
 #include <iostream>
 #include "ProjetMoteur/Tiles/TilesManager.h"
-
+#include "ProjetMoteur/Tiles/Tiles.h"
 #include "Window.h"
 
 using namespace core;
@@ -38,6 +38,8 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_frame = new UIFrame();
 
+	m_angleOrbit = XMConvertToRadians(90.0f);
+
 	for (Entity* entity : m_entities)
 	{
 		entity->SetActive(false);
@@ -45,10 +47,10 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 }
 
 void GameScene::OnEnter()
-{	
+{
 	Window* window = Window::GetInstance();
 	window->LockCursor(true);
-	
+
 	m_tilesManager->OnEnter();
 	for (Entity* entity : m_entities)
 	{
@@ -57,7 +59,7 @@ void GameScene::OnEnter()
 
 	m_frame->showSplash = false;
 	m_frame->score = 0;
-	
+
 }
 
 void GameScene::OnExit()
@@ -78,8 +80,9 @@ void GameScene::Update(float dt)
 
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
+	m_frame->score = m_tilesManager->GetScoreValue();
 
-	m_frame->score = m_tilesManager->GetScoreValue() ;
+	FollowRail();
 	MovePlayer();
 	Shooting();
 	m_renderer->SetUiFrame(*m_frame);
@@ -105,21 +108,56 @@ Entity* GameScene::CreateFloor()
 	return floor;
 }
 
+void GameScene::FollowRail()
+{
+	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();
+	float smoothSpeed = m_tilesManager->GetSpeed();
+	float playerZ = m_body->GetPosition().z;
+
+	if (activeTiles.empty())
+		return;
+
+	Entity* closestRail = nullptr;
+	float closestDistance = 100.0f; // big value just in case -> first rail to be checked
+
+	for (Tiles* tile : activeTiles)
+	{
+		auto& rails = tile->GetRails();
+
+		for (Entity* rail : rails)
+		{
+			float railZ = rail->GetPosition().z;
+
+			if (railZ >= playerZ)
+			{
+				float dist = railZ - playerZ;
+
+				if (dist < closestDistance)
+				{
+					closestDistance = dist;
+					closestRail = rail;
+				}
+			}
+		}
+	}
+
+	if (closestRail == nullptr)
+		return;
+
+	float targetPivot = closestRail->GetPosition().x;
+	m_pivot = std::lerp(m_pivot, targetPivot, smoothSpeed * m_deltaTime);
+}
+
 void GameScene::MovePlayer() {
-	float offset = 1;
 
-	// ROTATION AUTOUR DU RAIL
-	if (Input::GetKey(Keyboard::LEFT))
-	{
-		m_body->OrbitAround({ 0.0f,0.0f,0.0f }, {0,0,1}, XMConvertToRadians(90.0f * m_deltaTime), offset);
-		m_body->RotateLocalZ(XMConvertToRadians(90.0f * m_deltaTime));
+	float offset = .5f;
+	int dir = (Input::GetKey(Keyboard::LEFT) - Input::GetKey(Keyboard::RIGHT));
 
-	}
-	if (Input::GetKey(Keyboard::RIGHT))
-	{
-		m_body->OrbitAround({0.0f,0.0f,0.0f}, {0,0,1}, XMConvertToRadians(-90.0f * m_deltaTime), offset);
-		m_body->RotateLocalZ(XMConvertToRadians(-90.0f * m_deltaTime));
-	}
+	m_angleOrbit += XMConvertToRadians(dir * 90.0f * m_deltaTime);
+
+	m_body->OrbitAround({ m_pivot, 0.0f, 0.0f }, { 0,0,1 }, m_angleOrbit, offset);
+	m_body->RotateLocalZ(XMConvertToRadians(dir * 90.0f * m_deltaTime));
+
 }
 
 // -[SHOOTING]- //
@@ -137,45 +175,48 @@ void GameScene::Shooting() {
 		// shoot from player
 		temp->SetPosition(m_cam->GetPosition());
 		temp->GetComponent<RigidBodyComponent>()->SetVelocity(bulletSpeed);
-			
+
 	}
 }
 
 // -[LOCK & HIDE CURSOR + Calculate DeltaMouse]- //
 void GameScene::HandleCursor()
 {
-  Window* window = Window::GetInstance();
+	Window* window = Window::GetInstance();
 
-    if (Input::GetKeyDown(Keyboard::ESC))
-    {
-        m_locked = !m_locked;
-        window->LockCursor(m_locked);
-    }
+	if (Input::GetKeyDown(Keyboard::ESC))
+	{
+		m_locked = !m_locked;
+		window->LockCursor(m_locked);
+	}
 
-    if (!m_locked)
-        return;
+	if (!m_locked)
+	{
+		return;
+	}
 
-    window->UpdateCursorCenter();
+	window->UpdateCursorCenter();
 
-    POINT mouse;
-    GetCursorPos(&mouse);
+	POINT mouse;
+	GetCursorPos(&mouse);
 
-    float dx = float(mouse.x - window->GetCursorCenter().x);
-    float dy = float(mouse.y - window->GetCursorCenter().y);
+	float dx = float(mouse.x - window->GetCursorCenter().x);
+	float dy = float(mouse.y - window->GetCursorCenter().y);
 
-    float sensitivity = 0.0025f;
+	float sensitivity = 0.0025f;
 
-    m_yaw   += dx * sensitivity;
-    m_pitch += dy * sensitivity;
-    m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);
-	m_yaw = std::clamp(m_yaw, -1.0f,1.0f);
+	m_yaw += dx * sensitivity;
+	m_pitch += dy * sensitivity;
 
-    SetCursorPos(
-        window->GetCursorCenter().x,
-        window->GetCursorCenter().y
-    );
+	m_yaw = std::clamp(m_yaw, -1.0f, 1.0f);
+	m_pitch = std::clamp(m_pitch, -1.0f, 1.0f);
 
-    UpdateCameraTransform();
+	SetCursorPos(
+		window->GetCursorCenter().x,
+		window->GetCursorCenter().y
+	);
+
+	UpdateCameraTransform();
 }
 
 void GameScene::UpdateCameraTransform()
@@ -196,7 +237,7 @@ void GameScene::UpdateCameraTransform()
 	XMVECTOR yawQ = XMQuaternionRotationAxis(bodyUp, m_yaw);
 
 	// Rotation apres yaw
-	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ,yawQ);
+	XMVECTOR yawedBody = XMQuaternionMultiply(bodyQ, yawQ);
 
 	// Right local apres yaw
 	XMVECTOR bodyRight = XMVector3Rotate(
@@ -208,7 +249,7 @@ void GameScene::UpdateCameraTransform()
 	XMVECTOR pitchQ = XMQuaternionRotationAxis(bodyRight, m_pitch);
 
 	// Rotation
-	XMVECTOR finalQ = XMQuaternionMultiply( yawedBody, pitchQ );
+	XMVECTOR finalQ = XMQuaternionMultiply(yawedBody, pitchQ);
 	finalQ = XMQuaternionNormalize(finalQ);
 
 	XMFLOAT4 qFloat;

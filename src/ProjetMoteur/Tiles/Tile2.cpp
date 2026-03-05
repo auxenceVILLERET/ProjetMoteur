@@ -65,6 +65,14 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	GetEntities().push_back(tileEntity3);
 	GetLocalOffset().push_back(offset3);
 
+
+	// Define m_rails vector //
+	GetRails().push_back(tileEntity);
+	GetRails().push_back(tileEntity1);
+	GetRails().push_back(tileEntity2);
+	GetRails().push_back(tileEntity4);
+	GetRails().push_back(tileEntity3);
+
 	Entity* EnemyEntity = ecs->CreateEntity<Entity>();
 	EnemyEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	EnemyEntity->AddComponent<EnemyComponent>()->SetID(1);
