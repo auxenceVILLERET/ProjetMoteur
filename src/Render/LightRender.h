@@ -10,16 +10,22 @@ class LightSystem;
 
 #include "DescriptorHeapManager.h"
 
+struct PointLightCB
+{
+    XMFLOAT3 pos;
+    float range;
+    XMFLOAT3 color;
+    float intensity;
+};
+
 struct FrameCB
 {
     XMFLOAT4X4 viewProj;
     XMFLOAT3 cameraPos;
     uint32_t pad0;
 
-    XMFLOAT3 lightPos; 
-    float lightRange;
-    XMFLOAT3 lightColor;
-    float lightIntensity;
+    PointLightCB light0;
+    PointLightCB light1;
 };
 
 struct LightGPU

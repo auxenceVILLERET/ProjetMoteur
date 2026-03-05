@@ -8,12 +8,13 @@
 #include "InputsMethods.h"
 #include "Window.h"
 
-void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
+void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager)
 {
 	m_engine = engine;
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_cam = camera;
+	m_sceneManager = sceneManager;
 
  	Entity* menuEntity = m_ecs->CreateEntity<Entity>();
 	MeshRendererComponent* mrc = menuEntity->AddComponent<MeshRendererComponent>();

@@ -18,6 +18,7 @@
 #include "Engine/ECS/Systems/StateMachineSystem.h"
 #include "Engine/ECS/Systems/PhysicSystem.h"
 #include "Engine/ECS/Systems/ColliderSystem.h"
+#include "Engine/ECS/Systems/PlayerSystem.h"
 
 using namespace core;
 
@@ -48,15 +49,16 @@ void App::Initialize()
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 
-	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
-	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
+	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
 
 	m_sceneManager->ChangeScene("Menu");
 
 	m_ecs->AddSystem<StateMachineSystem>();
 	m_ecs->AddSystem<PhysicSystem>();
 	m_ecs->AddSystem<ColliderSystem>();
+	m_ecs->AddSystem<PlayerSystem>();
 }
 
 void App::Update()

@@ -10,7 +10,8 @@
 
 void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 {
-	TextureHandle blueHandle = ResourceManager::Instance().LoadTexture(L"../../res/BlueTexture.png");
+	TextureHandle blueHandle = ResourceManager::Instance().LoadTexture(L"../../res/RailTex.png");
+	TextureHandle targetHandle = ResourceManager::Instance().LoadTexture(L"../../res/TargetTex.png");
 	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
 	// Define Rails Positions //
@@ -71,7 +72,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy = { 2.0f, 1.0f, 6.0f };
 	EnemyEntity->SetPosition(GetPosition().x + offsetEnemy.x, GetPosition().y + offsetEnemy.y, GetPosition().z + offsetEnemy.z);
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
+	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity->SetActive(false);
 	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
@@ -84,7 +85,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy2 = { -2.0f, 1.0f, 6.0f };
 	EnemyEntity2->SetPosition(GetPosition().x + offsetEnemy2.x, GetPosition().y + offsetEnemy2.y, GetPosition().z + offsetEnemy2.z);
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
+	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity2->SetActive(false);
 	EnemyEntity2->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity2);
@@ -97,7 +98,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy3 = { 0.0f, 1.0f, 14.0f };
 	EnemyEntity3->SetPosition(GetPosition().x + offsetEnemy3.x, GetPosition().y + offsetEnemy3.y, GetPosition().z + offsetEnemy3.z);
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(blueHandle);
+	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity3->SetActive(false);
 	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
@@ -106,7 +107,7 @@ void Tile1::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
 	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	ObstacleEntity->AddComponent<ObstacleComponent>();
-	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Box);
 	XMFLOAT3 offsetObstacle = { -2.0f, 0.0f, 18.0f };
 	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
 	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });

@@ -14,20 +14,21 @@
 #include "ProjetMoteur/Tiles/TilesManager.h"
 #include "ProjetMoteur/Tiles/Tiles.h"
 #include "Window.h"
+#include "Engine/Scene/SceneManager.h"
 
 #include <iostream>
 
 using namespace core;
 
-void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
+void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager)
 {
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_engine = engine;
 	m_cam = camera;
+	m_sceneManager = sceneManager;
 
 	m_body = CreateBody();
-	m_floor = CreateFloor();
 
 	m_projectile = new Projectile();
 	m_projectile->Initialize(0.08f, Shape::SPHERE, 15, 10.0f, m_engine, m_ecs, m_renderer);
@@ -62,9 +63,11 @@ void GameScene::OnEnter()
 	}
 
 	m_frame->showSplash = false;
+	m_frame->showScore = true;
+	m_frame->showCrosshair = true;
+	m_tilesManager->SetScoreValue(0);
 	m_frame->score = 0;
 	m_pivot = 0.0f;
-
 }
 void GameScene::OnExit()
 {
@@ -74,6 +77,8 @@ void GameScene::OnExit()
 	{
 		entity->SetActive(false);
 	}
+	m_frame->score = 0;
+	m_tilesManager->SetScoreValue(0);
 }
 void GameScene::Update(float dt)
 {
@@ -81,8 +86,13 @@ void GameScene::Update(float dt)
 	
 	HandleCursor();
 	if (!m_locked) { return; }
-
+	
 	LookAround();
+	if (m_body->IsActive() == false)
+	{
+		m_sceneManager->ChangeScene("Menu");
+	}
+
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
 	m_frame->score = m_tilesManager->GetScoreValue();
@@ -98,21 +108,13 @@ Entity* GameScene::CreateBody()
 {
 	Entity* body = m_ecs->CreateEntity<Entity>();
 	body->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
+	body->AddComponent<PlayerComponent>();
+	body->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Box);
 	body->SetPosition(0, 1, 0);
 	body->SetScale({ .01f });
 	m_entities.push_back(body);
 	return body;
 }
-Entity* GameScene::CreateFloor()
-{
-	Entity* floor = m_ecs->CreateEntity<Entity>();
-	floor->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cylinder), m_renderer);
-	floor->SetPosition(0, -2.5f, 0);
-	floor->SetScale({ 50,0.1f,50 });
-	m_entities.push_back(floor);
-	return floor;
-}
-
 // -[PLAYER MOVEMENT]- //
 void GameScene::MovePlayer() {
 
@@ -126,6 +128,7 @@ void GameScene::MovePlayer() {
 
 	FollowRail();
 }
+
 void GameScene::FollowRail()
 {
 	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();

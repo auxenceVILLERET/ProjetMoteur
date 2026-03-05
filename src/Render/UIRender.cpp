@@ -44,7 +44,11 @@ void UIRender::Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui)
     if (ui.showSplash) 
         DrawSplash(cmd);
 
-    DrawScore(cmd, ui.score , 1920, 1080);
+    if (ui.showScore)
+        DrawScore(cmd, ui.score , 1920, 1080);
+
+	if (ui.showCrosshair)
+        DrawCrosshair(cmd, 1920, 1080);
 }
 
 void UIRender::UpdateTint(float r, float g, float b, float a)
@@ -288,6 +292,52 @@ void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screen
     XMFLOAT4 col(1.f, 1.f, 1.f, 1.f);
 
     const UINT vertexCount = CreateTextVertices(buf, 20.f, 0.f, 2.0f, screenW, screenH, col);
+    if (vertexCount == 0) return;
+
+    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmd->IASetVertexBuffers(0, 1, &m_textVBV);
+    cmd->DrawInstanced(vertexCount, 1, 0, 0);
+}
+
+void UIRender::DrawCrosshair(ID3D12GraphicsCommandList* cmd, float screenW, float screenH)
+{
+    const char* plus = "+";
+    const float scale = 2.0f;
+    XMFLOAT4 col(1.f, 1.f, 1.f, 1.f);
+
+    // position approximative au centre
+    float x = screenW * 0.5f;
+    float y = screenH * 0.5f - 32.f;
+
+    unsigned char c = (unsigned char)'+';
+    const Glyph& g = m_fontData.glyphs[c];
+
+    float w = g.xAdvance * scale;          // approx largeur
+    float h = m_fontData.lineHeight * scale;
+
+    x -= w * 0.5f;
+    y -= h * 0.5f;
+
+    DrawT(cmd, plus, x, y, scale, screenW, screenH, col);
+}
+
+void UIRender::DrawT(ID3D12GraphicsCommandList* cmd, const char* text, float x, float y, float scale, float screenW, float screenH, const XMFLOAT4& color)
+{
+    // PSO/RS
+    cmd->SetPipelineState(m_pipeline->GetUIPSO());
+    cmd->SetGraphicsRootSignature(m_pipeline->GetUIRootSignature());
+
+    ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
+    cmd->SetDescriptorHeaps(1, heaps);
+
+    // CBV
+    UpdateTint(1.f, 1.f, 1.f, 1.f);
+    cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
+
+    // Atlas font
+    cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);
+
+    const UINT vertexCount = CreateTextVertices(text, x, y, scale, screenW, screenH, color);
     if (vertexCount == 0) return;
 
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
