@@ -10,7 +10,8 @@
 
 void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 {
-	TextureHandle texture = ResourceManager::Instance().LoadTexture(L"../../res/SplashScreen.png");
+	TextureHandle texture = ResourceManager::Instance().LoadTexture(L"../../res/RailTex.png");
+	TextureHandle targetHandle = ResourceManager::Instance().LoadTexture(L"../../res/TargetTex.png");
 	TextureHandle wallTexture = ResourceManager::Instance().LoadTexture(L"../../res/smiley.png");
 
 	Entity* tileEntity = ecs->CreateEntity<Entity>();
@@ -80,7 +81,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy = { 2.0f, 1.0f, 6.0f };
 	EnemyEntity->SetPosition(GetPosition().x + offsetEnemy.x, GetPosition().y + offsetEnemy.y, GetPosition().z + offsetEnemy.z);
 	EnemyEntity->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	EnemyEntity->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity->SetActive(false);
 	EnemyEntity->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity);
@@ -93,7 +94,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy2 = { -2.0f, 1.0f, 6.0f };
 	EnemyEntity2->SetPosition(GetPosition().x + offsetEnemy2.x, GetPosition().y + offsetEnemy2.y, GetPosition().z + offsetEnemy2.z);
 	EnemyEntity2->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	EnemyEntity2->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity2->SetActive(false);
 	EnemyEntity2->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity2);
@@ -106,7 +107,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	XMFLOAT3 offsetEnemy3 = { 0.0f, 1.0f, 14.0f };
 	EnemyEntity3->SetPosition(GetPosition().x + offsetEnemy3.x, GetPosition().y + offsetEnemy3.y, GetPosition().z + offsetEnemy3.z);
 	EnemyEntity3->SetScale({ 0.5f, 0.5f, 0.5f });
-	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(texture);
+	EnemyEntity3->GetComponent<MeshRendererComponent>()->SetTexture(targetHandle);
 	EnemyEntity3->SetActive(false);
 	EnemyEntity3->GetComponent<ColliderComponent>()->SetRadius(0.5f);
 	GetEntities().push_back(EnemyEntity3);
