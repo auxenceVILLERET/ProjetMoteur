@@ -110,33 +110,43 @@ Entity* GameScene::CreateFloor()
 
 void GameScene::FollowRail()
 {
-	Tiles* activeTiles = m_tilesManager->GetActiveTiles().front();
+	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();
 
-	auto& rails = activeTiles->GetRails();
-	if (rails.empty())
+	if (activeTiles.empty())
 		return;
 
-	// Sécurité si on dépasse
-	if (m_currentRailIndex >= rails.size())
-		m_currentRailIndex = rails.size() - 1.0f;
+	float playerZ = m_body->GetPosition().z;
 
-	Entity* incoming = rails[m_currentRailIndex];
+	Entity* closestRail = nullptr;
+	float closestDistance = FLT_MAX;
 
-	// Si le rail est passé derrière le joueur
-	if (incoming->GetPosition().z < 0)
+	for (Tiles* tile : activeTiles)
 	{
-		m_currentRailIndex++;
-		
-		if (m_currentRailIndex >= rails.size())
-			m_currentRailIndex = 0;
-			return;
+		auto& rails = tile->GetRails();
 
-		incoming = rails[m_currentRailIndex];
+		for (Entity* rail : rails)
+		{
+			float railZ = rail->GetPosition().z;
+
+			if (railZ >= playerZ)
+			{
+				float dist = railZ - playerZ;
+
+				if (dist < closestDistance)
+				{
+					closestDistance = dist;
+					closestRail = rail;
+				}
+			}
+		}
 	}
 
-	float targetPivot = incoming->GetPosition().x;
-	
-	float smoothSpeed = 5.0f;
+	if (closestRail == nullptr)
+		return;
+
+	float targetPivot = closestRail->GetPosition().x;
+
+	float smoothSpeed = 8.0f;
 
 	m_pivot += (targetPivot - m_pivot) * smoothSpeed * m_deltaTime;
 }
@@ -184,7 +194,9 @@ void GameScene::HandleCursor()
 	}
 
 	if (!m_locked)
+	{
 		return;
+	}
 
 	window->UpdateCursorCenter();
 
