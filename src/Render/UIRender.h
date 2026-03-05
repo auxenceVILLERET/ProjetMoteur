@@ -27,6 +27,8 @@ struct UIConstants
 struct UIFrame 
 { 
 	bool showSplash = false;
+	bool showScore = false;
+	bool showCrosshair = false;
 	int score = 0;
 };
 

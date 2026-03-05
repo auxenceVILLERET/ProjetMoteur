@@ -44,8 +44,11 @@ void UIRender::Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui)
     if (ui.showSplash) 
         DrawSplash(cmd);
 
-    DrawScore(cmd, ui.score , 1920, 1080);
-    DrawCrosshair(cmd, 1920, 1080);
+    if (ui.showScore)
+        DrawScore(cmd, ui.score , 1920, 1080);
+
+	if (ui.showCrosshair)
+        DrawCrosshair(cmd, 1920, 1080);
 }
 
 void UIRender::UpdateTint(float r, float g, float b, float a)
