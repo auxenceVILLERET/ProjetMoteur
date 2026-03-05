@@ -16,7 +16,7 @@ struct UIFrame;
 class GameScene : public Scene
 {
 public:
-	~GameScene() = default;
+	~GameScene();
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera) override;
 	void OnEnter() override;
 	void OnExit() override;
@@ -73,6 +73,7 @@ private:
 
 	//LOOK WITH MOUSE
 	void HandleCursor();
+	void LookAround();
 
 	//SHOOTING
 	void Shooting();

@@ -4,6 +4,8 @@
 #include "Engine/ECS/Components/MeshRendererComponent.h"
 #include "Render/Renderer.h"
 #include "Engine/ECS/ECS.h"
+#include "InputSystem.h"
+#include "InputsMethods.h"
 #include "Window.h"
 
 void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera)
@@ -48,4 +50,5 @@ void MenuScene::OnExit()
 
 void MenuScene::Update(float dt)
 {
+
 }

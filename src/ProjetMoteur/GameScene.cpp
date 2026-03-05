@@ -8,15 +8,14 @@
 #include "Engine/Engine.h"
 #include "Core/InputsMethods.h"
 #include "Engine/ECS/Components/StateMachineComponent.h"
-#include "ProjetMoteur/EnemyIdleState.h"
-#include "ProjetMoteur/EnemyChaseState.h"
 #include "Engine/ECS/Components/RigidBodyComponent.h"
 #include "Engine/Projectile.h"
 #include "Engine/ECS/Components/ColliderComponent.h"
-#include <iostream>
 #include "ProjetMoteur/Tiles/TilesManager.h"
 #include "ProjetMoteur/Tiles/Tiles.h"
 #include "Window.h"
+
+#include <iostream>
 
 using namespace core;
 
@@ -45,6 +44,11 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 		entity->SetActive(false);
 	}
 }
+GameScene::~GameScene(){
+	m_entities.clear();
+	m_body->~Entity();
+	m_floor->~Entity();
+}
 
 void GameScene::OnEnter()
 {
@@ -62,7 +66,6 @@ void GameScene::OnEnter()
 	m_pivot = 0.0f;
 
 }
-
 void GameScene::OnExit()
 {
 	// Clean up entities 
@@ -72,13 +75,14 @@ void GameScene::OnExit()
 		entity->SetActive(false);
 	}
 }
-
 void GameScene::Update(float dt)
 {
 	m_deltaTime = dt;
+	
 	HandleCursor();
 	if (!m_locked) { return; }
 
+	LookAround();
 	m_projectile->Update(m_deltaTime);
 	m_tilesManager->Update(dt);
 	m_frame->score = m_tilesManager->GetScoreValue();
@@ -89,6 +93,7 @@ void GameScene::Update(float dt)
 	m_renderer->SetUiFrame(*m_frame);
 }
 
+// -[CREATING BASE ENTITY]- // 
 Entity* GameScene::CreateBody()
 {
 	Entity* body = m_ecs->CreateEntity<Entity>();
@@ -98,7 +103,6 @@ Entity* GameScene::CreateBody()
 	m_entities.push_back(body);
 	return body;
 }
-
 Entity* GameScene::CreateFloor()
 {
 	Entity* floor = m_ecs->CreateEntity<Entity>();
@@ -109,6 +113,19 @@ Entity* GameScene::CreateFloor()
 	return floor;
 }
 
+// -[PLAYER MOVEMENT]- //
+void GameScene::MovePlayer() {
+
+	float offset = .5f;
+	int dir = (Input::GetKey(Keyboard::LEFT) - Input::GetKey(Keyboard::RIGHT));
+
+	m_angleOrbit += XMConvertToRadians(dir * 90.0f * m_deltaTime);
+
+	m_body->OrbitAround({ m_pivot, 0.0f, 0.0f }, { 0,0,1 }, m_angleOrbit, offset);
+	m_body->RotateLocalZ(XMConvertToRadians(dir * 90.0f * m_deltaTime));
+
+	FollowRail();
+}
 void GameScene::FollowRail()
 {
 	std::vector<Tiles*> activeTiles = m_tilesManager->GetActiveTiles();
@@ -149,18 +166,6 @@ void GameScene::FollowRail()
 	m_pivot = std::lerp(m_pivot, targetPivot, smoothSpeed * m_deltaTime);
 }
 
-void GameScene::MovePlayer() {
-
-	float offset = .5f;
-	int dir = (Input::GetKey(Keyboard::LEFT) - Input::GetKey(Keyboard::RIGHT));
-
-	m_angleOrbit += XMConvertToRadians(dir * 90.0f * m_deltaTime);
-
-	m_body->OrbitAround({ m_pivot, 0.0f, 0.0f }, { 0,0,1 }, m_angleOrbit, offset);
-	m_body->RotateLocalZ(XMConvertToRadians(dir * 90.0f * m_deltaTime));
-
-}
-
 // -[SHOOTING]- //
 void GameScene::Shooting() {
 	if (Input::GetMouseButtonDown(Mouse::LEFT))
@@ -180,7 +185,7 @@ void GameScene::Shooting() {
 	}
 }
 
-// -[LOCK & HIDE CURSOR + Calculate DeltaMouse]- //
+// -[LOCK & HIDE CURSOR]- //
 void GameScene::HandleCursor()
 {
 	Window* window = Window::GetInstance();
@@ -191,14 +196,17 @@ void GameScene::HandleCursor()
 		window->LockCursor(m_locked);
 	}
 
-	if (!m_locked)
-	{
-		return;
-	}
-
+	if (!m_locked) return;
+		
 	window->UpdateCursorCenter();
+}
 
+// -[CAMERA ROTATION]- //
+void GameScene::LookAround()
+{
+	Window* window = Window::GetInstance();
 	POINT mouse;
+
 	GetCursorPos(&mouse);
 
 	float dx = float(mouse.x - window->GetCursorCenter().x);
@@ -219,7 +227,6 @@ void GameScene::HandleCursor()
 
 	UpdateCameraTransform();
 }
-
 void GameScene::UpdateCameraTransform()
 {
 	// Position = body

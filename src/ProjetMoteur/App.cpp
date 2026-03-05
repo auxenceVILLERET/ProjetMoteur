@@ -70,7 +70,8 @@ void App::Update()
 
 void App::Shutdown()
 {
-	// Clean up your application here
+	GameScene* game;
+	game->~GameScene();
 }
 
 void App::UpdateWindow()
@@ -88,7 +89,7 @@ void App::HandleInput()
 	if (Input::GetKey(Keyboard::NUMPAD2) || Input::GetKey(Keyboard::_2)) { m_sceneManager->ChangeScene("Game"); }
 	if (Input::GetKey(Keyboard::NUMPAD3) || Input::GetKey(Keyboard::_3)) { m_sceneManager->ChangeScene("Sandbox"); }
 
-	if (Input::GetKey(Keyboard::ESC)) {
+	if (Input::GetKey(Keyboard::BACKSPACE)) {
 		App::Shutdown();
 	}
 
