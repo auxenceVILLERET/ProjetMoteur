@@ -46,6 +46,9 @@ public:
 	void Scale(float scale); // multiply current scale
 	void SetScale(XMFLOAT3 vectorScale); // set the scale with XYZ Vector
 	void Scale(XMFLOAT3 vectorScale); // multiply current scale with XYZ Vector
+	void SetScale(float scaleX, float scaleY, float scaleZ);
+	void Scale(float scaleX, float scaleY, float scaleZ);
+
 	XMFLOAT3 GetScale() const { return m_scale; } // get the scale of the obj
 
 	void CoutScale(); // DEBUG
@@ -70,7 +73,6 @@ public:
 	XMFLOAT3 GetForward();
 	XMFLOAT3 GetRight();
 	XMFLOAT3 GetUp();
-
 
 	void LookAt(float x, float y, float z); // look at a specific coords
 	void OrbitAround(XMFLOAT3 pivot, XMFLOAT3 axis, float angle, float radius);
