@@ -26,7 +26,7 @@ public:
 	void SetMinimized(bool minimized) { m_minimized = minimized; }
 	void SetMaximized(bool maximized) { m_maximized = maximized; }
 	void SetResizing(bool resizing) { m_resizing = resizing; }
-	void SetFullscreen(bool fullscreen) { m_fullscreen = fullscreen; }
+    void SetFullscreen(bool fullscreen);
 
     void LockCursor(bool enable);
     void UpdateCursorCenter();
