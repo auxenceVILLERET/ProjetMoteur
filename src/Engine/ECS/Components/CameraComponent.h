@@ -15,7 +15,6 @@ public:
 	void SetAll(float nearPlane, float farPlane, float height, float width, bool perspective);
 	void SetWindowSize(float width, float height);
 
-	
 	const XMFLOAT4X4& GetViewMatrix() const { return m_viewMatrix; }
 	const XMFLOAT4X4& GetProjectionMatrix() const { return m_projectionMatrix; }
 	float GetFOV() const { return m_fov; }

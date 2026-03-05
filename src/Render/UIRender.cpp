@@ -41,7 +41,8 @@ void UIRender::Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui)
 {
     if (cmd == nullptr) return;
 
-    if (ui.showSplash) DrawSplash(cmd);
+    if (ui.showSplash) 
+        DrawSplash(cmd);
 
     DrawScore(cmd, ui.score , 1920, 1080);
 }
@@ -56,10 +57,26 @@ void UIRender::UpdateTint(float r, float g, float b, float a)
 
 void UIRender::Shutdown()
 {
-    SafeRelease(m_quadVB);
+    if (m_quadVB) 
+    { 
+        m_quadVB->Release();
+        m_quadVB = nullptr; 
+    }
+    if (m_uiCB)
+    { 
+        m_uiCB->Release();
+        m_uiCB = nullptr;
+    }
+    if (m_textVB) 
+    {
+        m_textVB->Release();
+        m_textVB = nullptr; 
+    }
+
     delete m_splashTex;
-	SafeRelease(m_uiCB);
+    m_splashTex = nullptr;
 	delete m_fontAtlas;
+    m_fontAtlas = nullptr;
 }
 
 bool UIRender::CreateFullscreenQuadVB(ID3D12Device* device)
@@ -257,6 +274,10 @@ void UIRender::DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screen
 
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap->GetHeap() };
     cmd->SetDescriptorHeaps(1, heaps);
+
+    UpdateTint(1.f, 1.f, 1.f, 0.5f);
+
+    cmd->SetGraphicsRootConstantBufferView(0, GetTintCBAddress());
 
     // SRV atlas (t0 sur root param 1)
     cmd->SetGraphicsRootDescriptorTable(1, m_fontSrv.gpu);

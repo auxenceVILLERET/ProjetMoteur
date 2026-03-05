@@ -47,19 +47,33 @@ bool MeshRendererComponent::CreateConstantBuffer(ID3D12Device* device)
 
 	// init à identité
 	ObjectConstants oc{};
-	DirectX::XMStoreFloat4x4(&oc.WorldViewProj, DirectX::XMMatrixIdentity());
+	XMStoreFloat4x4(&oc.World, DirectX::XMMatrixIdentity());
+	XMStoreFloat4x4(&oc.WorldInvTranspose, DirectX::XMMatrixIdentity());
+	XMStoreFloat4x4(&oc.WorldViewProj, DirectX::XMMatrixIdentity());
 	memcpy(m_pCbMapped, &oc, sizeof(oc));
 
 	return true;
 }
 
-void MeshRendererComponent::UpdateConstants(XMFLOAT4X4& worldViewProjT)
+void MeshRendererComponent::UpdateConstants(XMFLOAT4X4& worldMatrixT, XMFLOAT4X4& worldViewProjMatrixT)
 {
 	if (m_pCbMapped == nullptr) return;
 
 	ObjectConstants oc{};
-	oc.WorldViewProj = worldViewProjT;
+	oc.World = worldMatrixT;
+	oc.WorldInvTranspose = BuildWorldInvTranspose(worldMatrixT);
+	oc.WorldViewProj = worldViewProjMatrixT;
 	memcpy(m_pCbMapped, &oc, sizeof(oc));
+}
+
+XMFLOAT4X4 MeshRendererComponent::BuildWorldInvTranspose(XMFLOAT4X4& worldMatrixT)
+{
+	XMFLOAT4X4 worldInvTransposeT;
+	XMMATRIX world = XMLoadFloat4x4(&worldMatrixT);
+	XMMATRIX worldInv = XMMatrixInverse(nullptr, world);
+	XMMATRIX worldInvTranspose = XMMatrixTranspose(worldInv);
+	XMStoreFloat4x4(&worldInvTransposeT, worldInvTranspose);
+	return worldInvTransposeT;
 }
 
 #endif // !MESH_RENDERER_COMPONENT_CPP_INCLUDED

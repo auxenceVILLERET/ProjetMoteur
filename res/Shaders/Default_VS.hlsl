@@ -1,28 +1,36 @@
 cbuffer ObjectCB : register(b0)
 {
+    float4x4 gWorld;
+    float4x4 gWorldInvTranspose;
     float4x4 gWorldViewProj;
 };
-
-Texture2D gTex0 : register(t0);
-
-SamplerState gSamp0 : register(s0);
 
 struct VertexIn
 {
     float3 pos : POSITION;
-    float2 uv  : TEXCOORD0;
+    float3 normal : NORMAL;
+    float2 uv : TEXCOORD0;
 };
 
 struct VertexOut
 {
     float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
+    float3 worldPos : TEXCOORD0;
+    float3 worldNrm : TEXCOORD1;
+    float2 uv : TEXCOORD2;
 };
 
 VertexOut VSMain(VertexIn v)
 {
     VertexOut o;
-    o.pos = mul(float4(v.pos, 1.0), gWorldViewProj);
+
+    float4 wp = mul(float4(v.pos, 1.0f), gWorld);
+    o.worldPos = wp.xyz;
+
+    o.worldNrm = normalize(mul(float4(v.normal, 0.0f), gWorldInvTranspose).xyz);
+
+    o.pos = mul(float4(v.pos, 1.0f), gWorldViewProj);
     o.uv = v.uv;
+
     return o;
 }

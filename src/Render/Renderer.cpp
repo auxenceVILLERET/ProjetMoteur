@@ -10,6 +10,7 @@
 #include "UploadContext.h"
 #include "Mesh.h"
 #include "Texture2D.h"
+#include "LightRender.h"
 #include "RenderResourceManager.h"
 #include "Engine/ECS/Entity.h"
 #include "Engine/ECS/Components/CameraComponent.h"
@@ -21,7 +22,7 @@ inline D3D12_CPU_DESCRIPTOR_HANDLE Offset(D3D12_CPU_DESCRIPTOR_HANDLE h, INT off
     return h;
 }
 
-bool Renderer::Initialize(Window* window, Entity* camera)
+bool Renderer::Initialize(Window* window, CameraComponent* camera)
 {
     if (window == nullptr || camera == nullptr)
         return false;
@@ -79,12 +80,17 @@ bool Renderer::Initialize(Window* window, Entity* camera)
     RenderResourceManager::Instance().Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager);
 
 	//7) UI renderer
-	m_ui = new UIRender();
-	if (m_ui->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
+	m_pUiRender = new UIRender();
+	if (m_pUiRender->Initialize(m_pDxContext, m_pUploadContext, m_pDescriptorHeapManager, m_pPipeline) == false)
 		return false;
 
 	m_uiFrame.showSplash = false;
 	m_uiFrame.score = 50;
+
+	//8) Lights
+	m_pLightRender = new LightRender();
+    if (m_pLightRender->Initialize(m_pDxContext->GetDevice(), m_pDescriptorHeapManager, 2, 16) == false)
+		return false;
 
     return true;
 }
@@ -94,41 +100,28 @@ void Renderer::Shutdown()
     if (m_pDxContext)
         m_pDxContext->WaitForGpu();
 
+    if (m_pLightRender)
+		m_pLightRender->Shutdown();
+
+	if (m_pUiRender)
+		m_pUiRender->Shutdown();
+
     if (m_pPipeline)
-    {
-        m_pPipeline->Shutdown();
-        delete m_pPipeline;
-        m_pPipeline = nullptr;
-    }
+		m_pPipeline->Shutdown();
 
     if (m_pUploadContext)
-    {
-        m_pUploadContext->Shutdown();
-        delete m_pUploadContext;
-        m_pUploadContext = nullptr;
-    }
+		m_pUploadContext->Shutdown();
 
-    if (m_pDescriptorHeapManager)
-    {
-        m_pDescriptorHeapManager->Shutdown();
-        delete m_pDescriptorHeapManager;
-        m_pDescriptorHeapManager = nullptr;
-    }
+	if (m_pDescriptorHeapManager)
+		m_pDescriptorHeapManager->Shutdown();
 
-    if (m_pSwapChainTargets)
-    {
-        m_pSwapChainTargets->Shutdown();
-        delete m_pSwapChainTargets;
-        m_pSwapChainTargets = nullptr;
-    }
+	if (m_pSwapChainTargets)
+		m_pSwapChainTargets->Shutdown();
 
     if (m_pDxContext)
-    {
-        m_pDxContext->Shutdown();
-        delete m_pDxContext;
-        m_pDxContext = nullptr;
-    }
+		m_pDxContext->Shutdown();
 
+	m_pCamera = nullptr;
     m_pWindow = nullptr;
 }
 
@@ -139,7 +132,7 @@ void Renderer::Update()
         if (m_pWindow->IsResizing())
         {
             m_pSwapChainTargets->Resize(m_pWindow->GetWidth(), m_pWindow->GetHeight());
-			m_pCamera->GetComponent<CameraComponent>()->SetWindowSize(
+			m_pCamera->SetWindowSize(
                 static_cast<float>(m_pWindow->GetWidth()),
                 static_cast<float>(m_pWindow->GetHeight())
             );
@@ -154,8 +147,8 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
 
     BeginFrame();
 
-    // draw calls (PSO, root signature, IA, DrawInstanced...)*
     ID3D12GraphicsCommandList* cmd = m_pDxContext->GetCommandList();
+	uint32_t bb = m_pSwapChainTargets->GetCurrentBackBufferIndex();
 
     cmd->SetPipelineState(m_pPipeline->GetPSO());
     cmd->SetGraphicsRootSignature(m_pPipeline->GetRootSignature());
@@ -163,12 +156,24 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     ID3D12DescriptorHeap* heaps = m_pDescriptorHeapManager->GetHeap();
     cmd->SetDescriptorHeaps(1, &heaps);
 
+    //LIGHT SOLEIL
+    FrameCB frame{};
+    frame.lightPos = { 0.0f, 10.0f, 0.0f };
+    frame.lightRange = 50.0f;
+    frame.lightColor = { 1,1,1 };
+    frame.lightIntensity = 1.0f;
+
+    m_pLightRender->UpdateFrame(bb, frame);
+
+    // Bind b1 + t1 via LightRender
+    m_pLightRender->Bind(cmd, bb, /*ROOT_FRAME=*/1, /*ROOT_LIGHTS=*/3);
+
     cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
 
-	m_ui->Render(cmd, m_uiFrame);
+	m_pUiRender->Render(cmd, m_uiFrame);
 
     EndFrame();
 }
@@ -184,16 +189,10 @@ void Renderer::DrawObj(MeshRendererComponent& obj)
     Mesh* mesh = RenderResourceManager::Instance().ResolveMesh(obj.GetMeshHandle());
     if (mesh == nullptr) return;
 
-    Texture2D* tex = nullptr;
-    tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
+    Texture2D* tex = RenderResourceManager::Instance().ResolveTexture(obj.GetTextureHandle());
 
-    // Root param 1 = SRV(t0) (si texture)
-    if (tex)
-    {
-        ID3D12DescriptorHeap* heaps[] = { m_pDescriptorHeapManager->GetHeap() };
-        cmd->SetDescriptorHeaps(1, heaps);
-        cmd->SetGraphicsRootDescriptorTable(1, tex->GetSrv().gpu);
-    }
+    // Root param 2 = SRV(t0)
+    cmd->SetGraphicsRootDescriptorTable(2, tex->GetSrv().gpu);
 
     mesh->Draw(cmd);
 }
@@ -240,7 +239,7 @@ void Renderer::BeginFrame()
     pCommandList->OMSetRenderTargets(1, &rtv, true, &dsv);
 
     // Clear.
-    float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float clearColor[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
     pCommandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
     pCommandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 }
@@ -270,19 +269,32 @@ void Renderer::EndFrame()
 
     // Present.
     hr = m_pSwapChainTargets->GetSwapChain()->Present(1, 0);
-	if (FAILED(hr))
-		throw std::runtime_error("Swap chain present failed.");
-
+    if (FAILED(hr))
+    {
+        throw std::runtime_error("Swap chain present failed.");
+    }
     // Simple but safe: CPU waits GPU each frame.
     m_pDxContext->WaitForGpu();
 
     m_pSwapChainTargets->UpdateCurrentBackBuffer();
 }
 
+XMFLOAT4X4 Renderer::GetViewProjMatrix()
+{
+    XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetViewMatrix());
+    XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetProjectionMatrix());
+	XMMATRIX viewProj = view * proj;
+	viewProj = XMMatrixTranspose(viewProj);
+
+    XMFLOAT4X4 vpMatrix;
+    XMStoreFloat4x4(&vpMatrix, viewProj);
+    return vpMatrix;
+}
+
 XMFLOAT4X4 Renderer::BuildWorldViewProjMatrix(XMMATRIX& world)
 {
-    XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetViewMatrix());
-    XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetComponent<CameraComponent>()->GetProjectionMatrix());
+    XMMATRIX view = XMLoadFloat4x4(&m_pCamera->GetViewMatrix());
+    XMMATRIX proj = XMLoadFloat4x4(&m_pCamera->GetProjectionMatrix());
     XMMATRIX wvp = world * view * proj;
     wvp = XMMatrixTranspose(wvp);
 

@@ -8,7 +8,7 @@ class Engine;
 class Camera;
 class Projectile;
 class Renderer;
-
+struct UIFrame;
 
 class SandboxScene : public Scene
 {

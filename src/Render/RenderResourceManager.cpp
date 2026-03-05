@@ -27,6 +27,17 @@ void RenderResourceManager::Initialize(DxContext* dx, UploadContext* uploader, D
     CreateWhiteTexture1x1();
 }
 
+void RenderResourceManager::Shutdown()
+{
+    ReleaseAll();
+
+    m_defaultTexture->Release();
+
+    m_dx = nullptr;
+    m_uploader = nullptr;
+    m_srvHeap = nullptr;
+}
+
 Mesh* RenderResourceManager::ResolveMesh(MeshHandle h)
 {
     if (!h || m_uploader == nullptr) return nullptr;
@@ -128,7 +139,14 @@ void RenderResourceManager::FinalizeUpload()
 
 void RenderResourceManager::ReleaseAll()
 {
+	for (int i = 0; i < m_textures.size(); ++i)
+		m_textures[i].get()->Release();
+
     m_textures.clear();
+
+    for (int i = 0; i < m_meshes.size(); ++i)
+		m_meshes[i].get()->Release();
+
     m_meshes.clear();
 }
 

@@ -2,13 +2,9 @@
 #define DESCRIPTOR_HEAP_MANAGER_CPP_INCLUDED
 
 #include "DescriptorHeapManager.h"
+#include "Helpers/d3dUtil.h"
 
-#include "DescriptorHeapManager.h"
 #include <stdexcept>
-
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p) do { if(p){ (p)->Release(); (p)=nullptr; } } while(0)
-#endif
 
 static D3D12_CPU_DESCRIPTOR_HANDLE CpuOffset(D3D12_CPU_DESCRIPTOR_HANDLE h, uint32_t index, uint32_t size)
 {
@@ -22,13 +18,9 @@ static D3D12_GPU_DESCRIPTOR_HANDLE GpuOffset(D3D12_GPU_DESCRIPTOR_HANDLE h, uint
     return h;
 }
 
-bool DescriptorHeapManager::Initialize(ID3D12Device* device,
-    D3D12_DESCRIPTOR_HEAP_TYPE heapType,
-    uint32_t numDescriptors,
-    bool shaderVisible)
+bool DescriptorHeapManager::Initialize(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, uint32_t numDescriptors, bool shaderVisible)
 {
-    if (device == nullptr || numDescriptors == 0)
-        return false;
+    if (device == nullptr || numDescriptors == 0) return false;
 
     Shutdown();
 
@@ -48,21 +40,22 @@ bool DescriptorHeapManager::Initialize(ID3D12Device* device,
     }
 
     HRESULT hr = m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_heap));
-    if (FAILED(hr))
-        return false;
+
+    if (FAILED(hr)) return false;
 
     m_descriptorSize = m_device->GetDescriptorHandleIncrementSize(heapType);
     m_cpuStart = m_heap->GetCPUDescriptorHandleForHeapStart();
+
     if (shaderVisible)
         m_gpuStart = m_heap->GetGPUDescriptorHandleForHeapStart();
     else
         m_gpuStart = D3D12_GPU_DESCRIPTOR_HANDLE{ 0 };
 
-    // Mode free list (plein) + linear pointer
     m_freeList.clear();
     m_freeList.reserve(m_capacity);
+
     for (uint32_t i = 0; i < m_capacity; ++i)
-        m_freeList.push_back(m_capacity - 1 - i); // push en reverse (pop_back = 0..)
+        m_freeList.push_back(m_capacity - 1 - i);
 
     m_nextLinear = 0;
 
@@ -71,15 +64,18 @@ bool DescriptorHeapManager::Initialize(ID3D12Device* device,
 
 void DescriptorHeapManager::Shutdown()
 {
-    SAFE_RELEASE(m_heap);
-    m_device = nullptr;
+    if (m_heap)
+    {
+        m_heap->Release();
+        m_heap = nullptr;
+    }
 
     m_capacity = 0;
     m_descriptorSize = 0;
     m_cpuStart = { 0 };
     m_gpuStart = { 0 };
     m_freeList.clear();
-    m_nextLinear = 0;
+	m_nextLinear = 0;
 }
 
 DescriptorHandle DescriptorHeapManager::Allocate()
@@ -113,7 +109,6 @@ void DescriptorHeapManager::Free(uint32_t index)
     if (index >= m_capacity)
         return;
 
-    // pas de double-free check ici (tu peux en ajouter avec un bitset si besoin)
     m_freeList.push_back(index);
 }
 
@@ -141,6 +136,7 @@ void DescriptorHeapManager::ResetAll()
 
     m_freeList.clear();
     m_freeList.reserve(m_capacity);
+
     for (uint32_t i = 0; i < m_capacity; ++i)
         m_freeList.push_back(m_capacity - 1 - i);
 

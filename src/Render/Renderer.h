@@ -21,8 +21,9 @@ class DxContext;
 class SwapChainTargets;
 class Pipeline;
 class UploadContext;
-class Entity;
+class CameraComponent;
 class MeshRendererComponent;
+class LightRender;
 
 using namespace DirectX;
 
@@ -32,7 +33,7 @@ public:
 	Renderer() = default;
 	~Renderer() { Shutdown(); }
 
-	bool Initialize(Window* window, Entity* camera);
+	bool Initialize(Window* window, CameraComponent* camera);
 	void Shutdown();
 
 	void Update();
@@ -53,10 +54,14 @@ private:
     void BeginFrame();
     void EndFrame();
 
-	Window* m_pWindow = nullptr;
-	Entity* m_pCamera = nullptr;
+	XMFLOAT4X4 GetViewProjMatrix();
 
-	UIRender* m_ui = nullptr;
+	Window* m_pWindow = nullptr;
+	CameraComponent* m_pCamera = nullptr;
+
+	LightRender* m_pLightRender = nullptr;
+
+	UIRender* m_pUiRender = nullptr;
 	UIFrame m_uiFrame;
 
 	DxContext* m_pDxContext = nullptr;

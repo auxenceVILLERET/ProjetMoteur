@@ -8,11 +8,14 @@ using namespace DirectX;
 struct Vertex
 {
 	XMFLOAT3 Pos;
+	XMFLOAT3 Normal;
 	XMFLOAT2 UV;
 };
 
 struct ObjectConstants
 {
+	XMFLOAT4X4 World;
+	XMFLOAT4X4 WorldInvTranspose;
 	XMFLOAT4X4 WorldViewProj;
 };
 
@@ -43,6 +46,8 @@ public:
 	void Release();
 
 private:
+	void CalculateNormals();
+
 	std::vector<Vertex> m_vertices;
 	std::vector<uint32_t> m_indices;
 
