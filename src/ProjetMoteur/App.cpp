@@ -72,8 +72,7 @@ void App::Update()
 
 void App::Shutdown()
 {
-	GameScene* game;
-	game->~GameScene();
+	//Clean everything and Exit App
 }
 
 void App::UpdateWindow()

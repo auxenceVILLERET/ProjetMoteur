@@ -16,7 +16,7 @@ struct UIFrame;
 class GameScene : public Scene
 {
 public:
-	~GameScene() = default;
+	~GameScene();
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager) override;
 	void OnEnter() override;
 	void OnExit() override;
@@ -28,24 +28,16 @@ private:
 
 	std::vector<Entity*> m_entities = {};
 
-	Entity* m_floor = nullptr;
-
-	Entity* m_rail = nullptr;
-	std::vector<Entity*> m_rails = {};
-
 	Entity* m_body = nullptr;
 	Entity* m_cam = nullptr;
+	Entity* m_bullet = nullptr;
+
+	UIFrame* m_frame = nullptr;
 
 	float m_pivot = 0.0f;
 	int m_currentRailIndex = 0;
 
 	float m_angleOrbit = 0.0f;
-
-	float m_maxRails = 5;
-
-	Entity* m_bullet = nullptr;
-
-	float m_speedPlayer = 1.f;
 
 	float m_yaw = 0.0f;
 	float m_pitch = 0.0f;
@@ -55,24 +47,17 @@ private:
 	TilesManager* m_tilesManager = nullptr;
 	Tiles* m_tiles = nullptr;
 	
+	//Creating Player
 	Entity* CreateBody();
-
-	UIFrame* m_frame = nullptr;
-
-	//RAILS
-	void CreateRail();
-	void ProceduralRails();
-	void DeleteRails();
-
-	void FollowRail();
 
 	//MOVING PLAYER
 	void MovePlayer();
-	void UpdateCameraTransform();
+	void FollowRail();
 
 	//LOOK WITH MOUSE
 	void HandleCursor();
 	void LookAround();
+	void UpdateCameraTransform();
 
 	//SHOOTING
 	void Shooting();
