@@ -15,7 +15,7 @@ class Tiles;
 class GameScene : public Scene
 {
 public:
-	~GameScene() = default;
+	~GameScene();
 	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager, UIFrame* frame) override;
 	void OnEnter() override;
 	void OnExit() override;

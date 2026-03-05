@@ -43,6 +43,7 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 		entity->SetActive(false);
 	}
 }
+
 GameScene::~GameScene(){
 	m_entities.clear();
 	m_body->~Entity();
