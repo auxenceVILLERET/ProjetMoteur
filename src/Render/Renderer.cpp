@@ -180,7 +180,7 @@ void Renderer::Render(std::vector<MeshRendererComponent*> vObj)
     for (MeshRendererComponent* m : vObj)
         DrawObj(*m);
 
-	m_pUiRender->Render(cmd, m_uiFrame);
+	m_pUiRender->Render(cmd, m_pWindow->GetWidth(), m_pWindow->GetHeight(), m_uiFrame);
 
     EndFrame();
 }

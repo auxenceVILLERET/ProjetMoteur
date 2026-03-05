@@ -55,7 +55,7 @@ public:
 	~UIRender() { Shutdown(); }
 
 	bool Initialize(DxContext* dx, UploadContext* uploader, DescriptorHeapManager* heap, Pipeline* pipeline);
-	void Render(ID3D12GraphicsCommandList* cmd, const UIFrame& ui);
+	void Render(ID3D12GraphicsCommandList* cmd, float screenW, float screenH, const UIFrame& ui);
 
 	void UpdateTint(float r, float g, float b, float a);
 
@@ -69,14 +69,10 @@ private:
 
 	bool CreateTextVB(ID3D12Device* device, uint32_t maxChars);
 	UINT CreateTextVertices(const char* text, float x, float y, float scale,
-		float screenW, float screenH, XMFLOAT4 color);
+		float screenW, float screenH, const XMFLOAT4& color, UINT startVertex);
 
 	void DrawSplash(ID3D12GraphicsCommandList* cmd);
-	void DrawScore(ID3D12GraphicsCommandList* cmd, int score, float screenW, float screenH);
-	void DrawCrosshair(ID3D12GraphicsCommandList* cmd, float screenW, float screenH);
-
-	void DrawT(ID3D12GraphicsCommandList* cmd, const char* text, float x, float y,
-		float scale, float screenW, float screenH, const XMFLOAT4& color);
+	void DrawScoreCrosshairBatch(ID3D12GraphicsCommandList* cmd, float screenW, float screenH, const UIFrame& ui);
 
 	float PxToNdcX(float x, float screenW) { return (x / screenW) * 2.0f - 1.0f; }
 	float PxToNdcY(float y, float screenH) { return 1.0f - (y / screenH) * 2.0f; }
