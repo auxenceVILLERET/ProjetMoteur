@@ -116,7 +116,7 @@ void Tile2::Initialize(ECS* ecs, Renderer* renderer)
 	Entity* ObstacleEntity = ecs->CreateEntity<Entity>();
 	ObstacleEntity->AddComponent<MeshRendererComponent>()->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), renderer);
 	ObstacleEntity->AddComponent<ObstacleComponent>();
-	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Sphere);
+	ObstacleEntity->AddComponent<ColliderComponent>()->SetType(ColliderComponent::Type::Box);
 	XMFLOAT3 offsetObstacle = { 2.0f, 0.0f, 16.0f };
 	ObstacleEntity->SetPosition(GetPosition().x + offsetObstacle.x, GetPosition().y + offsetObstacle.y, GetPosition().z + offsetObstacle.z);
 	ObstacleEntity->SetScale({ 1.0f, 1.0f, 1.0f });
