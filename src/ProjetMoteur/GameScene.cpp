@@ -58,6 +58,7 @@ void GameScene::OnEnter()
 	}
 
 	m_frame->showSplash = false;
+	m_frame->showScore = true;
 	m_frame->score = 0;
 
 }
