@@ -22,7 +22,7 @@ int WINAPI WinMain(
     _In_ int nCmdShow)
 {
 
-	AttachConsoleIO();
+	//AttachConsoleIO();
 
 	Engine engine;
 	App app(engine);
