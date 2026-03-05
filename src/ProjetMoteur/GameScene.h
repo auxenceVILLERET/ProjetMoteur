@@ -10,14 +10,13 @@ class Projectile;
 class Renderer;
 class TilesManager;
 class Tiles;
-struct UIFrame;
 
 
 class GameScene : public Scene
 {
 public:
 	~GameScene() = default;
-	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager) override;
+	void Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager, UIFrame* frame) override;
 	void OnEnter() override;
 	void OnExit() override;
 	void Update(float dt) override;
@@ -58,7 +57,6 @@ private:
 	Entity* CreateBody();
 	Entity* CreateFloor();
 
-	UIFrame* m_frame = nullptr;
 
 	//RAILS
 	void CreateRail();

@@ -39,19 +39,20 @@ App::App(Engine& engine) : m_engine(engine)
 void App::Initialize()
 {
 	// Initialize your application here
-	m_window = new Window(800, 600, L"LAB ENGINE GAMEPLAY");
+	m_window = new Window(1920, 1080, L"LAB ENGINE GAMEPLAY");
 	m_ecs = &m_engine.GetECS();
 	CreateCamera();
 	m_renderer = new Renderer();
 	m_sceneManager = new SceneManager();
+	UIFrame* frame = new UIFrame();
 
 	m_renderer->Initialize(m_window, m_cam->GetComponent<CameraComponent>());
 
 	m_ecs->AddSystem<RenderSystem>()->SetRenderer(m_renderer);
 
-	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
-	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
-	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager);
+	m_sceneManager->CreateScene<MenuScene>("Menu")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager, frame);
+	m_sceneManager->CreateScene<GameScene>("Game")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager,frame);
+	m_sceneManager->CreateScene<SandboxScene>("Sandbox")->Initialize(m_ecs, m_renderer, &m_engine, m_cam, m_sceneManager,frame);
 
 	m_sceneManager->ChangeScene("Menu");
 

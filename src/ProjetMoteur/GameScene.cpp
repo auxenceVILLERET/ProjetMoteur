@@ -21,14 +21,14 @@
 
 using namespace core;
 
-void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager)
+void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager, UIFrame* frame)
 {
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_engine = engine;
 	m_cam = camera;
 	m_sceneManager = sceneManager;
-
+	m_frame = frame;
 	m_body = CreateBody();
 
 	m_projectile = new Projectile();
@@ -36,8 +36,6 @@ void GameScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity*
 
 	m_tilesManager = new TilesManager();
 	m_tilesManager->Initialize(m_ecs, m_renderer);
-
-	m_frame = new UIFrame();
 
 	m_angleOrbit = XMConvertToRadians(90.0f);
 

@@ -6,20 +6,21 @@
 #include "Engine/ECS/ECS.h"
 #include "Window.h"
 
-void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager)
+void MenuScene::Initialize(ECS* ecs, Renderer* renderer, Engine* engine, Entity* camera, SceneManager* sceneManager, UIFrame* frame)
 {
 	m_engine = engine;
 	m_ecs = ecs;
 	m_renderer = renderer;
 	m_cam = camera;
 	m_sceneManager = sceneManager;
+	m_frame = frame;
 
  	Entity* menuEntity = m_ecs->CreateEntity<Entity>();
 	MeshRendererComponent* mrc = menuEntity->AddComponent<MeshRendererComponent>();
 	mrc->SetMesh(ResourceManager::Instance().GetMeshPreset(MeshPreset::Cube), m_renderer);
 	TextureHandle test = ResourceManager::Instance().LoadTexture(L"../../res/testTexture.png");
 	mrc->SetTexture(test);
-	
+
 	menuEntity->SetPosition(0.0f, 0.0f, 5.0f);
 	m_entities.push_back(menuEntity);
 }
@@ -33,7 +34,7 @@ void MenuScene::OnEnter()
 	{
 		entity->SetActive(true);
 	}
-	
+	m_frame->showCrosshair = false;
 	Window* window = Window::GetInstance();
 	window->LockCursor(false);
 }
@@ -49,4 +50,5 @@ void MenuScene::OnExit()
 
 void MenuScene::Update(float dt)
 {
+	m_renderer->SetUiFrame(*m_frame);
 }
